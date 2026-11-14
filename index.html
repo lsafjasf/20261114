@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云台追踪 · Gimbal Tracker</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0c1410; overflow: hidden;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  #game { display: block; width: 100vw; height: 100vh; }
+  #hint { position: fixed; left: 12px; bottom: 10px; color: #9fb8a4;
+    font-size: 13px; opacity: .8; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hint">方向键 / WASD 控制云台 · 转太快会抖动 · 目标出画 2 秒失败 · 连续锁定 30 秒获胜 · R 重开</div>
+<script src="src/sim.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>

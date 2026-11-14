@@ -1,0 +1,25 @@
+{
+  "name": "uid216",
+  "version": "1.0.0",
+  "description": "云台追踪小游戏：惯性云台 + 固定轨迹目标 + Canvas/Web Audio",
+  "scripts": {
+    "test": "node --test test/sim.test.js",
+    "test:e2e": "node test/e2e.mjs",
+    "start": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}
