@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>风层采样 · Wind Layer Survey</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23092434'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%238fe6c2' stroke-width='2'/%3E%3Cpath d='M12 32h38M32 14v8' stroke='%238fe6c2' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app" aria-label="风层采样游戏">
+    <canvas id="scene" aria-label="三层风带中的测风风筝"></canvas>
+
+    <header class="masthead" id="masthead">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">FIELD STATION 07 · 风层观测</p>
+          <h1>风层采样</h1>
+        </div>
+      </div>
+      <div class="mission-state">
+        <span class="status-dot"></span>
+        <span id="mission-state">待命</span>
+      </div>
+    </header>
+
+    <aside class="ledger" id="ledger" aria-label="采样任务">
+      <p class="panel-kicker">SAMPLE LEDGER / 采样记录</p>
+      <div class="sample-row" data-sample="0">
+        <span class="sample-index">01</span>
+        <div class="sample-copy">
+          <strong>低层偏西风</strong>
+          <small>高度 09–26 m · 目标区 A</small>
+        </div>
+        <span class="sample-time">3.0s</span>
+        <span class="sample-check" aria-hidden="true"></span>
+      </div>
+      <div class="sample-row" data-sample="1">
+        <span class="sample-index">02</span>
+        <div class="sample-copy">
+          <strong>中层偏东风</strong>
+          <small>高度 43–61 m · 目标区 B</small>
+        </div>
+        <span class="sample-time">3.0s</span>
+        <span class="sample-check" aria-hidden="true"></span>
+      </div>
+      <div class="sample-row" data-sample="2">
+        <span class="sample-index">03</span>
+        <div class="sample-copy">
+          <strong>高层西向急流</strong>
+          <small>高度 77–95 m · 目标区 C</small>
+        </div>
+        <span class="sample-time">3.0s</span>
+        <span class="sample-check" aria-hidden="true"></span>
+      </div>
+      <div class="ledger-footer">
+        <span>线长 <b id="line-readout">04 m</b></span>
+        <span>峰值损伤 <b id="damage-readout">0%</b></span>
+      </div>
+    </aside>
+
+    <div class="objective" id="objective">
+      <span class="objective-index">01</span>
+      <span id="objective-copy">放线升空，寻找第一个采样区</span>
+    </div>
+
+    <div class="alert-banner" id="alert-banner" role="status" aria-live="polite"></div>
+
+    <section class="controls" id="controls">
+      <div class="control-pair">
+        <span class="key">A</span><span class="key">D</span>
+        <small>横向移动</small>
+      </div>
+      <div class="control-pair wide">
+        <span class="key">W</span>
+        <span class="key">S</span>
+        <small>放线 / 收线</small>
+      </div>
+      <button class="sound-button" id="sound-button" type="button" aria-pressed="true">
+        <span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span id="sound-label">风噪开启</span>
+      </button>
+    </section>
+
+    <section class="start-screen" id="start-screen">
+      <div class="start-card">
+        <p class="start-kicker">AEROLOGICAL SURVEY · 三层风带</p>
+        <h2>把测量<br><em>送上天空</em></h2>
+        <p class="start-lede">
+          风筝下悬挂的测风仪需在三处采样窗各停留 3 秒。
+          风带方向相反，线松会失去控制，线紧会损伤绳索。
+        </p>
+        <div class="start-rules">
+          <span><b>W</b> 放线升空</span>
+          <span><b>S</b> 收线下降</span>
+          <span><b>A / D</b> 横向修正</span>
+        </div>
+        <button class="start-button" id="start-button" type="button">
+          <span>开始观测</span>
+          <i aria-hidden="true">↗</i>
+        </button>
+        <p class="start-foot">采集三组读数后，以低损伤状态安全落地</p>
+      </div>
+      <div class="start-diagram" aria-hidden="true">
+        <span>03</span><span>02</span><span>01</span>
+      </div>
+    </section>
+
+    <section class="result-screen" id="result-screen" aria-hidden="true">
+      <div class="result-card">
+        <p class="result-kicker" id="result-kicker">OBSERVATION COMPLETE</p>
+        <h2 id="result-title">观测完成</h2>
+        <p id="result-copy"></p>
+        <div class="result-stats">
+          <div><span>采样</span><b id="result-samples">0 / 3</b></div>
+          <div><span>绳索损伤</span><b id="result-damage">0%</b></div>
+          <div><span>用时</span><b id="result-time">0:00</b></div>
+        </div>
+        <button class="start-button" id="restart-button" type="button">
+          <span>再次观测</span>
+          <i aria-hidden="true">↺</i>
+        </button>
+      </div>
+    </section>
+
+    <div class="touch-controls" id="touch-controls" aria-label="触控操作">
+      <button type="button" data-key="KeyA">←</button>
+      <button type="button" data-key="KeyW">↑</button>
+      <button type="button" data-key="KeyS">↓</button>
+      <button type="button" data-key="KeyD">→</button>
+    </div>
+  </main>
+  <script src="js/audio.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
