@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#e9e1d2" />
+    <title>折月 · 十二秒剪纸动画</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span class="brand-moon"></span>
+            <span class="brand-boat"></span>
+          </div>
+          <div>
+            <p class="eyebrow">PAPER MOTION STUDY · NO. 018</p>
+            <h1>折月 <span>十二秒剪纸</span></h1>
+          </div>
+        </div>
+
+        <div class="project-state" id="projectState">
+          <span class="state-dot"></span>
+          <span id="projectStateText">示例工程已就绪</span>
+          <span class="state-separator"></span>
+          <span>12.0 秒循环</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="icon-button" id="soundButton" type="button" aria-pressed="true" title="开关声音">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9v6h4l5 4V5L8 9H4Z"></path>
+              <path class="sound-wave" d="M16 8.4c1.4 1.8 1.4 5.4 0 7.2M18.7 5.8c2.8 3.4 2.8 8.9 0 12.3"></path>
+            </svg>
+            <span class="button-label">声音</span>
+          </button>
+          <button class="button button-ghost" id="loadButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 4h10l4 4v12H5V4Z"></path>
+              <path d="M8 14h8M12 10v8"></path>
+            </svg>
+            载入工程
+          </button>
+          <button class="button button-ink" id="saveButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 4h12l2 2v14H5V4Z"></path>
+              <path d="M8 4v6h8V4M8 20v-6h8v6"></path>
+            </svg>
+            保存 JSON
+          </button>
+          <input id="fileInput" type="file" accept="application/json,.json" hidden />
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-column" aria-label="动画舞台">
+          <div class="stage-frame">
+            <div class="stage-toolbar">
+              <div class="stage-title">
+                <span class="live-pip"></span>
+                <span>舞台</span>
+                <span class="muted">960 × 540</span>
+              </div>
+              <div class="stage-tools">
+                <span class="zoom-label">适应窗口</span>
+                <button class="mini-button" id="sampleButton" type="button" title="恢复内置示例">重置示例</button>
+              </div>
+            </div>
+
+            <div class="canvas-shell">
+              <canvas id="stage" width="960" height="540" aria-label="月亮、树、纸船和小人的剪纸动画画面"></canvas>
+              <div class="canvas-corner canvas-corner-tl" aria-hidden="true"></div>
+              <div class="canvas-corner canvas-corner-br" aria-hidden="true"></div>
+            </div>
+
+            <div class="stage-caption">
+              <span>「月落之后，纸船仍向岸边漂。」</span>
+              <span id="frameReadout">FRAME 000 / 360</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector" aria-label="图层参数">
+          <div class="inspector-head">
+            <div>
+              <p class="section-kicker">LAYER NOTES</p>
+              <h2>手作参数</h2>
+            </div>
+            <span class="layer-index" id="layerIndex">03 / 04</span>
+          </div>
+
+          <div class="selected-layer">
+            <div class="layer-emblem" id="layerEmblem" aria-hidden="true">船</div>
+            <div class="selected-layer-copy">
+              <span>当前图层</span>
+              <strong id="selectedLayerName">纸船</strong>
+            </div>
+            <span class="layer-chip" id="layerChip">顶层之下</span>
+          </div>
+
+          <div class="control-group">
+            <div class="control-heading">
+              <label for="jitterRange">手绘抖动</label>
+              <output id="jitterValue">3.2 px</output>
+            </div>
+            <input id="jitterRange" type="range" min="0" max="14" step="0.2" value="3.2" />
+            <div class="range-labels"><span>稳</span><span>呼吸感</span><span>强烈</span></div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-heading">
+              <span>入场偏移</span>
+              <button class="text-button" id="resetOffsetButton" type="button">归零</button>
+            </div>
+            <div class="offset-controls">
+              <label class="number-control">
+                <span>X</span>
+                <input id="offsetXRange" type="range" min="-180" max="180" step="1" value="120" />
+                <output id="offsetXValue">+120</output>
+              </label>
+              <label class="number-control">
+                <span>Y</span>
+                <input id="offsetYRange" type="range" min="-160" max="160" step="1" value="-30" />
+                <output id="offsetYValue">−30</output>
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group timing-group">
+            <div class="control-heading">
+              <label for="delayRange">入场时间</label>
+              <output id="delayValue">0.45 s</output>
+            </div>
+            <input id="delayRange" type="range" min="0" max="6" step="0.05" value="0.45" />
+            <div class="control-heading secondary-heading">
+              <label for="entranceRange">过渡时长</label>
+              <output id="entranceValue">1.35 s</output>
+            </div>
+            <input id="entranceRange" type="range" min="0.3" max="3" step="0.05" value="1.35" />
+          </div>
+
+          <div class="inspector-note">
+            <span class="note-mark">✳</span>
+            <p>拖动时间线行首可调整遮挡关系。抖动按 12 fps 定格，像逐格手绘纸片。</p>
+          </div>
+        </aside>
+      </main>
+
+      <section class="timeline-panel" aria-label="动画时间线">
+        <div class="timeline-toolbar">
+          <div class="transport">
+            <button class="transport-button" id="startButton" type="button" title="回到开头">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M19 6 8 12l11 6V6Z"></path></svg>
+            </button>
+            <button class="play-button" id="playButton" type="button" title="播放 / 暂停 (空格)">
+              <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z"></path></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM14 5h4v14h-4z"></path></svg>
+              <span id="playLabel">播放</span>
+            </button>
+            <div class="time-display">
+              <span id="timecode">00:04:06</span>
+              <span class="time-total">/ 00:12:00</span>
+            </div>
+          </div>
+
+          <div class="timeline-meta">
+            <span class="loop-pill"><span>↻</span> LOOP 12s</span>
+            <span class="timeline-hint">拖动播放头查看任意帧</span>
+          </div>
+        </div>
+
+        <div class="timeline-main">
+          <div class="track-heading">
+            <span>图层顺序</span>
+            <span class="drag-hint">上层 ↑</span>
+          </div>
+          <div class="ruler-row">
+            <div class="ruler-spacer"></div>
+            <div class="ruler" id="ruler" aria-hidden="true"></div>
+          </div>
+          <div class="tracks-label-column" id="tracksLabelColumn"></div>
+          <div class="timeline-surface" id="timelineSurface" tabindex="0" aria-label="时间线播放头">
+            <div class="timeline-grid" id="timelineGrid"></div>
+            <div class="playhead" id="playhead">
+              <span class="playhead-cap"></span>
+              <span class="playhead-line"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-icon">✓</span>
+      <span id="toastText">已保存</span>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
