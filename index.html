@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090d">
+  <title>霓虹故障编辑器 · SUNDOWN SIGN SERVICE</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M9 24V8h3.2l7.3 10.4V8H23v16h-3.2L12.4 13.6V24H9Z"/><path class="brand-spark" d="m25 4 1.2 2.8L29 8l-2.8 1.2L25 12l-1.2-2.8L21 8l2.8-1.2L25 4Z"/></svg>
+        </span>
+        <div>
+          <p class="eyebrow">SUNDOWN SIGN SERVICE · UNIT 03</p>
+          <h1>霓虹故障编辑器</h1>
+        </div>
+      </div>
+      <div class="top-status">
+        <div class="loop-badge"><span class="loop-dot"></span>8 SEC LOOP</div>
+        <div class="top-separator"></div>
+        <div class="contact-tag"><span>CONTACT FAULT</span><strong id="faultCount">05</strong></div>
+        <button class="button button-ghost" id="helpBtn" type="button" aria-label="显示使用说明">?</button>
+      </div>
+    </header>
+
+    <main class="workbench">
+      <section class="viewer-pane" aria-label="霓虹招牌预览">
+        <div class="stage-head">
+          <div class="live-label"><span></span>LIVE PREVIEW <i></i> <b id="sceneName">雾街 · 23:47</b></div>
+          <div class="stage-tools">
+            <span class="render-stat">CANVAS 2D · 60 FPS</span>
+            <button class="button button-export" id="exportBtn" type="button">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v10m0 0 3.5-3.5M10 12 6.5 8.5M3 14v3h14v-3"/></svg>
+              导出当前帧 <kbd>PNG</kbd>
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="sceneCanvas" aria-label="潮湿街面上的 NIGHT 霓虹招牌动画"></canvas>
+          <div class="canvas-ui canvas-ui-top">
+            <div class="scene-index">STREET SIGN STUDY<br><strong>NO. 03 — NIGHT OWL</strong></div>
+            <div class="frame-status"><span class="pulse-dot"></span><span id="playStatus">ANIMATING</span></div>
+          </div>
+          <div class="canvas-ui canvas-ui-bottom">
+            <div class="voltage-readout"><span>TUBE VOLTAGE</span><strong id="voltageReadout">118.4 V</strong><i></i></div>
+            <div class="drag-hint">拖动时间轴可定格任意帧</div>
+          </div>
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="transport">
+          <div class="transport-buttons">
+            <button class="icon-button play-button" id="playBtn" type="button" aria-label="播放预览">
+              <svg class="icon-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg>
+              <svg class="icon-play" viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 7 5-7 5V5Z"/></svg>
+            </button>
+            <button class="icon-button" id="resetBtn" type="button" aria-label="重置到循环起点">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.3 8A6.3 6.3 0 1 1 4 12M4.3 8V3.8M4.3 8h4.3"/></svg>
+            </button>
+          </div>
+          <div class="timeline-shell">
+            <div class="timeline-scale" aria-hidden="true"><span>0s</span><span>2s</span><span>4s</span><span>6s</span><span>8s</span></div>
+            <div class="timeline" id="timeline" role="slider" tabindex="0" aria-label="动画时间轴，范围 0 到 8 秒" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0">
+              <div class="timeline-grid" aria-hidden="true"></div>
+              <div class="timeline-tracks" id="timelineTracks"></div>
+              <div class="playhead" id="playhead"><span></span></div>
+            </div>
+          </div>
+          <div class="timecode"><span id="timeCode">00:00.00</span><small>/ 08.00</small></div>
+        </div>
+      </section>
+
+      <aside class="inspector" aria-label="字母动画参数">
+        <div class="inspector-heading">
+          <div>
+            <p class="eyebrow">LETTER CONTROL</p>
+            <h2>逐字调校</h2>
+          </div>
+          <span class="panel-number">03</span>
+        </div>
+        <p class="inspector-intro">每根灯管都有自己的脾气。选择字母，设置节奏与故障相位。</p>
+
+        <div class="copy-field">
+          <label for="signText">招牌文字</label>
+          <div class="copy-input-wrap">
+            <input id="signText" type="text" maxlength="7" value="NIGHT" autocomplete="off" spellcheck="false" aria-label="招牌文字，最多七个字母">
+            <span id="letterCount">5 / 7</span>
+          </div>
+        </div>
+
+        <div class="letter-rail-wrap">
+          <div class="section-label"><span>选择字母</span><span>可读性锁已启用</span></div>
+          <div class="letter-rail" id="letterRail"></div>
+        </div>
+
+        <div class="selected-panel">
+          <div class="selected-heading">
+            <div class="swatch-letter" id="selectedLetter">N</div>
+            <div>
+              <span>当前通道</span>
+              <strong id="selectedName">字母 01 · N</strong>
+            </div>
+            <div class="energy-readout" id="energyReadout"><i></i><span>82%</span></div>
+          </div>
+
+          <div class="control-stack">
+            <label class="range-control" for="cycleRange">
+              <span class="range-label"><b>亮灭周期</b><output id="cycleValue">1.6 s</output></span>
+              <input id="cycleRange" type="range" min="1" max="4" step="0.1" value="1.6">
+            </label>
+            <label class="range-control" for="dutyRange">
+              <span class="range-label"><b>点亮占空</b><output id="dutyValue">62%</output></span>
+              <input id="dutyRange" type="range" min="35" max="90" step="1" value="62">
+            </label>
+            <label class="range-control hue-control" for="hueRange">
+              <span class="range-label"><b>色相</b><output id="hueValue">298°</output></span>
+              <input id="hueRange" class="hue-range" type="range" min="0" max="360" step="1" value="298">
+            </label>
+            <label class="range-control" for="sweepRange">
+              <span class="range-label"><b>扫光强度</b><output id="sweepValue">80%</output></span>
+              <input id="sweepRange" type="range" min="0" max="100" step="1" value="80">
+            </label>
+            <label class="range-control" for="delayRange">
+              <span class="range-label"><b>延迟</b><output id="delayValue">0.14 s</output></span>
+              <input id="delayRange" type="range" min="0" max="3.9" step="0.01" value="0.14">
+            </label>
+            <label class="range-control" for="faultRange">
+              <span class="range-label"><b>接触故障</b><output id="faultValue">70%</output></span>
+              <input id="faultRange" type="range" min="0" max="100" step="1" value="70">
+            </label>
+          </div>
+        </div>
+
+        <div class="deadlock-card">
+          <div class="deadlock-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5 4.5 6v6.7c0 4 3 6.6 7.5 8.8 4.5-2.2 7.5-4.8 7.5-8.8V6L12 2.5Z"/><path d="M8.5 12.2 11 14.7l4.7-5.2"/></svg>
+          </div>
+          <div>
+            <span>ANTI-DEADLOCK</span>
+            <strong>最低可见度 26%</strong>
+            <p>亮灭、接触故障和扫光按可见度上限合成，任何相位叠加都不会留下全黑灯管。</p>
+          </div>
+        </div>
+
+        <div class="inspector-actions">
+          <button class="button button-preset" id="presetBtn" type="button">载入验收节奏</button>
+          <button class="text-button" id="restoreBtn" type="button">恢复出厂值</button>
+        </div>
+      </aside>
+    </main>
+
+    <div class="help-dialog" id="helpDialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+      <div class="help-card">
+        <button class="help-close" id="helpClose" type="button" aria-label="关闭">×</button>
+        <p class="eyebrow">QUICK MANUAL</p>
+        <h2 id="helpTitle">像修灯管一样调动画</h2>
+        <ol>
+          <li><b>选字。</b> 顶部的字母通道对应招牌上的每个字符。</li>
+          <li><b>调相位。</b> 周期控制亮灭快慢，延迟让字母错峰，扫光给灯管一道移动高光。</li>
+          <li><b>叠加故障。</b> 接触故障会制造局部压暗和火花，但可见度锁保证字始终可读。</li>
+          <li><b>定格导出。</b> 拖动底部时间轴选帧，暂停后导出当前 1280 × 720 PNG。</li>
+        </ol>
+        <button class="button button-export" id="helpDone" type="button">开始调灯</button>
+      </div>
+    </div>
+
+    <div class="boot-screen" id="bootScreen" aria-hidden="true">
+      <div class="boot-mark">N</div>
+      <span>WARMING TUBES</span>
+      <i></i>
+    </div>
+  </div>
+
+  <script src="js/neon.js"></script>
+  <script src="js/sign.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
