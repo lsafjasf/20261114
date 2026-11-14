@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>潮汐数据清洗与可视化</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>潮汐数据清洗与双站曲线</h1>
+    <div class="toolbar">
+      <label class="btn">
+        载入 CSV
+        <input type="file" id="fileInput" accept=".csv,text/csv" hidden>
+      </label>
+      <button id="sampleBtn" class="btn">载入内置样例</button>
+      <button id="resetBtn" class="btn">重置缩放</button>
+      <button id="exportBtn" class="btn">导出 PNG</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="chart-panel">
+      <div class="chart-hint">拖拽框选时间窗口缩放 · 点击红色异常点查看原始行号 · 双击图表重置</div>
+      <canvas id="chart" width="1100" height="460"></canvas>
+    </section>
+
+    <section class="panels">
+      <div class="panel" id="statsPanel">
+        <h2>窗口统计</h2>
+        <div id="statsContent" class="placeholder">框选或加载数据后显示</div>
+      </div>
+      <div class="panel" id="anomalyPanel">
+        <h2>异常点详情</h2>
+        <div id="anomalyContent" class="placeholder">点击图中的红色异常点</div>
+      </div>
+      <div class="panel" id="reportPanel">
+        <h2>清洗报告</h2>
+        <div id="reportContent" class="placeholder">尚未载入数据</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="sample-data.js"></script>
+  <script src="clean.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
