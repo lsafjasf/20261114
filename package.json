@@ -1,0 +1,22 @@
+{
+  "name": "hovercraft-mudflat-inspection",
+  "version": "1.0.0",
+  "description": "气垫巡检艇泥滩三点巡检（Canvas + Web Audio）",
+  "scripts": {
+    "test": "node test.js",
+    "test:e2e": "node e2e.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "dependencies": {
+    "playwright": "^1.65.1"
+  }
+}

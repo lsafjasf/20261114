@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>气垫巡检艇 · 泥滩三点巡检</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #10151a; overflow: hidden;
+    font-family: "PingFang SC", "Microsoft YaHei", monospace; }
+  #wrap { position: relative; width: 100vw; height: 100vh; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #hud { position: absolute; top: 10px; left: 12px; color: #dff3ff;
+    font-size: 14px; line-height: 1.7; text-shadow: 0 1px 3px #000;
+    pointer-events: none; white-space: pre; }
+  #banner { position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 42px; color: #fff; font-weight: 700;
+    text-shadow: 0 2px 12px #000; pointer-events: none; }
+  #help { position: absolute; bottom: 10px; left: 12px; color: #9fb6c3;
+    font-size: 12px; text-shadow: 0 1px 2px #000; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="1600" height="950"></canvas>
+  <div id="hud"></div>
+  <div id="banner"></div>
+  <div id="help">↑/W 加速（会侧滑） · ←→/AD 转向 · ↓/S 倒车 · R 重来 · 潮线回流前完成三点巡检并撤回坡道</div>
+</div>
+<script src="sim.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
