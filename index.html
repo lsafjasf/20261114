@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081d20">
+  <title>折流 · 双人驳船</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23071d20'/%3E%3Cpath d='M18 17h28v31H18z' fill='none' stroke='%235ed3b4' stroke-width='2'/%3E%3Cpath d='M24 31c8-7 14 7 18 0' fill='none' stroke='%23f0bd68' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="gameShell" class="game-shell" data-mode="ready" data-outcome="">
+    <canvas id="gameCanvas" width="1280" height="720" aria-label="弯道驳船游戏画面"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-seal">折</span>
+        <div>
+          <strong>折流</strong>
+          <small>BEND CURRENT</small>
+        </div>
+      </div>
+
+      <div class="run-info">
+        <span id="runState" class="run-state">等待解缆</span>
+        <div class="progress-track" aria-label="航程进度">
+          <span id="progressFill" class="progress-fill"></span>
+          <i class="gate-mark" style="left:34%"></i>
+          <i class="gate-mark" style="left:67%"></i>
+        </div>
+        <span id="distanceLabel" class="distance-label">0 / 4,200 m</span>
+      </div>
+
+      <div class="hud-stats">
+        <div class="hud-stat">
+          <span>航速</span>
+          <strong id="speedValue">0.0</strong><em>节</em>
+        </div>
+        <div class="hud-stat danger">
+          <span>货损</span>
+          <strong id="cargoValue">0</strong><em>%</em>
+        </div>
+        <div class="hud-stat">
+          <span>船体</span>
+          <strong id="hullValue">100</strong><em>%</em>
+        </div>
+      </div>
+    </header>
+
+    <section class="route-strip" aria-label="三段水道">
+      <span class="route-label">航段</span>
+      <div id="stageOne" class="route-stage active"><b>壹</b><span>青芦弯</span></div>
+      <i></i>
+      <div id="stageTwo" class="route-stage"><b>贰</b><span>回澜弯</span></div>
+      <i></i>
+      <div id="stageThree" class="route-stage"><b>叁</b><span>窄门</span></div>
+    </section>
+
+    <aside class="helm-panel helm-front">
+      <div class="helm-heading">
+        <span class="player-dot"></span>
+        <div><small>左舷玩家</small><strong>前舵</strong></div>
+        <span id="frontAngle" class="angle-readout">0°</span>
+      </div>
+      <div class="key-row"><kbd>A</kbd><span>左压</span><i></i><span>右压</span><kbd>D</kbd></div>
+      <p>看住船头，提前入弯。</p>
+    </aside>
+
+    <aside class="helm-panel helm-rear">
+      <div class="helm-heading">
+        <span class="player-dot"></span>
+        <div><small>右舷玩家</small><strong>后舵</strong></div>
+        <span id="rearAngle" class="angle-readout">0°</span>
+      </div>
+      <div class="key-row"><kbd>←</kbd><span>左压</span><i></i><span>右压</span><kbd>→</kbd></div>
+      <p>稳住船尾，别让船身折起来。</p>
+    </aside>
+
+    <section class="bend-meter" aria-label="前后舵角差">
+      <div class="bend-title">
+        <span>舵角差 / 船体折弯</span>
+        <strong id="bendValue">0°</strong>
+      </div>
+      <div class="bend-scale">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        <span id="bendNeedle" class="bend-needle"></span>
+      </div>
+      <div class="meter-caption"><span>同步</span><span>危险</span></div>
+    </section>
+
+    <section class="cargo-monitor" aria-label="货物状态">
+      <div class="monitor-row">
+        <span>货物倾斜</span>
+        <div class="mini-track"><i id="cargoTiltFill"></i></div>
+        <strong id="cargoTiltValue">0%</strong>
+      </div>
+      <div class="monitor-row">
+        <span>船体完整</span>
+        <div class="mini-track hull"><i id="hullFill"></i></div>
+        <strong id="hullFillValue">100%</strong>
+      </div>
+      <div class="throttle-row">
+        <kbd>W</kbd><span>加速</span><kbd>S</kbd><span>减速</span>
+        <em>高速会放大偏航</em>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <section id="startPanel" class="overlay start-panel">
+      <div class="start-card">
+        <div class="eyebrow">双人同屏 · 一艘船 · 两副舵</div>
+        <h1><span>折</span>流</h1>
+        <p class="lede">穿过青芦、回澜与窄门。前后舵必须同时发力，<br>也要在船身折弯前同时收手。</p>
+        <div class="player-guide">
+          <article>
+            <span class="guide-index">左</span>
+            <div><small>前舵</small><strong>A / D</strong><p>决定入弯时机</p></div>
+          </article>
+          <span class="guide-link">同 步</span>
+          <article>
+            <span class="guide-index">右</span>
+            <div><small>后舵</small><strong>← / →</strong><p>守住船尾姿态</p></div>
+          </article>
+        </div>
+        <div class="rules">
+          <span><b>01</b> 舵角差让船身折弯，货箱会滑。</span>
+          <span><b>02</b> 贴岸会磨损船帮，硬撞会断船。</span>
+          <span><b>03</b> 抵达终点且货损低于 65% 即胜。</span>
+        </div>
+        <button id="startButton" class="primary-button" type="button">
+          <span>双人就位</span><b>解缆启航</b><i>→</i>
+        </button>
+        <p class="sound-note">建议开启声音 · 舵角差会变成可听见的张力</p>
+      </div>
+    </section>
+
+    <section id="endPanel" class="overlay end-panel" hidden>
+      <div class="end-card">
+        <span id="endKicker" class="end-kicker">航行终止</span>
+        <h2 id="endTitle">船体撞裂</h2>
+        <p id="endReason">船头擦上岸坡，船身断开。</p>
+        <div class="end-stats">
+          <div><span>抵达</span><strong id="endDistance">0 m</strong></div>
+          <div><span>货损</span><strong id="endCargo">0%</strong></div>
+          <div><span>船体</span><strong id="endHull">100%</strong></div>
+          <div><span>用时</span><strong id="endTime">0:00</strong></div>
+        </div>
+        <button id="restartButton" class="primary-button" type="button">
+          <span>再来一次</span><b>重新解缆</b><i>↻</i>
+        </button>
+      </div>
+    </section>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
