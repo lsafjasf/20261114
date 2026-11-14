@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111310" />
+    <title>MOTION LINE — 二维镜头路径编辑器</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23111310'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23ff6b3d'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-play" viewBox="0 0 24 24">
+        <path d="M8 5.5v13l10-6.5-10-6.5Z" fill="currentColor" />
+      </symbol>
+      <symbol id="icon-pause" viewBox="0 0 24 24">
+        <path d="M8 5h3v14H8V5Zm5 0h3v14h-3V5Z" fill="currentColor" />
+      </symbol>
+      <symbol id="icon-loop" viewBox="0 0 24 24">
+        <path d="M17 8H7a4 4 0 0 0-4 4M7 16h10a4 4 0 0 0 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <path d="m15 5 3 3-3 3M9 19l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3.5A1.5 1.5 0 0 0 6.5 21h11A1.5 1.5 0 0 0 19 19.5V16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M12 15V4m0 0 4 4m-4-4-4 4M5 16v3.5A1.5 1.5 0 0 0 6.5 21h11A1.5 1.5 0 0 0 19 19.5V16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M5 7h14M9 7V4h6v3m2 0-1 14H8L7 7m2 0v10m4-10v10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </symbol>
+      <symbol id="icon-camera" viewBox="0 0 24 24">
+        <path d="M4 8h3l2-3h6l2 3h3v11H4V8Z" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <div class="brand-mark"><span></span></div>
+          <div class="brand-type">
+            <span class="brand-name">MOTION LINE</span>
+            <span class="brand-caption">2D CAMERA STUDIO</span>
+          </div>
+        </div>
+        <div class="project-heading">
+          <span class="project-kicker" id="projectKicker">SHOT 01 / 08 SEC</span>
+          <h1 id="projectTitle">河畔暮光</h1>
+        </div>
+        <div class="header-actions">
+          <span class="save-state" id="saveState"><i></i><span>示例已载入</span></span>
+          <button class="text-button" id="loadButton" type="button">
+            <svg class="icon"><use href="#icon-upload"></use></svg>
+            载入 JSON
+          </button>
+          <button class="primary-button" id="saveButton" type="button">
+            <svg class="icon"><use href="#icon-download"></use></svg>
+            保存 JSON
+          </button>
+          <input id="fileInput" type="file" accept=".json,application/json" hidden />
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="director-card" aria-label="镜头导演视图">
+          <header class="director-head">
+            <div class="director-title">
+              <span class="eyebrow">DIRECTOR VIEW</span>
+              <span class="divider"></span>
+              <span class="scene-name">暮色游乐园</span>
+            </div>
+            <div class="director-meta">
+              <span>1600 × 900</span>
+              <span class="live-indicator"><i></i>CANVAS 2D</span>
+            </div>
+          </header>
+
+          <div class="canvas-stage" id="canvasStage">
+            <canvas id="directorCanvas" aria-label="可拖动的镜头路线画布"></canvas>
+            <div class="grab-hint" id="grabHint">
+              <span class="grab-icon">↖</span>
+              拖动端点与控制点
+            </div>
+            <div class="axis-label"><span>WORLD</span><b>01</b></div>
+            <div class="canvas-readout" id="canvasReadout">X 000 · Y 000</div>
+          </div>
+
+          <footer class="transport">
+            <div class="transport-left">
+              <button class="play-button" id="playButton" type="button" aria-label="播放镜头">
+                <svg class="icon play-icon"><use href="#icon-play"></use></svg>
+                <svg class="icon pause-icon"><use href="#icon-pause"></use></svg>
+              </button>
+              <div class="time-display">
+                <span class="time-now" id="timeNow">00:00.0</span>
+                <span class="time-total" id="timeTotal">/ 00:08.0</span>
+              </div>
+            </div>
+
+            <div class="timeline-wrap" aria-label="时间轴">
+              <div class="timeline-labels">
+                <span>0s</span>
+                <span>镜头路径</span>
+                <span id="timelineEndLabel">8s</span>
+              </div>
+              <div class="timeline" id="timeline" role="slider" tabindex="0" aria-label="拖动时间轴预览镜头" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0">
+                <div class="timeline-rail"></div>
+                <div class="timeline-progress" id="timelineProgress"></div>
+                <div class="timeline-keyframes" id="timelineKeyframes"></div>
+                <div class="timeline-playhead" id="timelinePlayhead"><span></span></div>
+              </div>
+            </div>
+
+            <div class="transport-right">
+              <button class="loop-button is-active" id="loopButton" type="button" aria-pressed="true">
+                <svg class="icon"><use href="#icon-loop"></use></svg>
+                <span>循环</span>
+              </button>
+              <div class="speed-readout"><span>24</span> FPS</div>
+            </div>
+          </footer>
+        </section>
+
+        <aside class="inspector" aria-label="镜头参数检查器">
+          <section class="preview-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">CAMERA PREVIEW</span>
+                <h2>实时取景</h2>
+              </div>
+              <span class="preview-live"><i></i>LIVE</span>
+            </div>
+            <div class="preview-frame">
+              <canvas id="previewCanvas" aria-label="当前镜头取景预览"></canvas>
+              <div class="preview-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <span class="preview-tag" id="previewTag">FOV 16:9</span>
+            </div>
+            <div class="preview-stats">
+              <div><span>缩放</span><strong id="zoomReadout">1.35×</strong></div>
+              <div><span>旋转</span><strong id="rotationReadout">−4.0°</strong></div>
+              <div><span>时长</span><strong id="durationReadout">8.00s</strong></div>
+            </div>
+          </section>
+
+          <section class="inspector-section shot-section">
+            <div class="section-title">
+              <div>
+                <span class="eyebrow">SHOT DATA</span>
+                <h2>镜头概览</h2>
+              </div>
+              <span class="section-index">01</span>
+            </div>
+            <div class="data-grid">
+              <div class="data-card">
+                <span>镜头位置</span>
+                <strong id="positionReadout">X 612 · Y 568</strong>
+              </div>
+              <div class="data-card">
+                <span>路线长度</span>
+                <strong id="lengthReadout">— px</strong>
+              </div>
+              <div class="data-card">
+                <span>关键帧</span>
+                <strong id="keyframeCount">4 段</strong>
+              </div>
+              <div class="data-card accent-card">
+                <span>当前进度</span>
+                <strong id="progressReadout">0.0%</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="inspector-section keyframe-section">
+            <div class="section-title compact">
+              <div>
+                <span class="eyebrow">CURVE KEYS</span>
+                <h2>缩放与旋转</h2>
+              </div>
+              <button class="add-key-button" id="addKeyframeButton" type="button">
+                <svg class="icon"><use href="#icon-plus"></use></svg>
+                当前时间
+              </button>
+            </div>
+            <div class="keyframe-list" id="keyframeList"></div>
+            <div class="key-editor" id="keyEditor">
+              <div class="key-editor-head">
+                <div>
+                  <span class="eyebrow">SELECTED KEY</span>
+                  <strong id="selectedKeyTime">0.00s</strong>
+                </div>
+                <button class="delete-key-button" id="deleteKeyframeButton" type="button" aria-label="删除关键帧">
+                  <svg class="icon"><use href="#icon-trash"></use></svg>
+                </button>
+              </div>
+              <label class="control-row" for="zoomInput">
+                <span>缩放 <b id="zoomValue">1.35×</b></span>
+                <input id="zoomInput" type="range" min="0.75" max="3.2" step="0.01" value="1.35" />
+              </label>
+              <label class="control-row" for="rotationInput">
+                <span>旋转 <b id="rotationValue">−4°</b></span>
+                <input id="rotationInput" type="range" min="-45" max="45" step="0.1" value="-4" />
+              </label>
+            </div>
+          </section>
+
+          <div class="inspector-tip">
+            <span class="tip-mark">i</span>
+            <p>拖动画布上的起终点与控制点改变路线；沿时间轴移动可检查每个关键帧之间的过渡。</p>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-mark">✓</span>
+      <span id="toastText">已保存镜头路线</span>
+    </div>
+
+    <script src="scene.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
