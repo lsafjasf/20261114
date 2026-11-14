@@ -1,0 +1,191 @@
+@import url("assets/fonts/noto/subset.css");
+
+:root {
+  color-scheme: dark;
+  font-family: "Orbital CN", "Rajdhani", "DIN Alternate", "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: #03070e;
+  color: #d8f6ff;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(22, 121, 154, 0.14), transparent 29rem),
+    radial-gradient(circle at 85% 75%, rgba(214, 121, 42, 0.08), transparent 27rem),
+    #03070e;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(95, 210, 230, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95, 210, 230, 0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, black, transparent 78%);
+}
+
+.game-shell {
+  position: relative;
+  width: min(calc(100vw - 24px), calc((100svh - 24px) * 1.6), 1536px);
+  aspect-ratio: 16 / 10;
+  isolation: isolate;
+  border: 1px solid rgba(122, 222, 241, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #040a13;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 32px 100px rgba(0, 0, 0, 0.75),
+    0 0 70px rgba(38, 174, 204, 0.06);
+}
+
+.game-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 90px rgba(2, 7, 14, 0.72),
+    inset 0 0 0 1px rgba(186, 244, 255, 0.04);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+.top-actions {
+  position: absolute;
+  top: 2.4%;
+  right: 2.2%;
+  z-index: 8;
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 30px;
+  padding: 0.35em 0.75em;
+  border: 1px solid rgba(101, 213, 233, 0.32);
+  border-radius: 3px;
+  background: rgba(5, 18, 31, 0.75);
+  color: #94ced9;
+  font: 600 clamp(8px, 0.7vw, 11px) / 1 "Rajdhani", "DIN Alternate", sans-serif;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  border-color: rgba(94, 234, 255, 0.75);
+  color: #e5fdff;
+  outline: none;
+}
+
+.icon-button[aria-pressed="true"] {
+  color: #ffd38d;
+  border-color: rgba(248, 178, 80, 0.55);
+  background: rgba(57, 32, 9, 0.65);
+}
+
+.sound-icon {
+  font-size: 1.25em;
+  line-height: 0.7;
+  transform: rotate(-28deg);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  z-index: 9;
+  max-width: 70%;
+  padding: 0.58em 1.1em;
+  border: 1px solid rgba(255, 173, 91, 0.36);
+  border-left-width: 3px;
+  border-radius: 3px;
+  background: rgba(11, 19, 28, 0.92);
+  color: #ffd4a4;
+  font: 600 clamp(10px, 0.95vw, 14px) / 1.2 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 10px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  backdrop-filter: blur(8px);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast.danger {
+  border-color: rgba(255, 87, 75, 0.7);
+  color: #ffb1a7;
+}
+
+.toast.success {
+  border-color: rgba(99, 242, 193, 0.55);
+  color: #a8ffe2;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 700px) {
+  .game-shell {
+    width: 100vw;
+    border-radius: 0;
+    border-inline: 0;
+  }
+
+  .top-actions {
+    top: 1.6%;
+    right: 1.6%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

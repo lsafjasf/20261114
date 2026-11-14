@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050b16" />
+    <title>轨道货舱 · 机械臂转运</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23050b16'/%3E%3Cpath d='M6 17h10l4-6h7' stroke='%2358e1ee' stroke-width='3' fill='none'/%3E%3Ccircle cx='7' cy='17' r='4' fill='%23ffb24d'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell" aria-label="轨道空间站机械臂转运控制台">
+      <canvas id="game" width="1280" height="800" aria-label="空间站机械臂与三个待转运吊舱"></canvas>
+      <div class="top-actions">
+        <button id="soundToggle" class="icon-button" type="button" aria-pressed="false" title="开启声音">
+          <span class="sound-icon" aria-hidden="true">◖</span>
+          <span class="sound-label">SOUND</span>
+        </button>
+      </div>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <div class="sr-only" id="liveStatus" aria-live="polite"></div>
+    </main>
+    <script src="src/config.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/game.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/main.js"></script>
+  </body>
+</html>
