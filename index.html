@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>凹凸表面法线贴图生成器</title>
+<style>
+  :root {
+    --bg: #16181d;
+    --panel: #1f232b;
+    --border: #2e3440;
+    --text: #d8dee9;
+    --accent: #88c0d0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+  }
+  h1 { font-size: 18px; margin: 0 0 12px; color: var(--accent); }
+  .layout { display: flex; gap: 16px; flex-wrap: wrap; }
+  .views { display: flex; gap: 12px; flex-wrap: wrap; }
+  .view { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .view h2 { font-size: 13px; margin: 0 0 8px; font-weight: 600; }
+  canvas {
+    display: block;
+    width: 256px;
+    height: 256px;
+    image-rendering: pixelated;
+    background: #000;
+    cursor: crosshair;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 280px;
+  }
+  .row { margin-bottom: 10px; }
+  .row label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .row output { color: var(--accent); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  button {
+    background: var(--accent);
+    color: #11141a;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  #readout {
+    margin-top: 12px;
+    padding: 8px 10px;
+    background: #12151a;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    white-space: pre-line;
+    min-height: 64px;
+  }
+  #selftest { margin-top: 10px; font-size: 12px; }
+  #selftest .pass { color: #a3be8c; }
+  #selftest .fail { color: #bf616a; }
+</style>
+</head>
+<body>
+<h1>凹凸表面法线贴图生成器</h1>
+<div class="layout">
+  <div class="views">
+    <div class="view">
+      <h2>原图（高度图）</h2>
+      <canvas id="cvHeight" width="256" height="256"></canvas>
+    </div>
+    <div class="view">
+      <h2>法线贴图</h2>
+      <canvas id="cvNormal" width="256" height="256"></canvas>
+    </div>
+    <div class="view">
+      <h2>灯光预览</h2>
+      <canvas id="cvLight" width="256" height="256"></canvas>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="row">
+      <label>凹凸尺度 <output id="oBump">8.0</output></label>
+      <input type="range" id="inBump" min="0" max="30" step="0.5" value="8">
+    </div>
+    <div class="row">
+      <label>细节层数 <output id="oOct">5</output></label>
+      <input type="range" id="inOct" min="1" max="8" step="1" value="5">
+    </div>
+    <div class="row">
+      <label>光源方位角 <output id="oAz">45°</output></label>
+      <input type="range" id="inAz" min="0" max="360" step="1" value="45">
+    </div>
+    <div class="row">
+      <label>光源仰角 <output id="oEl">55°</output></label>
+      <input type="range" id="inEl" min="5" max="90" step="1" value="55">
+    </div>
+    <div class="row">
+      <label>光照强度 <output id="oInt">1.0</output></label>
+      <input type="range" id="inInt" min="0" max="3" step="0.05" value="1">
+    </div>
+    <div class="row">
+      <label>随机种子 <output id="oSeed">1337</output></label>
+      <input type="range" id="inSeed" min="1" max="9999" step="1" value="1337">
+    </div>
+    <div class="btns">
+      <button id="btnH">导出原图 PNG</button>
+      <button id="btnN">导出法线 PNG</button>
+      <button id="btnL">导出灯光 PNG</button>
+    </div>
+    <div id="readout">悬停任意视图读取像素…</div>
+    <div id="selftest"></div>
+  </div>
+</div>
+<script src="noise.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
