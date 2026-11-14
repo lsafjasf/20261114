@@ -1,0 +1,29 @@
+{
+  "name": "uid188",
+  "version": "1.0.0",
+  "description": "8-second abstract Canvas 2D loop background with seam inspection and auto loop correction",
+  "main": "index.html",
+  "scripts": {
+    "test": "node test/run-loop-test.js > /dev/null && node test/dom-smoke-test.js",
+    "test:seam": "node test/run-loop-test.js",
+    "test:dom": "node test/dom-smoke-test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "dependencies": {
+    "@napi-rs/canvas": "^1.1.1"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.1"
+  }
+}

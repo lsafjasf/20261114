@@ -1,0 +1,4 @@
+node_modules/
+artifacts/*.png
+artifacts/seam-report.json
+artifacts/params.sample.json
