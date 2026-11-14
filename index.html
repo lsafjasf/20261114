@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地下泵站 · 双人协作稳态</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">地下泵站 <span>UNDERGROUND PUMP STATION</span></div>
+    <div class="hud">
+      <div class="hud-item"><label>任务计时</label><b id="hud-time">00:00</b></div>
+      <div class="hud-item"><label>安全稳态</label><b id="hud-steady">0:00 / 5:00</b></div>
+      <div class="hud-item"><label>共享总流量</label><b id="hud-flow">0.000</b></div>
+      <div class="hud-item"><label>管道损伤</label><b id="hud-damage">0%</b></div>
+      <div class="hud-item status" id="hud-status"><b>待机</b></div>
+    </div>
+    <div class="actions">
+      <button id="btn-start" class="primary">开始值班</button>
+      <button id="btn-demo">自动驾驶演示</button>
+      <button id="btn-reset">复位</button>
+      <button id="btn-mute" title="M">🔊 音效</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel valve-panel">
+      <h2>左位 · 进水阀操作员</h2>
+      <p class="role-hint">你只看得到阀门侧仪表：阀位、来水压力、进水流量。泵的细节在对面。</p>
+      <div class="pool-block" id="valve-blocks"></div>
+      <div class="keys-hint">
+        <b>键盘</b>
+        <span><kbd>Q</kbd>/<kbd>A</kbd> A池阀 开/关</span>
+        <span><kbd>W</kbd>/<kbd>S</kbd> B池阀 开/关</span>
+        <span>按住 <kbd>Shift</kbd> = 快速动作（易爆管）</span>
+      </div>
+    </section>
+
+    <section class="center">
+      <canvas id="canvas" width="960" height="560"></canvas>
+      <div class="steady-track">
+        <span>稳态进度</span>
+        <div class="bar"><i id="steady-fill"></i></div>
+      </div>
+      <div class="alarm-log">
+        <h3>共享报警 / 流量频道（双方可见）</h3>
+        <ul id="alarm-list"><li class="muted">系统就绪，等待值班开始……</li></ul>
+      </div>
+    </section>
+
+    <section class="panel pump-panel">
+      <h2>右位 · 排水泵操作员</h2>
+      <p class="role-hint">你只看得到泵侧仪表：转速、出口压力、排水流量、停泵计时。阀门的细节在对面。</p>
+      <div class="pool-block" id="pump-blocks"></div>
+      <div class="keys-hint">
+        <b>键盘</b>
+        <span><kbd>I</kbd>/<kbd>K</kbd> A池泵 升/降速</span>
+        <span><kbd>O</kbd>/<kbd>L</kbd> B池泵 升/降速</span>
+        <span>停泵超过 15 秒平台淹没</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="briefing">
+    <b>任务：</b>两台泵、两个集水池，地下水持续渗入。把两个池子稳定在安全门限（32%–68%）内连续 5 分钟即胜利。
+    任一执行机构动作过猛都会触发<b>水锤</b>，累积损伤 100% 管道崩裂；泵抽空会<b>气蚀</b>；停泵超时平台淹没；水位漫顶直接失败。
+    两人共享报警与总流量，请用语言沟通配合。
+  </footer>
+
+  <div class="modal hidden" id="modal">
+    <div class="modal-card">
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <button id="modal-close">知道了</button>
+    </div>
+  </div>
+
+  <script src="sim.js"></script>
+  <script src="pilot.js"></script>
+  <script src="audio.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
