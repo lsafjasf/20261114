@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>星空望远镜排程</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>星空望远镜排程</h1>
+      <p class="subtitle">
+        三颗目标星依次进入窗口。安排转台、换色片与曝光，避开地平线与月光，在
+        20:00 前让每颗星都拿到一次足额有效曝光。
+      </p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>夜空</h2>
+        <canvas id="sky" width="900" height="360"></canvas>
+        <div id="skyLegend" class="legend"></div>
+      </section>
+
+      <section class="panel">
+        <h2>时间轴与排程</h2>
+        <canvas id="timeline" width="900" height="260"></canvas>
+      </section>
+
+      <section class="panel controls">
+        <div class="control-group">
+          <label>目标星
+            <select id="starSelect"></select>
+          </label>
+          <label>开始 t
+            <input id="startInput" type="number" min="0" max="60" step="1" value="0" />
+          </label>
+          <label>时长(分)
+            <input id="durationInput" type="number" min="1" max="60" step="1" value="2" />
+          </label>
+        </div>
+        <div class="control-group">
+          <button id="addSlew">加转台</button>
+          <button id="addFilter">换色片</button>
+          <button id="addExpose">加曝光</button>
+          <button id="deleteAction" class="warn">删除选中</button>
+        </div>
+        <div class="control-group">
+          <button id="loadGood" class="good">载入可行排程</button>
+          <button id="loadBad" class="bad">载入迟到排程</button>
+          <button id="clearAll" class="warn">清空</button>
+        </div>
+        <div class="control-group">
+          <button id="validate" class="primary">验证排程</button>
+          <button id="play" class="primary">▶ 播放</button>
+          <button id="reset">⏹ 复位</button>
+          <label class="mute">
+            <input id="muteToggle" type="checkbox" /> 静音
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>判定结果与事件日志</h2>
+        <div id="verdict" class="verdict">尚未验证</div>
+        <div id="stats" class="stats"></div>
+        <ol id="log" class="log"></ol>
+      </section>
+    </main>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

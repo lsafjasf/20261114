@@ -1,0 +1,17 @@
+{
+  "name": "telescope-scheduler",
+  "version": "1.0.0",
+  "description": "星空望远镜排程小游戏（Canvas + Web Audio）",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node verify/verify.js && node verify/dom-smoke.mjs",
+    "verify": "node verify/verify.js",
+    "smoke": "node verify/dom-smoke.mjs",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "jsdom": "^31.0.1",
+    "playwright": "^1.65.1"
+  }
+}
