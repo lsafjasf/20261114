@@ -1,0 +1,88 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: #14161c;
+  color: #e8eaf0;
+}
+header {
+  padding: 12px 20px;
+  border-bottom: 1px solid #2a2e3a;
+}
+header h1 { font-size: 18px; margin: 0 0 10px; }
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.toolbar label { font-size: 13px; color: #9aa3b5; }
+.toolbar input[type="number"] {
+  width: 70px;
+  margin-left: 6px;
+  background: #1d2029;
+  border: 1px solid #343949;
+  color: #e8eaf0;
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+button {
+  background: #2f6fed;
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button:hover { background: #3f7df5; }
+button.playing { background: #d64545; }
+#status { font-size: 12px; color: #7ddc8b; }
+main { padding: 16px 20px; }
+#board {
+  width: 100%;
+  max-width: 1200px;
+  display: block;
+  background: #1a1d26;
+  border: 1px solid #2a2e3a;
+  border-radius: 8px;
+  cursor: default;
+}
+#panelEditor { max-width: 1200px; margin-top: 14px; }
+#panelEditor h2 { font-size: 14px; color: #9aa3b5; font-weight: 600; }
+#panelEditor small { color: #5d6577; font-weight: 400; }
+#panelRows {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.prow {
+  background: #1d2029;
+  border: 1px solid #2c3140;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.prow.active { border-color: #2f6fed; }
+.prow .title { font-weight: 600; color: #cdd4e3; }
+.prow .locked { color: #f0b64c; margin-left: 4px; }
+.prow label { color: #8b93a7; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.prow input[type="number"] {
+  width: 58px;
+  background: #14161c;
+  border: 1px solid #343949;
+  color: #e8eaf0;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+.prow select {
+  background: #14161c;
+  border: 1px solid #343949;
+  color: #e8eaf0;
+  border-radius: 4px;
+  padding: 2px 4px;
+  max-width: 110px;
+}
