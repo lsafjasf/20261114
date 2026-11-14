@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>提线之间 · 双人木偶演出</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>提线之间</h1>
+          <p>TWO PLAYERS · ONE PUPPET</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost-btn" id="soundBtn" type="button" aria-pressed="true">
+          <span class="sound-dot"></span><span id="soundLabel">声音 · 开</span>
+        </button>
+        <button class="ghost-btn" id="restartBtn" type="button">重新入场</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="player-panel left-panel" id="leftPanel">
+        <div class="player-heading">
+          <span class="player-index">01</span>
+          <div>
+            <h2>左提线师</h2>
+            <p>W A S D</p>
+          </div>
+        </div>
+        <div class="joint-readouts">
+          <div class="readout" data-joint="leftArm">
+            <div class="readout-line"><span>左臂</span><b>-16°</b></div>
+            <div class="meter"><i></i><em class="target-slot"></em></div>
+          </div>
+          <div class="readout" data-joint="waist">
+            <div class="readout-line"><span>腰部</span><b>0°</b></div>
+            <div class="meter"><i></i><em class="target-slot"></em></div>
+          </div>
+        </div>
+        <div class="keyboard left-keys" aria-label="左侧控制">
+          <div class="key-row single"><span class="key" data-key="W">W<small>升</small></span></div>
+          <div class="key-row">
+            <span class="key" data-key="A">A<small>左</small></span>
+            <span class="key" data-key="S">S<small>降</small></span>
+            <span class="key" data-key="D">D<small>右</small></span>
+          </div>
+        </div>
+        <div class="panel-note">
+          <span class="note-line"></span>
+          <p>左臂升降与腰部转向。两手同时施力，才会让关节留在窗口内。</p>
+        </div>
+      </aside>
+
+      <section class="stage-column">
+        <div class="stage-frame" id="stageFrame">
+          <canvas id="stage" aria-label="木偶舞台"></canvas>
+
+          <div class="in-stage-top">
+            <div class="act-chip" id="actChip">
+              <span class="act-number">幕 01</span>
+              <strong>挥杆</strong>
+            </div>
+            <div class="clock-box">
+              <span>窗口剩余</span>
+              <b id="clockValue">14.0</b>
+            </div>
+          </div>
+
+          <div class="instruction-card" id="instructionCard">
+            <span class="instruction-kicker">同步动作 · 第一幕</span>
+            <h3>让双臂抬入金色窗口</h3>
+            <p><kbd>W</kbd> + <kbd>↑</kbd> 同时抬臂，停稳后保持半秒。</p>
+            <div class="settle-bar"><i id="settleFill"></i></div>
+          </div>
+
+          <div class="toast" id="toast" role="status"></div>
+
+          <div class="start-overlay overlay visible" id="startOverlay">
+            <div class="overlay-card intro-card">
+              <span class="over-eyebrow">今晚唯一剧目</span>
+              <h2>两只手，<br><em>一具身体。</em></h2>
+              <p class="intro-copy">木偶必须穿过挥杆、转身、下蹲三个狭窄动作窗口。任何一侧抢先，都会让关节失衡。</p>
+              <div class="roles">
+                <div><span>左侧</span><strong>WASD</strong><small>左臂 / 腰部</small></div>
+                <div><span>右侧</span><strong>方向键</strong><small>右臂 / 头部</small></div>
+              </div>
+              <div class="over-actions">
+                <button class="primary-btn" id="startBtn" type="button"><span>开始合演</span><i>→</i></button>
+                <button class="secondary-btn" id="demoBtn" type="button">观看排练 · 自动完成三幕</button>
+              </div>
+              <p class="over-footnote">动作过猛会累积关节应力 · 连续失衡 3 次演出中断</p>
+            </div>
+          </div>
+
+          <div class="end-overlay overlay" id="endOverlay">
+            <div class="overlay-card end-card">
+              <span class="over-eyebrow" id="endEyebrow">幕落</span>
+              <h2 id="endTitle">演出完成</h2>
+              <p id="endCopy">三条提线，一次呼吸。</p>
+              <div class="result-grid">
+                <div><b id="resActs">3 / 3</b><span>动作窗口</span></div>
+                <div><b id="resStress">0%</b><span>最高关节应力</span></div>
+                <div><b id="resTime">0:00</b><span>演出时长</span></div>
+              </div>
+              <div class="over-actions">
+                <button class="primary-btn" id="againBtn" type="button"><span>再演一次</span><i>↻</i></button>
+                <button class="secondary-btn" id="replayDemoBtn" type="button">再看排练</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stage-caption">
+          <div class="act-timeline" id="actTimeline">
+            <div class="timeline-act active" data-act="0"><span>01</span><b>挥杆</b></div>
+            <div class="timeline-act" data-act="1"><span>02</span><b>转身</b></div>
+            <div class="timeline-act" data-act="2"><span>03</span><b>下蹲</b></div>
+          </div>
+          <p id="stageHint">两侧同时抬臂，等指尖进入窗口。</p>
+        </div>
+      </section>
+
+      <aside class="player-panel right-panel" id="rightPanel">
+        <div class="player-heading">
+          <span class="player-index">02</span>
+          <div>
+            <h2>右提线师</h2>
+            <p>↑ ← ↓ →</p>
+          </div>
+        </div>
+        <div class="joint-readouts">
+          <div class="readout" data-joint="rightArm">
+            <div class="readout-line"><span>右臂</span><b>-16°</b></div>
+            <div class="meter"><i></i><em class="target-slot"></em></div>
+          </div>
+          <div class="readout" data-joint="head">
+            <div class="readout-line"><span>头部</span><b>0°</b></div>
+            <div class="meter"><i></i><em class="target-slot"></em></div>
+          </div>
+        </div>
+        <div class="keyboard right-keys" aria-label="右侧控制">
+          <div class="key-row single"><span class="key" data-key="ARROWUP">↑<small>升</small></span></div>
+          <div class="key-row">
+            <span class="key" data-key="ARROWLEFT">←<small>左</small></span>
+            <span class="key" data-key="ARROWDOWN">↓<small>降</small></span>
+            <span class="key" data-key="ARROWRIGHT">→<small>右</small></span>
+          </div>
+        </div>
+        <div class="balance-panel">
+          <div class="balance-heading">
+            <span>连续失衡</span><b><i id="imbalanceCount">0</i> / 3</b>
+          </div>
+          <div class="balance-pips" id="balancePips">
+            <i></i><i></i><i></i>
+          </div>
+          <div class="strain-row">
+            <span>关节应力</span><b id="strainValue">0%</b>
+          </div>
+          <div class="strain-bar"><i id="strainFill"></i></div>
+        </div>
+        <div class="panel-note">
+          <span class="note-line"></span>
+          <p>右臂升降与头部转向。抬到金色刻度后松手，别硬拉到尽头。</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>建议两人并肩而坐，各自掌管一侧。</span>
+      <span class="footer-rule"></span>
+      <span>缓慢施力 · 同时到位 · 停稳再动</span>
+    </footer>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script src="js/puppet.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
