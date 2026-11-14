@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>陀螺仪漂移校准</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="layout">
+    <section class="panel stage">
+      <canvas id="ball" width="520" height="520"></canvas>
+      <div class="hold-meter">
+        <div class="hold-label">
+          <span id="holdText">稳定保持 0.0 / 10.0 s</span>
+          <span id="statusText" class="status">调整中</span>
+        </div>
+        <div class="hold-track"><div id="holdFill" class="hold-fill"></div></div>
+      </div>
+    </section>
+
+    <section class="panel side">
+      <h1>陀螺仪漂移校准</h1>
+      <p class="hint">
+        陀螺读数正在漂移。调整三轴校正偏置，让姿态球回到中心并保持在误差带内
+        10 秒。校正过度会产生反向漂移；注意周期性的外部摆动。音调越高表示
+        正向漂移越快，越低表示反向漂移越快。
+      </p>
+
+      <div id="axes" class="axes"></div>
+
+      <div class="controls-help">
+        <span><kbd>A</kbd>/<kbd>D</kbd> X 轴</span>
+        <span><kbd>W</kbd>/<kbd>S</kbd> Y 轴</span>
+        <span><kbd>Q</kbd>/<kbd>E</kbd> Z 轴</span>
+        <span><kbd>Shift</kbd> 微调</span>
+        <span><kbd>M</kbd> 声音开关</span>
+      </div>
+
+      <canvas id="bands" width="360" height="150"></canvas>
+
+      <div id="result" class="result hidden">
+        <h2>校准通过</h2>
+        <p>最终三轴偏移（校正偏置，°/s）：</p>
+        <pre id="finalBias"></pre>
+        <button id="restartBtn">重新校准</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="gyro.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
