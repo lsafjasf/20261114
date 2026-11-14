@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="一段纯 Web Audio 合成的声学辨识任务：在混响与底噪中配对三段机械声。"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%2309100c'/%3E%3Cpath d='M14 32h36M32 14v36' stroke='%23d8ff63'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23ececdf'/%3E%3C/svg%3E"
+    />
+    <title>ECHO INDEX — 机械回声辨识台</title>
+    <link rel="stylesheet" href="assets/fonts.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise-layer" aria-hidden="true"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Echo Index 首页">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-type">
+            <strong>ECHO INDEX</strong>
+            <small>ACOUSTIC IDENTIFICATION UNIT</small>
+          </span>
+        </a>
+
+        <div class="topbar-center" aria-hidden="true">
+          <span>LAB / 07</span>
+          <i></i>
+          <span>SESSION 2603</span>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="live-status" id="engineStatus">
+            <span class="status-light"></span>
+            <span id="engineStatusText">SYNTH READY</span>
+          </div>
+          <button class="icon-button" id="soundToggle" type="button" aria-label="停止所有声音">
+            <span class="speaker-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">
+              <span>TEST 03</span>
+              <span class="eyebrow-rule"></span>
+              <span>MECHANICAL ECHO</span>
+            </div>
+            <h1>噪声不是答案。<br /><em>它是掩体。</em></h1>
+            <p class="hero-lede">
+              一段环境声里藏着三段几乎相同的机械声。用干燥参考中的
+              <strong>频率轮廓</strong>与<strong>起音方式</strong>，把它们逐一找回。
+            </p>
+          </div>
+
+          <aside class="case-card" aria-label="任务状态">
+            <div class="case-orbit" aria-hidden="true">
+              <span class="orbit orbit-a"></span>
+              <span class="orbit orbit-b"></span>
+              <span class="orbit-core"></span>
+            </div>
+            <div class="case-heading">
+              <span>CASE / 2603</span>
+              <strong>FIELD ASSAY</strong>
+            </div>
+            <dl class="case-stats">
+              <div>
+                <dt>容错阈值</dt>
+                <dd><span id="errorCount">00</span><small> / 02</small></dd>
+              </div>
+              <div>
+                <dt>已闭合</dt>
+                <dd><span id="matchCount">00</span><small> / 03</small></dd>
+              </div>
+            </dl>
+            <div class="progress-dots" id="progressDots" aria-label="配对进度">
+              <i></i><i></i><i></i>
+            </div>
+            <div class="seed-line">
+              <span>FIXED SEED</span>
+              <code id="seedLabel">0x00000000</code>
+            </div>
+          </aside>
+        </section>
+
+        <section class="workbench" aria-label="机械声配对工作台">
+          <aside class="deck source-deck">
+            <header class="deck-header">
+              <div>
+                <span class="section-index">01</span>
+                <h2>现场声场</h2>
+              </div>
+              <span class="deck-tag">WET / MIXED</span>
+            </header>
+            <p class="deck-intro">一段连续环境录音，包含三段机械事件。点击切片单独试听。</p>
+
+            <button class="ambient-player" id="ambientPlay" type="button" disabled>
+              <span class="ambient-play-icon" aria-hidden="true">
+                <span></span>
+              </span>
+              <span class="ambient-copy">
+                <small>FIELD RECORDING</small>
+                <strong>播放完整环境声</strong>
+              </span>
+              <span class="ambient-time">18.0s</span>
+            </button>
+
+            <div class="specimen-list" id="targetList" aria-live="polite"></div>
+          </aside>
+
+          <section class="spectral-panel" aria-label="频谱与配对映射">
+            <header class="spectral-header">
+              <div class="spectral-title">
+                <span class="section-index">02</span>
+                <div>
+                  <h2>频谱映射</h2>
+                  <p>AMBIENT SPECTROGRAM / PAIRING TRACE</p>
+                </div>
+              </div>
+              <div class="record-badge" id="recordBadge">
+                <i></i>
+                <span>LISTENING</span>
+              </div>
+            </header>
+
+            <div class="canvas-frame" id="canvasFrame">
+              <canvas
+                id="spectralCanvas"
+                role="img"
+                aria-label="环境声频谱、三段目标声音与参考片段的配对连线"
+              ></canvas>
+              <div class="canvas-loading" id="canvasLoading">
+                <span class="loading-ring"></span>
+                <p>正在合成声场 <small>OFFLINE AUDIO</small></p>
+              </div>
+            </div>
+
+            <div class="lock-console">
+              <div class="selection-readout">
+                <span class="readout-label">当前线索</span>
+                <strong id="activeTargetLabel">等待目标</strong>
+                <span class="readout-arrow" aria-hidden="true">→</span>
+                <strong id="activeReferenceLabel" class="muted">选择右侧参考</strong>
+              </div>
+              <div class="lock-help">
+                <span class="pulse-dot"></span>
+                <span id="lockHint">先点选一段现场切片</span>
+              </div>
+              <button class="text-button" id="clearSelection" type="button" disabled>
+                取消选择
+              </button>
+            </div>
+
+            <div class="interference-strip">
+              <div class="interference-title">
+                <span>INTERFERENCE PROFILE</span>
+                <small>SEED-DERIVED</small>
+              </div>
+              <div class="interference-values" id="interferenceValues">
+                <span>WET <b>--</b></span>
+                <span>NOISE <b>--</b></span>
+                <span>LPF <b>--</b></span>
+              </div>
+            </div>
+          </section>
+
+          <aside class="deck reference-deck">
+            <header class="deck-header">
+              <div>
+                <span class="section-index">03</span>
+                <h2>参考档案</h2>
+              </div>
+              <span class="deck-tag">DRY / ISOLATED</span>
+            </header>
+            <p class="deck-intro">干净样本保留原始起音。先试听，再把参考锁定到当前目标。</p>
+
+            <div class="reference-key" aria-label="参考片段速记">
+              <span><i class="key-line"></i>频率轮廓</span>
+              <span><i class="key-attack"></i>起音方式</span>
+            </div>
+
+            <div class="specimen-list reference-list" id="referenceList"></div>
+          </aside>
+        </section>
+
+        <footer class="footer-note">
+          <span>全部声音由 Web Audio 实时合成 · 无外部音频</span>
+          <span class="footer-code">EI-2603 / REV.03</span>
+        </footer>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="modal" id="resultModal" hidden>
+      <div class="modal-backdrop" data-close-modal></div>
+      <section class="result-panel" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <button class="modal-close" type="button" data-close-modal aria-label="关闭结果">×</button>
+        <span class="result-kicker" id="resultKicker">TASK RESULT</span>
+        <div class="result-glyph" id="resultGlyph" aria-hidden="true">
+          <span></span><span></span>
+        </div>
+        <h2 id="resultTitle">声场已闭合</h2>
+        <p id="resultCopy"></p>
+        <div class="result-stats">
+          <div><span>正确配对</span><strong id="resultCorrect">0 / 3</strong></div>
+          <div><span>误判次数</span><strong id="resultErrors">0 / 2</strong></div>
+          <div><span>使用 seed</span><strong id="resultSeed">0x00000000</strong></div>
+        </div>
+        <div class="result-actions">
+          <button class="primary-action" id="restartButton" type="button">重新开始任务</button>
+          <button class="secondary-action" type="button" data-close-modal>留在声场</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
