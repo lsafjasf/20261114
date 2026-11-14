@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="晚高峰换电站调度游戏：在电池过热前送走五辆车。"
+    />
+    <title>晚高峰 · 换电站热限</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">V</span>
+          <div>
+            <p class="eyebrow">TIDE-9 / NIGHT SHIFT</p>
+            <h1>晚高峰 · 换电站热限</h1>
+          </div>
+        </div>
+
+        <div class="topbar-stats" aria-label="运营数据">
+          <div class="stat">
+            <span>已送走</span>
+            <strong><span id="served-value">0</span> / 5</strong>
+          </div>
+          <div class="stat">
+            <span>班次时间</span>
+            <strong id="timer">00:00</strong>
+          </div>
+          <div class="topbar-actions">
+            <button id="sound-button" class="icon-button" type="button" aria-pressed="true">
+              音频 开
+            </button>
+            <button id="pause-button" class="icon-button" type="button">
+              暂停
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-panel" aria-label="换电站实时画面">
+          <div class="stage-heading">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span id="status-text">站台待命</span>
+            <span class="stage-code">CAM 04 · THERMAL FEED</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas
+              id="station-canvas"
+              width="1000"
+              height="620"
+              aria-label="Canvas 换电站：入口队列、两个工位、四块电池及其电量与温度"
+            ></canvas>
+          </div>
+          <div class="event-feed" aria-live="polite">
+            <span class="feed-label">调度台</span>
+            <p id="event-message">点击“进入站台”开始晚高峰。</p>
+          </div>
+        </section>
+
+        <aside class="console" aria-label="调度控制台">
+          <section class="panel objective-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">SHIFT TARGET</p>
+                <h2>送出 5 辆，零热失控</h2>
+              </div>
+              <span id="queue-count" class="count-chip">队列 0</span>
+            </div>
+            <div id="delivery-pips" class="delivery-pips" aria-label="送车进度">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <p class="micro-copy">快换升温高、耗电多；慢充更稳。等待归零的车辆会离队。</p>
+          </section>
+
+          <section class="panel queue-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ENTRY ORDER</p>
+                <h2>入场队列</h2>
+              </div>
+              <span class="selection-label">用 ↑ 调整顺序</span>
+            </div>
+            <div id="queue-list" class="queue-list" aria-live="polite">
+              <p class="empty-state">等待车辆抵达…</p>
+            </div>
+          </section>
+
+          <section class="panel battery-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">PACK RACK / 4</p>
+                <h2>电池库</h2>
+              </div>
+              <span id="selected-pack-label" class="selection-label">已选 P1</span>
+            </div>
+            <p class="micro-copy">点选电池用于下一单；温度超过 74°C 会触发警报。</p>
+            <div id="battery-list" class="battery-list"></div>
+          </section>
+
+          <section class="legend">
+            <span><i class="legend-dot swap"></i>快换 4.8s</span>
+            <span><i class="legend-dot charge"></i>慢充 8.4s</span>
+            <span><i class="legend-dot cooldown"></i>工位切换 1.8s</span>
+          </section>
+        </aside>
+      </main>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <div id="modal" class="modal is-visible" role="dialog" aria-modal="true">
+        <div class="modal-card">
+          <p id="modal-kicker" class="eyebrow">TIDE-9 / SHIFT BRIEF</p>
+          <h2 id="modal-title">今晚，只有一条热限。</h2>
+          <p id="modal-copy" class="modal-copy">
+            六辆车陆续抵达。调度两座工位与四块电池，在电池过热前送走五辆车。
+          </p>
+          <div id="modal-rules" class="modal-rules">
+            <span>2 工位</span>
+            <span>4 电池</span>
+            <span>热限 84°C</span>
+            <span>目标 5 辆</span>
+          </div>
+          <div class="modal-actions">
+            <button id="modal-primary" class="primary-button" type="button">进入站台</button>
+            <button id="modal-secondary" class="secondary-button" type="button" hidden>
+              重新开始
+            </button>
+          </div>
+          <p class="keyboard-hint">空格暂停 · 点击电池切换 · 冷却期间电池不可用</p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

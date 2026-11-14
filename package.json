@@ -1,0 +1,26 @@
+{
+  "name": "uid139",
+  "version": "1.0.0",
+  "description": "Canvas 换电站晚高峰调度游戏",
+  "main": "index.html",
+  "scripts": {
+    "start": "node tests/server.mjs",
+    "test": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "puppeteer": "^24.31.0"
+  }
+}
