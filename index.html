@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0d12" />
+    <title>KINETIC — 画布转场实验室</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="KINETIC 首页">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>KINETIC</strong><small>画布转场实验室</small></span>
+      </a>
+      <div class="topbar-meta">
+        <span class="engine-pill"><b></b> CANVAS 2D · WEB AUDIO</span>
+        <span class="save-state" id="saveState"><i></i> 参数已同步</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-button" id="soundToggle" type="button" aria-pressed="false" title="开启提示音">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+            <path class="sound-wave" d="M16 8c1.4 1 2 2.3 2 4s-.6 3-2 4M18.5 5.5c2.3 1.8 3.5 4 3.5 6.5s-1.2 4.7-3.5 6.5" />
+            <path class="sound-off" d="m16 9 5 6m0-6-5 6" />
+          </svg>
+          <span>音效</span>
+        </button>
+        <button class="ghost-button" id="exportFrame" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3" /></svg>
+          导出当前帧
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sequence-rail">
+        <div class="rail-heading"><span>序列 / 01</span><span class="rail-count">2 场景</span></div>
+        <div class="sequence">
+          <article class="scene-item">
+            <div class="scene-thumb thumb-a" aria-hidden="true"><span class="thumb-orb"></span><span class="thumb-line"></span></div>
+            <div class="scene-info"><span class="scene-index">A · 01</span><strong>日蚀花冠</strong><small>SOLAR CROWN</small></div>
+            <span class="scene-live"><i></i> 就绪</span>
+          </article>
+          <div class="transition-bridge">
+            <span class="bridge-line"></span>
+            <div class="bridge-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h8M8 19h8M5 8v8m14-8v8" /></svg>
+              <span id="bridgeMethod">推移</span><b id="bridgeDuration">2.0s</b>
+            </div>
+            <span class="bridge-line"></span>
+          </div>
+          <article class="scene-item">
+            <div class="scene-thumb thumb-b" aria-hidden="true"><span class="thumb-moon"></span><span class="thumb-wave"></span></div>
+            <div class="scene-info"><span class="scene-index">B · 02</span><strong>潮汐信号</strong><small>TIDAL SIGNAL</small></div>
+            <span class="scene-live"><i></i> 待机</span>
+          </article>
+        </div>
+        <div class="rail-note"><span class="note-icon">i</span><p>转场期间 B 场景保持第 0 帧，转场结束后才开始计时。</p></div>
+        <div class="rail-footer">
+          <span>VIEWPORT</span><strong>1280 × 720</strong><small>16:9 · 60 FPS</small>
+        </div>
+      </aside>
+
+      <section class="stage" aria-label="转场预览">
+        <div class="stage-heading">
+          <div><span class="eyebrow">COMPOSITION / LIVE</span><h1>两秒之间<span>，</span>一切皆可过渡。</h1></div>
+          <button class="demo-button" id="playAll" type="button">
+            <span class="demo-icon"><i></i><i></i><i></i></span>
+            <span><b>四式连播</b><small>完整演示 4 种转场</small></span>
+          </button>
+        </div>
+
+        <div class="canvas-shell" id="canvasShell">
+          <canvas id="previewCanvas" width="1280" height="720" aria-label="转场实时预览画布"></canvas>
+          <div class="canvas-hud hud-top">
+            <span>SCENE <b id="hudSceneState">A ACTIVE</b></span>
+            <span>1280 × 720</span>
+          </div>
+          <div class="canvas-hud hud-bottom">
+            <span id="hudProgress">TRANSITION 0%</span>
+            <span id="hudTimecode">00:00:00</span>
+          </div>
+          <div class="canvas-badge" id="canvasBadge"><i></i> 实时预览</div>
+        </div>
+
+        <div class="transport">
+          <button class="play-button" id="playButton" type="button" aria-label="播放转场">
+            <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" /></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z" /></svg>
+          </button>
+          <div class="time-readout"><strong id="currentTime">00:00</strong><span>/</span><span id="totalTime">00:03.5</span></div>
+          <div class="timeline-wrap">
+            <div class="timeline-labels"><span>场景 A</span><span id="timelineTransitionLabel">转场 · 2.0s</span><span>场景 B</span></div>
+            <div class="timeline" id="timeline">
+              <div class="timeline-track"></div>
+              <div class="timeline-active" id="timelineActive"></div>
+              <div class="timeline-transition" id="timelineTransition"></div>
+              <div class="timeline-head" id="timelineHead"><i></i></div>
+            </div>
+          </div>
+          <button class="restart-button" id="restartButton" type="button" title="从头预览">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5" /></svg>
+          </button>
+        </div>
+
+        <div class="stage-footer">
+          <div class="status-line"><span class="status-dot"></span><span id="statusText">拖动时间轴或播放，开始检视转场。</span></div>
+          <div class="shortcut-hint"><kbd>Space</kbd> 播放 <span>·</span> <kbd>⌘ S</kbd> 保存参数</div>
+        </div>
+      </section>
+
+      <aside class="control-panel">
+        <div class="panel-heading"><div><span class="eyebrow">TRANSITION</span><h2>转场控制</h2></div><span class="panel-number">03</span></div>
+        <section class="control-section method-section">
+          <div class="section-label"><span>选择效果</span><b id="activeMethodLabel">推移</b></div>
+          <div class="method-grid" id="methodGrid">
+            <button class="method-card is-active" type="button" data-method="push">
+              <span class="method-visual visual-push"><i></i><i></i><i></i></span>
+              <span class="method-name">推移 <small>PUSH</small></span>
+              <span class="method-check">✓</span>
+            </button>
+            <button class="method-card" type="button" data-method="wipe">
+              <span class="method-visual visual-wipe"><i></i><i></i></span>
+              <span class="method-name">擦除 <small>WIPE</small></span>
+              <span class="method-check">✓</span>
+            </button>
+            <button class="method-card" type="button" data-method="dissolve">
+              <span class="method-visual visual-dissolve"><i></i><i></i><i></i><i></i></span>
+              <span class="method-name">溶解 <small>DISSOLVE</small></span>
+              <span class="method-check">✓</span>
+            </button>
+            <button class="method-card" type="button" data-method="light">
+              <span class="method-visual visual-light"><i></i><i></i><i></i></span>
+              <span class="method-name">光带 <small>LIGHT SWEEP</small></span>
+              <span class="method-check">✓</span>
+            </button>
+          </div>
+          <p class="method-description" id="methodDescription">两个场景像胶片一样同向滑动，画面始终被内容完全覆盖。</p>
+        </section>
+
+        <section class="control-section">
+          <div class="section-label"><span>持续时间</span><output id="durationValue">2.0s</output></div>
+          <div class="range-row">
+            <input id="durationRange" type="range" min="0.8" max="4" step="0.1" value="2" aria-label="转场持续时间" />
+            <div class="range-scale"><span>0.8s</span><span>2.0s</span><span>4.0s</span></div>
+          </div>
+        </section>
+
+        <section class="control-section direction-section">
+          <div class="section-label"><span>运动方向</span><b id="directionLabel">向右</b></div>
+          <div class="direction-control">
+            <div class="direction-pad" role="group" aria-label="运动方向">
+              <button type="button" data-direction="up" aria-label="向上"><svg viewBox="0 0 24 24"><path d="m6 14 6-6 6 6" /></svg></button>
+              <button type="button" data-direction="left" aria-label="向左"><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6" /></svg></button>
+              <span class="pad-center"><i></i></span>
+              <button class="is-active" type="button" data-direction="right" aria-label="向右"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6" /></svg></button>
+              <button type="button" data-direction="down" aria-label="向下"><svg viewBox="0 0 24 24"><path d="m6 10 6 6 6-6" /></svg></button>
+            </div>
+            <div class="direction-readout"><span>DIRECTION</span><strong id="directionDegrees">000°</strong><small id="directionHint">A → B</small></div>
+          </div>
+        </section>
+
+        <section class="control-section preview-section">
+          <div class="section-label"><span>预览位置</span><output id="scrubValue">0%</output></div>
+          <input id="previewScrub" class="preview-range" type="range" min="0" max="100" step="0.5" value="0" aria-label="预览位置" />
+          <div class="preview-meta"><span>平滑缓入缓出</span><span id="bTimeLabel">B 时间轴 · 0.00s</span></div>
+        </section>
+
+        <div class="panel-actions">
+          <button class="primary-button" id="applyPreview" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" /></svg>
+            播放当前转场
+          </button>
+          <button class="save-button" id="saveParams" type="button" title="保存参数">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Zm3 0v6h8V4M8 20v-5h8v5" /></svg>
+            保存参数
+          </button>
+        </div>
+      </aside>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"><span>✓</span><p>参数已保存</p></div>
+    <script src="app.js"></script>
+  </body>
+</html>
