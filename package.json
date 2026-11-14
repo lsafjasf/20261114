@@ -1,0 +1,19 @@
+{
+  "name": "uid199",
+  "version": "1.0.0",
+  "description": "能源调度模拟器：Canvas 2D + Web Audio",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node test.js",
+    "e2e": "node e2e.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

@@ -1,0 +1,59 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: #0e1420;
+  color: #dbe4f0;
+}
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 20px;
+  background: #141c2c;
+  border-bottom: 1px solid #263149;
+}
+header h1 { font-size: 18px; margin: 0; }
+header span { color: #8fa3c0; font-size: 13px; }
+main { display: flex; gap: 16px; padding: 16px 20px; align-items: flex-start; }
+.canvas-wrap { position: relative; }
+canvas { background: #0a0f1a; border: 1px solid #263149; border-radius: 8px; display: block; }
+#banner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 700; letter-spacing: 4px;
+  background: rgba(10, 15, 26, 0.72); border-radius: 8px;
+}
+#banner.hidden { display: none; }
+#banner.ok { color: #4ade80; }
+#banner.bad { color: #f87171; }
+.panel { width: 320px; display: flex; flex-direction: column; gap: 14px; }
+.group {
+  background: #141c2c; border: 1px solid #263149;
+  border-radius: 8px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.row { display: flex; justify-content: space-between; align-items: center; }
+.status-row { font-size: 15px; }
+.status { padding: 2px 10px; border-radius: 10px; font-size: 13px; }
+.status.idle { background: #334155; }
+.status.run { background: #1d4ed8; }
+.status.ok { background: #15803d; }
+.status.bad { background: #b91c1c; }
+label { font-size: 13px; color: #a9bad2; }
+label small { color: #64748b; }
+output { color: #f8fafc; font-weight: 600; }
+input[type="range"] { width: 100%; accent-color: #38bdf8; }
+.soc-bar { height: 12px; background: #0a0f1a; border-radius: 6px; overflow: hidden; }
+#soc-fill { height: 100%; width: 50%; background: linear-gradient(90deg, #22c55e, #84cc16); transition: width .3s; }
+.mono { font-family: ui-monospace, monospace; font-size: 13px; }
+.mono b { color: #7dd3fc; }
+.buttons { flex-direction: row; gap: 8px; }
+button {
+  flex: 1; padding: 8px 0; border: none; border-radius: 6px;
+  background: #2563eb; color: #fff; font-size: 14px; cursor: pointer;
+}
+button:hover { background: #1d4ed8; }
+#btn-reset { background: #475569; }
+#btn-overload { background: #b45309; }
+.hint { font-size: 12px; color: #64748b; line-height: 1.6; margin: 0; }

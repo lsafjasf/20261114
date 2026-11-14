@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>能源调度模拟器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>能源调度模拟器</h1>
+    <span id="scenario-name"></span>
+  </header>
+  <main>
+    <section class="canvas-wrap">
+      <canvas id="grid" width="960" height="600"></canvas>
+      <div id="banner" class="hidden"></div>
+    </section>
+    <aside class="panel">
+      <div class="row status-row">
+        <span id="clock">t = 0 / 20 s</span>
+        <span id="status" class="status idle">待机</span>
+      </div>
+      <div class="group">
+        <label>太阳能输出 <output id="o-solar">0</output> kW <small>(可用 <span id="avail">-</span>)</small></label>
+        <input type="range" id="s-solar" min="0" max="60" value="0">
+        <label>备用发电机 <output id="o-gen">0</output> kW <small>(线路容量 40)</small></label>
+        <input type="range" id="s-gen" min="0" max="50" value="0">
+        <label>电池 <output id="o-batt">0</output> kW <small>(负=充电 / 正=放电，容量 25)</small></label>
+        <input type="range" id="s-batt" min="-30" max="30" value="0">
+      </div>
+      <div class="group">
+        <div class="row"><span>电池 SOC</span><span id="soc-text">50%</span></div>
+        <div class="soc-bar"><div id="soc-fill"></div></div>
+      </div>
+      <div class="group mono" id="balance">
+        <div>供给 <b id="b-supply">0</b> kW ／ 需求 <b id="b-demand">0</b> kW</div>
+        <div>充电 <b id="b-charge">0</b> ／ 弃电 <b id="b-curtail">0</b> kW</div>
+      </div>
+      <div class="group buttons">
+        <button id="btn-run">开始运行</button>
+        <button id="btn-reset">重置</button>
+        <button id="btn-overload" title="发电机推到 50kW，超过线路容量 40kW">过载演示</button>
+      </div>
+      <p class="hint">拖动滑杆分配功率，每秒供需必须守恒；线路超过容量会变红，持续 3 秒跳闸。运行满 20 秒不断电即完成调度。</p>
+    </aside>
+  </main>
+  <script src="src/sim.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/render.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
