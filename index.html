@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071d26" />
+    <title>潮线 · 近岸传感器布设</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="game-shell">
+      <canvas id="sea" aria-label="近岸浮标布设游戏画面"></canvas>
+
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">NEARSHORE / SECTOR 07</p>
+            <h1>潮线维护</h1>
+          </div>
+        </div>
+        <div class="mission">
+          <span>任务 04</span>
+          <strong>重布三座潮位传感器</strong>
+        </div>
+        <div class="seed-readout">
+          <span>海图种子</span>
+          <strong id="seed-label">----</strong>
+        </div>
+      </header>
+
+      <aside class="mission-panel" aria-label="任务状态">
+        <div class="panel-heading">
+          <span>布设进度</span>
+          <strong id="progress-label">0 / 3</strong>
+        </div>
+        <div id="zone-list" class="zone-list"></div>
+        <div class="tide-block">
+          <div class="tide-row">
+            <span>潮位</span>
+            <strong id="tide-label">+0.0 m</strong>
+          </div>
+          <div class="tide-track">
+            <i id="tide-fill"></i>
+            <b class="flood-mark" title="北湾封航潮位"></b>
+          </div>
+          <p id="tide-note">北湾窄口尚可通行</p>
+        </div>
+        <div class="return-clock">
+          <span>回流倒计时</span>
+          <strong id="return-time">01:45</strong>
+          <i id="clock-ring"></i>
+        </div>
+      </aside>
+
+      <section class="cargo-panel" aria-label="船舶状态">
+        <div class="gauge-title">
+          <span>维修艇 07</span>
+          <b id="status-chip">航行中</b>
+        </div>
+        <div class="cargo-row">
+          <span>剩余载荷</span>
+          <strong id="cargo-label">3 / 3</strong>
+        </div>
+        <div id="cargo-pips" class="cargo-pips"></div>
+        <div class="instrument-row">
+          <div>
+            <span>航速</span>
+            <strong><em id="speed-label">0.0</em> kn</strong>
+          </div>
+          <div>
+            <span>油门</span>
+            <strong><em id="throttle-label">0</em>%</strong>
+          </div>
+          <div>
+            <span>操控</span>
+            <strong id="handling-label">稳</strong>
+          </div>
+        </div>
+        <div class="engine-track"><i id="engine-fill"></i></div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <div class="controls-hint">
+        <span><kbd>W</kbd><kbd>S</kbd> 油门</span>
+        <span><kbd>A</kbd><kbd>D</kbd> 转向</span>
+        <span class="deploy-key"><kbd>E</kbd> 投放</span>
+        <span><kbd>G</kbd> 航线</span>
+        <span><kbd>V</kbd> 校验</span>
+        <span><kbd>M</kbd> 静音</span>
+      </div>
+
+      <div id="sound-prompt" class="sound-prompt">
+        <span class="sound-icon" aria-hidden="true"></span>
+        点击或按键启用引擎声
+      </div>
+
+      <section id="verify-panel" class="verify-panel" aria-hidden="true">
+        <div class="verify-head">
+          <div>
+            <span>NAVIGATION AUDIT</span>
+            <h2>航线自检</h2>
+          </div>
+          <button id="verify-close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div id="verify-content"></div>
+      </section>
+
+      <section id="end-screen" class="end-screen" aria-hidden="true">
+        <div class="end-card">
+          <p id="end-kicker">MISSION COMPLETE</p>
+          <h2 id="end-title">三座传感器已上线</h2>
+          <p id="end-copy">潮位数据正在回传维护站。</p>
+          <div id="end-stats" class="end-stats"></div>
+          <button id="restart-button" type="button">再次出航 <kbd>R</kbd></button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
