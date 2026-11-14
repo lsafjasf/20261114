@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07161c">
+  <title>SKYMED // 屋顶急救航线</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">+</div>
+        <div>
+          <p class="eyebrow">SKYMED / EMERGENCY DISPATCH</p>
+          <h1>屋顶急救航线</h1>
+        </div>
+      </div>
+
+      <div class="mission-clock" aria-live="polite">
+        <span class="clock-label">任务时限</span>
+        <strong id="clockValue">01:15.0</strong>
+        <div class="clock-track"><i id="clockBar"></i></div>
+      </div>
+
+      <div class="top-actions">
+        <button id="soundButton" class="icon-button" type="button" aria-pressed="false">
+          <span id="soundIcon" aria-hidden="true">◖</span>
+          <span id="soundLabel">声音开</span>
+        </button>
+        <button id="restartButton" class="icon-button" type="button">
+          <span aria-hidden="true">↻</span>
+          <span>重置</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="map-panel" aria-label="无人机航线地图">
+        <canvas id="mapCanvas" width="1000" height="640"></canvas>
+        <div class="map-readout">
+          <span class="live-dot"></span>
+          <span id="mapPhase">等待任务</span>
+          <span class="readout-separator">/</span>
+          <span id="mapNode">HUB 中央机库</span>
+        </div>
+        <div class="map-legend" aria-hidden="true">
+          <span><i class="legend-route"></i>可选航线</span>
+          <span><i class="legend-heat"></i>热区</span>
+          <span><i class="legend-delivery"></i>投送点</span>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </section>
+
+      <aside class="console">
+        <section class="panel mission-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">MISSION S-17</p>
+              <h2>双点紧急投送</h2>
+            </div>
+            <span id="phaseBadge" class="badge">待命</span>
+          </div>
+          <div class="mission-stats">
+            <div class="stat">
+              <span>已送达</span>
+              <strong><b id="deliveredValue">0</b> / 2</strong>
+            </div>
+            <div class="stat">
+              <span>可用电池</span>
+              <strong id="usableValue">5</strong>
+            </div>
+            <div class="stat">
+              <span>当前载重</span>
+              <strong id="loadValue">0 / 2</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">CARGO MANIFEST</p>
+              <h2>医疗包</h2>
+            </div>
+            <span class="mini-note">点击装载 / 卸下</span>
+          </div>
+          <div id="packageList" class="package-list"></div>
+        </section>
+
+        <section class="panel battery-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">POWER RACK</p>
+              <h2>电池架</h2>
+            </div>
+            <span id="swapStationNote" class="mini-note">HUB 可换电</span>
+          </div>
+          <div id="batteryList" class="battery-list"></div>
+          <button id="coolButton" class="wide-button cool-button" type="button">
+            <span>冷却当前电池</span>
+            <small>−26 热 / 耗时 4 秒</small>
+          </button>
+        </section>
+
+        <section class="panel route-panel">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">FLIGHT PLAN</p>
+              <h2 id="routeTitle">选择目的地</h2>
+            </div>
+            <span id="routeRisk" class="risk-tag neutral">无航线</span>
+          </div>
+          <div id="routeMetrics" class="route-metrics">
+            <div><span>航程</span><b>—</b></div>
+            <div><span>耗电</span><b>—</b></div>
+            <div><span>升温</span><b>—</b></div>
+            <div><span>预计</span><b>—</b></div>
+          </div>
+          <p id="routeHint" class="route-hint">点击地图上的屋顶平台规划下一段航线。</p>
+          <button id="launchButton" class="wide-button launch-button" type="button" disabled>
+            <span>启动航线</span>
+            <small id="launchSub">等待目的地</small>
+          </button>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer-strip">
+      <span id="logMessage">塔台：检查载重与电池热状态，75 秒内完成两次投送。</span>
+      <span class="footer-key">1–4 选平台 · Enter 起飞 · C 冷却</span>
+    </footer>
+  </div>
+
+  <div id="missionModal" class="modal is-open" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <p id="modalEyebrow" class="eyebrow">URGENT MEDICAL RUN</p>
+      <h2 id="modalTitle">S-17 屋顶急救投送</h2>
+      <p id="modalBody">两箱医疗物资必须送往东塔急诊与北塔儿科。无人机只能携带电池架中的电池；重载会显著增加耗电与升温。</p>
+      <div id="modalRules" class="modal-rules">
+        <span><b>75s</b> 完成全部投送</span>
+        <span><b>85°</b> 地面热锁</span>
+        <span><b>100°</b> 空中迫降</span>
+      </div>
+      <div class="modal-actions">
+        <button id="modalPrimary" class="wide-button launch-button" type="button">开始任务</button>
+        <button id="modalSecondary" class="wide-button ghost-button" type="button">查看地图</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game-core.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

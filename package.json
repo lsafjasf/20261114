@@ -1,0 +1,10 @@
+{
+  "name": "skymed-rooftop-dispatch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Canvas medical drone dispatch game",
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 4198"
+  }
+}
