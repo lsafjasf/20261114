@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canvas 2D 极光模拟</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <canvas id="aurora" width="1280" height="720" aria-label="极光光幕"></canvas>
+
+      <section class="panel" id="panel">
+        <header class="panel-head">
+          <h1>极光控制台</h1>
+          <span class="badge" id="status">运行中</span>
+        </header>
+
+        <div class="control">
+          <label>
+            <span>Seed</span>
+            <input type="number" id="seed" min="0" step="1" />
+          </label>
+          <button id="randomSeed" class="btn" type="button">随机 Seed</button>
+        </div>
+
+        <label class="slider">
+          <span>源位置 X <b id="sourceXVal"></b></span>
+          <input type="range" id="sourceX" min="0" max="1" step="0.01" />
+        </label>
+        <label class="slider">
+          <span>源位置 Y <b id="sourceYVal"></b></span>
+          <input type="range" id="sourceY" min="0" max="1" step="0.01" />
+        </label>
+        <label class="slider">
+          <span>亮度 <b id="brightnessVal"></b></span>
+          <input type="range" id="brightness" min="0" max="1" step="0.01" />
+        </label>
+        <label class="slider">
+          <span>密度 <b id="densityVal"></b></span>
+          <input type="range" id="density" min="0" max="1" step="0.01" />
+        </label>
+        <label class="slider">
+          <span>冷色调 <b id="coolVal"></b></span>
+          <input type="range" id="cool" min="0" max="1" step="0.01" />
+        </label>
+
+        <p class="hint">也可直接在画面上拖动来改变光源位置。</p>
+
+        <div class="actions">
+          <button id="togglePlay" class="btn primary" type="button">暂停</button>
+          <button id="screenshot" class="btn" type="button">保存 PNG</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>

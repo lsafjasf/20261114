@@ -1,0 +1,143 @@
+:root {
+  color-scheme: dark;
+  --panel: rgba(10, 16, 30, 0.72);
+  --line: rgba(150, 200, 255, 0.18);
+  --text: #dceaff;
+  --accent: #7fd8ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 20%, #0a1326, #03060d);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+}
+
+.stage {
+  position: relative;
+  width: min(96vw, 1280px);
+}
+
+#aurora {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  border-radius: 14px;
+  cursor: crosshair;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+.panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 270px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.panel-head h1 {
+  font-size: 15px;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(127, 216, 255, 0.16);
+  color: var(--accent);
+}
+
+.control {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.control label {
+  flex: 1;
+  font-size: 12px;
+}
+
+input[type="number"] {
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+}
+
+.slider {
+  display: block;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.slider span {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.slider b {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.hint {
+  font-size: 11px;
+  opacity: 0.65;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn:hover {
+  background: rgba(127, 216, 255, 0.16);
+}
+
+.btn.primary {
+  border-color: rgba(127, 216, 255, 0.5);
+}
