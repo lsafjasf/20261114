@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#071a22" />
+    <title>冰隙 / ICECORE SURVEY</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="game-shell">
+      <canvas id="world" aria-label="冰原勘测游戏画面"></canvas>
+      <div class="grain" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">IC//07</span>
+          <div>
+            <h1>冰隙勘测</h1>
+            <p>POLAR CORE RECOVERY</p>
+          </div>
+        </div>
+        <div class="nav-state">
+          <span class="live-dot"></span>
+          <span id="sector-label">白鼬冰原 / SECTOR N-41</span>
+          <span class="seed-label">SEED <b id="seed-label">20261114</b></span>
+        </div>
+        <div class="clock-block">
+          <span>任务计时</span>
+          <strong id="clock">00:00</strong>
+        </div>
+      </header>
+
+      <section class="vitals panel" aria-label="车辆生命状态">
+        <div class="vital">
+          <div class="vital-label"><span>氧气</span><b id="oxygen-value">100</b></div>
+          <div class="meter oxygen"><i id="oxygen-fill"></i></div>
+        </div>
+        <div class="vital">
+          <div class="vital-label"><span>车体耐久</span><b id="hull-value">100</b></div>
+          <div class="meter hull"><i id="hull-fill"></i></div>
+        </div>
+        <div class="vital load-vital">
+          <div class="vital-label"><span>冰芯载荷</span><b id="load-value">0 / 3</b></div>
+          <div class="load-pips" id="load-pips">
+            <i></i><i></i><i></i>
+          </div>
+        </div>
+      </section>
+
+      <aside class="mission panel">
+        <div class="eyebrow">MISSION 01</div>
+        <h2>带回三份冰芯</h2>
+        <p id="mission-copy">驶向三处采样点，停车钻取冰芯，然后返回营地。</p>
+        <ol class="core-list" id="core-list">
+          <li data-core="0"><span>01</span><b>北脊样本</b><em>未采集</em></li>
+          <li data-core="1"><span>02</span><b>蓝沟样本</b><em>未采集</em></li>
+          <li data-core="2"><span>03</span><b>断层样本</b><em>未采集</em></li>
+        </ol>
+        <div class="route-status"><span class="tick">✓</span> 三条营地路线已验证</div>
+      </aside>
+
+      <section class="telemetry panel">
+        <div class="speed">
+          <strong id="speed-value">000</strong>
+          <span>KM/H</span>
+        </div>
+        <div class="telemetry-row">
+          <span>载荷质量</span><b id="mass-value">320 KG</b>
+        </div>
+        <div class="telemetry-row">
+          <span>冰面厚度</span><b id="ice-value">-- CM</b>
+        </div>
+        <div class="telemetry-row">
+          <span>当前航向</span><b id="heading-value">090°</b>
+        </div>
+        <div class="risk-readout" id="risk-readout">
+          <i></i><span id="risk-label">冰面稳定</span>
+        </div>
+      </section>
+
+      <section class="minimap-wrap panel">
+        <div class="minimap-title"><span>地形扫描</span><b>LIVE</b></div>
+        <canvas id="minimap" width="240" height="160"></canvas>
+        <div class="map-legend"><span><i class="camp"></i>营地</span><span><i class="vehicle"></i>车辆</span><span><i class="core"></i>冰芯</span></div>
+      </section>
+
+      <div class="context-prompt" id="context-prompt" aria-live="polite">
+        <span class="keycap">E</span>
+        <div><b id="prompt-title">按住采集冰芯</b><small id="prompt-sub">停车并保持稳定</small></div>
+        <i id="sample-progress"></i>
+      </div>
+
+      <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+      <footer class="controls panel">
+        <div><span class="keycap">W</span><span class="keycap">S</span><b>油门 / 制动</b></div>
+        <div><span class="keycap">A</span><span class="keycap">D</span><b>转向</b></div>
+        <div><span class="keycap">E</span><b>钻取冰芯</b></div>
+        <div><span class="keycap">Q</span><b>弃样减重</b></div>
+        <div><span class="keycap">M</span><b>声音</b></div>
+      </footer>
+
+      <button class="audio-toggle" id="audio-toggle" type="button" aria-pressed="true">
+        <span class="sound-icon"></span><span id="audio-label">声音开启</span>
+      </button>
+
+      <div class="touch-controls" id="touch-controls" aria-hidden="true">
+        <div class="touch-steer">
+          <button data-control="left" type="button" aria-label="左转">←</button>
+          <button data-control="right" type="button" aria-label="右转">→</button>
+        </div>
+        <div class="touch-drive">
+          <button data-control="up" type="button" aria-label="加速">▲</button>
+          <button data-control="down" type="button" aria-label="制动">▼</button>
+        </div>
+        <div class="touch-actions">
+          <button data-control="sample" type="button">采样</button>
+          <button data-control="discard" type="button">弃样</button>
+        </div>
+      </div>
+
+      <section class="overlay start-overlay" id="start-overlay">
+        <div class="start-grid">
+          <div class="start-copy">
+            <div class="eyebrow">POLAR SURVEY UNIT 07</div>
+            <h2>冰面之下，<br /><span>没有第二次机会。</span></h2>
+            <p>驾驶履带勘测车取回三份深层冰芯。速度越快、载荷越重，履带下的冰面就越接近崩裂。</p>
+            <div class="briefing">
+              <div><b>01</b><span>抵达三处采样点<br />停车钻取冰芯</span></div>
+              <div><b>02</b><span>监控氧气与车体<br />避开薄冰和水面</span></div>
+              <div><b>03</b><span>返回营地<br />保住带回的样本</span></div>
+            </div>
+            <button class="primary-button" id="start-button" type="button">
+              <span>开始勘测</span><small>ENTER MISSION</small>
+            </button>
+            <p class="start-note">固定种子地图 · 三条可行路线已通过验证</p>
+          </div>
+          <div class="start-visual" aria-hidden="true">
+            <div class="radar-ring ring-a"></div>
+            <div class="radar-ring ring-b"></div>
+            <div class="radar-ring ring-c"></div>
+            <div class="radar-sweep"></div>
+            <div class="route-line"></div>
+            <span class="radar-core c1"><i>01</i></span>
+            <span class="radar-core c2"><i>02</i></span>
+            <span class="radar-core c3"><i>03</i></span>
+            <span class="radar-camp">CAMP</span>
+            <span class="radar-coord">71°12'04"N<br />041°18'33"E</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="overlay end-overlay hidden" id="end-overlay">
+        <div class="end-card panel">
+          <div class="eyebrow" id="end-eyebrow">MISSION COMPLETE</div>
+          <h2 id="end-title">三芯归营</h2>
+          <p id="end-copy">冰芯已封存。你带回了一份完整的冰层记录。</p>
+          <div class="end-stats" id="end-stats"></div>
+          <div class="end-actions">
+            <button class="primary-button" id="restart-button" type="button">
+              <span>再次勘测</span><small>NEW RUN</small>
+            </button>
+            <button class="ghost-button" id="review-button" type="button">查看冰面</button>
+          </div>
+          <p class="seed-foot">MAP SEED <b>20261114</b></p>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/sim.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>

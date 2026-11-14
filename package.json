@@ -1,0 +1,10 @@
+{
+  "name": "icebound-survey",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A procedural ice-field survey game rendered with Canvas.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/playthroughs.js"
+  }
+}
