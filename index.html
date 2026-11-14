@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>温室守夜 · Greenhouse Night Watch</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>温室守夜</h1>
+    <div id="hud">
+      <span id="hud-time">🌙 20:00</span>
+      <span id="hud-outside">外界 12.0°C</span>
+      <span id="hud-power">⚡ 功率储备 100%</span>
+    </div>
+  </header>
+
+  <div id="stage">
+    <canvas id="game" width="960" height="520"></canvas>
+    <div id="banner" class="hidden"></div>
+    <div id="overlay">
+      <div id="overlay-card">
+        <h2 id="overlay-title">温室守夜</h2>
+        <p id="overlay-text">
+          入夜后气温骤降。调节三个种植区的<b>加热带</b>、<b>通风窗</b>与<b>保温帘</b>，
+          让叶菜、番茄、幼苗同时保持适温。<br>
+          热量会跨区扩散；开窗会同时降温降湿；设备频繁切换会损耗功率储备。<br>
+          保持所有区域安全 <b>20 分钟</b> 并撑过一次<b>冷锋</b>即可获胜。
+        </p>
+        <p class="keys">操作：点击各区按钮，或按 1/2/3 选区，H 加热带 · W 通风窗 · C 保温帘</p>
+        <button id="start-btn">开始守夜</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panels"></div>
+  <footer>叶片枯萎 / 果实发灰 = 健康状况下降；湿度过高会霉病，过低会失水。</footer>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
