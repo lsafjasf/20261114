@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>气流飞镖 · Indoor Dart</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #14100c;
+    color: #e8dcc8;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 12px;
+    user-select: none;
+  }
+  h1 { font-size: 20px; letter-spacing: 4px; margin-bottom: 8px; color: #d8b56a; }
+  #stage { position: relative; }
+  canvas {
+    background: #1d1712;
+    border: 2px solid #4a3a26;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.6);
+  }
+  #hud {
+    display: flex;
+    gap: 18px;
+    margin-top: 10px;
+    font-size: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .meter { background: #241c14; border: 1px solid #4a3a26; border-radius: 6px; padding: 6px 12px; min-width: 120px; }
+  .meter b { color: #f0c060; font-size: 16px; }
+  .meter .bar { height: 6px; background: #3a2e1e; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .meter .bar i { display: block; height: 100%; background: linear-gradient(90deg,#7ec850,#f0c060,#e05050); width: 0%; }
+  #tips { margin-top: 8px; font-size: 12px; color: #9a8a70; text-align: center; line-height: 1.7; }
+  #tips kbd { background:#33291c; border:1px solid #55452e; border-radius:3px; padding:0 5px; font-family:inherit; }
+  #banner {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    background: rgba(10,8,6,.82); border-radius: 8px; z-index: 5; text-align: center;
+  }
+  #banner h2 { font-size: 34px; color: #f0c060; margin-bottom: 10px; }
+  #banner p { color: #cbb890; }
+  #banner button, #throwBtn {
+    margin-top: 14px; padding: 8px 26px; font-size: 15px; cursor: pointer;
+    background: #b8802a; color: #1d1408; border: none; border-radius: 6px; font-weight: bold;
+  }
+  #banner button:hover, #throwBtn:hover { background: #d89c3a; }
+</style>
+</head>
+<body>
+  <h1>气 流 飞 镖</h1>
+  <div id="stage">
+    <canvas id="cv" width="960" height="600"></canvas>
+    <div id="banner">
+      <h2 id="bannerTitle"></h2>
+      <p id="bannerText"></p>
+      <button id="restartBtn">再来一局</button>
+    </div>
+  </div>
+  <div id="hud">
+    <div class="meter">角度 <b id="mAngle">45</b>°</div>
+    <div class="meter">旋转 <b id="mSpin">0</b></div>
+    <div class="meter" style="min-width:170px">力度 <b id="mPower">0</b><div class="bar"><i id="mPowerBar"></i></div></div>
+    <div class="meter">得分 <b id="mScore">0</b> / <span id="mTarget"></span></div>
+    <div class="meter">飞镖 <b id="mDarts"></b></div>
+    <div class="meter">脱靶 <b id="mMiss">0</b> / 3</div>
+  </div>
+  <div id="tips">
+    <kbd>↑</kbd><kbd>↓</kbd> 调整角度 &nbsp; <kbd>←</kbd><kbd>→</kbd> 调整旋转(可抗风) &nbsp; 按住 <kbd>空格</kbd> 蓄力，松开出镖<br>
+    每个计分区只能得分一次；风扇与门口气流会在每投之间变化，注意风向！
+  </div>
+<script>
+"use strict";
+/* ================= 常量与状态 ================= */
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const G = 620;                 // 重力 px/s^2
+const FLOOR = 560;
+const PLAYER = { x: 90, y: 430 };
+const BOARD = { x: 830, y: 300, r: 128 };
+// 计分区：由内向外的环带
+const ZONES = [
+  { name: "红心",   r0: 0,   r1: 16,  score: 50, color: "#e04030" },
+  { name: "内环",   r0: 16,  r1: 38,  score: 25, color: "#2e7d32" },
+  { name: "中环",   r0: 38,  r1: 74,  score: 15, color: "#e8dcc8" },
+  { name: "外环",   r0: 74,  r1: 108, score: 10, color: "#263238" },
+  { name: "边环",   r0: 108, r1: 128, score: 5,  color: "#8d6e63" },
+];
+const TARGET_SCORE = 120;
+const MAX_DARTS = 6;
+const MAX_MISS = 3;
+
+const state = {
+  angle: 45,          // 度
+  spin: 0,            // -3 .. 3
+  power: 0,           // 0..100 蓄力
+  charging: false,
+  chargeDir: 1,
+  dartsLeft: MAX_DARTS,
+  score: 0,
+  misses: 0,
+  usedZones: new Set(),
+  flying: null,       // 飞行中的飞镖
+  stuck: [],          // 已扎在靶上的飞镖 {x,y,angle}
+  trails: [],         // 历史轨迹 [{pts:[], age}]
+  bounces: [],        // 弹落中的飞镖
+  over: false,
+  wind: { door: 0, fan: 1, gust: 0 },  // door: 水平风加速度, fan: 风扇档位0-3
+  time: 0,
+};
+
+/* ================= Web Audio 合成音效 ================= */
+let AC = null;
+function audio() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === "suspended") AC.resume();
+  return AC;
+}
+// 松手：气流呼啸（噪声 + 扫频带通）
+function sfxRelease(power) {
+  const ac = audio(), t = ac.currentTime;
+  const dur = 0.28 + power * 0.002;
+  const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+  const src = ac.createBufferSource(); src.buffer = buf;
+  const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.2;
+  bp.frequency.setValueAtTime(400 + power * 6, t);
+  bp.frequency.exponentialRampToValueAtTime(2400 + power * 20, t + dur);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.5, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(bp).connect(g).connect(ac.destination);
+  src.start(t);
+}
+// 命中靶面：闷响（低频正弦 + 短噪声）
+function sfxHit(strong) {
+  const ac = audio(), t = ac.currentTime;
+  const o = ac.createOscillator(); o.type = "sine";
+  o.frequency.setValueAtTime(strong ? 180 : 140, t);
+  o.frequency.exponentialRampToValueAtTime(55, t + 0.12);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.7, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+  o.connect(g).connect(ac.destination);
+  o.start(t); o.stop(t + 0.18);
+  const nb = ac.createBuffer(1, ac.sampleRate * 0.05, ac.sampleRate);
+  const nd = nb.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
+  const ns = ac.createBufferSource(); ns.buffer = nb;
+  const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900;
+  const ng = ac.createGain(); ng.gain.value = 0.35;
+  ns.connect(lp).connect(ng).connect(ac.destination);
+  ns.start(t);
+}
+// 金属碰撞：镖针撞靶圈钢丝 / 金属边框（泛音簇 + 快衰减）
+function sfxClang() {
+  const ac = audio(), t = ac.currentTime;
+  [1720, 2410, 3180, 4230].forEach((f, i) => {
+    const o = ac.createOscillator(); o.type = "square";
+    o.frequency.value = f * (1 + Math.random() * 0.01);
+    const g = ac.createGain();
+    const v = 0.16 / (i + 1);
+    g.gain.setValueAtTime(v, t);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + 0.35 + i * 0.05);
+    o.connect(g).connect(ac.destination);
+    o.start(t); o.stop(t + 0.45);
+  });
+  const nb = ac.createBuffer(1, ac.sampleRate * 0.03, ac.sampleRate);
+  const nd = nb.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
+  const ns = ac.createBufferSource(); ns.buffer = nb;
+  const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 3000;
+  const ng = ac.createGain(); ng.gain.value = 0.25;
+  ns.connect(hp).connect(ng).connect(ac.destination);
+  ns.start(t);
+}
+// 胜负提示音
+function sfxJingle(win) {
+  const ac = audio(), t = ac.currentTime;
+  const notes = win ? [523, 659, 784, 1047] : [392, 330, 262, 196];
+  notes.forEach((f, i) => {
+    const o = ac.createOscillator(); o.type = "triangle"; o.frequency.value = f;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t + i * 0.14);
+    g.gain.exponentialRampToValueAtTime(0.3, t + i * 0.14 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.14 + 0.3);
+    o.connect(g).connect(ac.destination);
+    o.start(t + i * 0.14); o.stop(t + i * 0.14 + 0.32);
+  });
+}
+
+/* ================= 风系统 ================= */
+// 风扇区域（吊扇下方产生下沉/回旋气流）与门口（水平穿堂风）
+const FAN = { x: 470, y: 60, zoneX0: 330, zoneX1: 620 };
+const DOOR = { x: 30, y: 250, w: 46, h: 220 };
+const streaks = [];  // 风迹粒子
+
+function randomizeWind() {
+  const w = state.wind;
+  w.fan = 1 + Math.floor(Math.random() * 3);            // 档位 1..3
+  w.door = (Math.random() * 2 - 1) * 170;               // -170..170 px/s^2
+  if (Math.abs(w.door) < 45) w.door = 45 * Math.sign(w.door || 1); // 保证有风
+  w.gust = Math.random() * Math.PI * 2;                 // 阵风相位
+}
+// 某点处的风加速度 {ax, ay}
+function windAt(x, y, t) {
+  const w = state.wind;
+  let ax = 0, ay = 0;
+  // 门口穿堂风：低处明显，随高度衰减，带阵风脉动
+  const gust = 1 + 0.45 * Math.sin(t * 1.7 + w.gust);
+  const hFade = Math.max(0, 1 - (y - 180) / 380);
+  ax += w.door * gust * hFade;
+  // 风扇：下方区域产生垂直气流，正弦摆动模拟叶片扫过
+  if (x > FAN.zoneX0 && x < FAN.zoneX1 && y > 120 && y < 520) {
+    const cx = (FAN.zoneX0 + FAN.zoneX1) / 2;
+    const dist = Math.abs(x - cx) / ((FAN.zoneX1 - FAN.zoneX0) / 2);
+    const strength = w.fan * 55 * (1 - dist * 0.6);
+    ay += strength * (0.6 + 0.4 * Math.sin(t * 6 + x * 0.02)); // 下沉为主
+    ax += strength * 0.35 * Math.sin(t * 3.1 + y * 0.015);     // 水平扰动
+  }
+  return { ax, ay };
+}
+function spawnStreaks(dt) {
+  const w = state.wind;
+  // 门口水平风迹
+  if (Math.random() < Math.abs(w.door) / 170 * 0.5) {
+    streaks.push({
+      x: w.door > 0 ? DOOR.x + DOOR.w : W - 10,
+      y: 200 + Math.random() * 260,
+      vx: w.door * 2.2, vy: 0, life: 1, kind: 0,
+    });
+  }
+  // 风扇下沉风迹
+  if (Math.random() < w.fan * 0.12) {
+    streaks.push({
+      x: FAN.zoneX0 + Math.random() * (FAN.zoneX1 - FAN.zoneX0),
+      y: 130, vx: 0, vy: 60 + w.fan * 40, life: 1, kind: 1,
+    });
+  }
+  for (let i = streaks.length - 1; i >= 0; i--) {
+    const s = streaks[i];
+    const wa = windAt(s.x, s.y, state.time);
+    s.vx += wa.ax * dt * 2; s.vy += wa.ay * dt * 2;
+    s.x += s.vx * dt; s.y += s.vy * dt;
+    s.life -= dt * 0.55;
+    if (s.life <= 0 || s.x < -20 || s.x > W + 20 || s.y > FLOOR) streaks.splice(i, 1);
+  }
+}
+function drawStreaks() {
+  ctx.save();
+  ctx.lineWidth = 1.5;
+  for (const s of streaks) {
+    const a = Math.max(0, s.life) * 0.5;
+    ctx.strokeStyle = s.kind === 0 ? `rgba(150,200,255,${a})` : `rgba(180,230,200,${a})`;
+    ctx.beginPath();
+    ctx.moveTo(s.x - s.vx * 0.09, s.y - s.vy * 0.09);
+    ctx.lineTo(s.x, s.y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ================= 场景绘制 ================= */
+function drawRoom() {
+  // 地板与墙
+  ctx.fillStyle = "#241b12";
+  ctx.fillRect(0, FLOOR, W, H - FLOOR);
+  ctx.strokeStyle = "#3a2d1c";
+  for (let x = 0; x < W; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, FLOOR); ctx.lineTo(x - 20, H); ctx.stroke();
+  }
+  // 门（左侧，门缝透光）
+  ctx.fillStyle = "#100d0a";
+  ctx.fillRect(DOOR.x - 14, DOOR.y - 30, DOOR.w + 14, DOOR.h + 30);
+  ctx.fillStyle = "#3d2f1e";
+  ctx.fillRect(DOOR.x, DOOR.y, DOOR.w, DOOR.h);
+  ctx.fillStyle = "rgba(140,190,255,0.25)";
+  ctx.fillRect(DOOR.x + DOOR.w - 6, DOOR.y, 6, DOOR.h); // 门缝
+  ctx.fillStyle = "#8a97a5";
+  ctx.font = "11px sans-serif";
+  ctx.fillText("门·穿堂风", DOOR.x - 6, DOOR.y - 36);
+  // 吊扇
+  const w = state.wind;
+  ctx.strokeStyle = "#555"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(FAN.x, 0); ctx.lineTo(FAN.x, FAN.y); ctx.stroke();
+  const rot = state.time * (2 + w.fan * 3);
+  ctx.save();
+  ctx.translate(FAN.x, FAN.y);
+  ctx.fillStyle = "#6b5a40";
+  for (let i = 0; i < 3; i++) {
+    ctx.save();
+    ctx.rotate(rot + i * Math.PI * 2 / 3);
+    ctx.fillRect(0, -4, 64, 8);
+    ctx.restore();
+  }
+  ctx.fillStyle = "#8a7450";
+  ctx.beginPath(); ctx.arc(0, 0, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = "#8a97a5";
+  ctx.fillText(`风扇 ${"▮".repeat(w.fan)}${"▯".repeat(3 - w.fan)}`, FAN.x - 26, FAN.y + 26);
+}
+
+function drawBoard() {
+  // 金属边框
+  ctx.save();
+  ctx.translate(BOARD.x, BOARD.y);
+  ctx.fillStyle = "#9aa2ab";
+  ctx.beginPath(); ctx.arc(0, 0, BOARD.r + 9, 0, Math.PI * 2); ctx.fill();
+  // 由外向内画环带
+  for (let i = ZONES.length - 1; i >= 0; i--) {
+    const z = ZONES[i];
+    ctx.fillStyle = state.usedZones.has(i) ? shade(z.color) : z.color;
+    ctx.beginPath(); ctx.arc(0, 0, z.r1, 0, Math.PI * 2); ctx.fill();
+  }
+  // 钢丝分隔线
+  ctx.strokeStyle = "rgba(200,205,212,0.85)";
+  ctx.lineWidth = 2;
+  for (const z of ZONES) {
+    ctx.beginPath(); ctx.arc(0, 0, z.r1, 0, Math.PI * 2); ctx.stroke();
+  }
+  // 分数标注
+  ctx.fillStyle = "rgba(255,255,255,0.75)";
+  ctx.font = "bold 12px sans-serif";
+  ctx.textAlign = "center";
+  ZONES.forEach((z, i) => {
+    const label = state.usedZones.has(i) ? "已用" : z.score;
+    ctx.fillText(label, 0, -(z.r0 + z.r1) / 2 + 4);
+  });
+  ctx.restore();
+  // 已扎上的飞镖
+  for (const d of state.stuck) drawDartShape(d.x, d.y, d.angle, 0.85);
+}
+function shade(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = c => Math.floor(c * 0.35);
+  return `rgb(${f(n >> 16 & 255)},${f(n >> 8 & 255)},${f(n & 255)})`;
+}
+function drawDartShape(x, y, ang, scale) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(ang);
+  ctx.scale(scale, scale);
+  ctx.strokeStyle = "#d8d2c4"; ctx.lineWidth = 2.5;      // 镖身
+  ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(0, 0); ctx.stroke();
+  ctx.fillStyle = "#c0c6cc";                              // 镖针
+  ctx.beginPath(); ctx.moveTo(0, -1.6); ctx.lineTo(9, 0); ctx.lineTo(0, 1.6); ctx.fill();
+  ctx.fillStyle = "#b8402e";                              // 镖翼
+  ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(-36, -7); ctx.lineTo(-31, 0); ctx.lineTo(-36, 7); ctx.fill();
+  ctx.restore();
+}
+function drawPlayer() {
+  // 简单人物剪影
+  ctx.strokeStyle = "#c8b088"; ctx.lineWidth = 5; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.arc(PLAYER.x - 10, PLAYER.y - 66, 12, 0, Math.PI * 2); ctx.stroke(); // 头
+  ctx.beginPath(); ctx.moveTo(PLAYER.x - 10, PLAYER.y - 54); ctx.lineTo(PLAYER.x - 10, PLAYER.y - 6); ctx.stroke(); // 身
+  ctx.beginPath(); ctx.moveTo(PLAYER.x - 10, PLAYER.y - 6); ctx.lineTo(PLAYER.x - 22, FLOOR); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PLAYER.x - 10, PLAYER.y - 6); ctx.lineTo(PLAYER.x + 2, FLOOR); ctx.stroke();
+  // 持镖手臂指向出手角度
+  const a = -state.angle * Math.PI / 180;
+  const hx = PLAYER.x - 10 + Math.cos(a) * 34, hy = PLAYER.y - 40 + Math.sin(a) * 34;
+  ctx.beginPath(); ctx.moveTo(PLAYER.x - 10, PLAYER.y - 40); ctx.lineTo(hx, hy); ctx.stroke();
+  if (!state.flying && state.dartsLeft > 0 && !state.over)
+    drawDartShape(hx + Math.cos(a) * 12, hy + Math.sin(a) * 12, a, 0.8);
+  // 瞄准虚线（不含风偏，仅供参照）
+  if (!state.flying && !state.over) {
+    const p = simulate(state.angle, Math.max(state.power, 30), state.spin, false);
+    ctx.save();
+    ctx.setLineDash([4, 7]);
+    ctx.strokeStyle = "rgba(240,192,96,0.35)";
+    ctx.beginPath();
+    p.pts.forEach((pt, i) => i ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y));
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* ================= 飞镖物理 ================= */
+// 旋转(spin)的作用：稳定镖体、削弱风的影响，并产生轻微马格努斯升力
+function simulate(angleDeg, power, spin, record) {
+  const a = -angleDeg * Math.PI / 180;
+  const v0 = 300 + power * 7.5;                 // 初速
+  let x = PLAYER.x + 2, y = PLAYER.y - 40;
+  let vx = Math.cos(a) * v0, vy = Math.sin(a) * v0;
+  const stability = 1 / (1 + Math.abs(spin) * 0.55);  // 旋转抗风
+  const dt = 1 / 240;
+  const pts = [{ x, y }];
+  let t = state.time;
+  for (let i = 0; i < 240 * 6; i++) {
+    const wa = windAt(x, y, t);
+    vx += wa.ax * stability * dt;
+    vy += (G + wa.ay * stability) * dt;
+    vy -= spin * vx * 0.012 * dt * 10;          // 马格努斯：顺/逆风微调升力
+    vx *= 1 - 0.06 * dt;                        // 空气阻力
+    vy *= 1 - 0.06 * dt;
+    x += vx * dt; y += vy * dt;
+    t += dt;
+    if (record && i % 3 === 0) pts.push({ x, y });
+    // 命中判定：到达靶平面
+    if (x >= BOARD.x - 4 && vx > 0) {
+      const dy = y - BOARD.y;
+      const dist = Math.abs(dy);
+      return { pts, hit: true, x: BOARD.x, y, dist, vy, vx };
+    }
+    if (y >= FLOOR || x > W + 30 || x < -30 || y < -60)
+      return { pts, hit: false, x, y, dist: Infinity, vy, vx };
+  }
+  return { pts, hit: false, x, y, dist: Infinity, vy, vx };
+}
+
+/* ================= 投掷与计分 ================= */
+function throwDart() {
+  if (state.flying || state.over || state.dartsLeft <= 0) return;
+  const power = Math.max(state.power, 15);
+  sfxRelease(power);
+  const res = simulate(state.angle, power, state.spin, true);
+  state.flying = { ...res, i: 0, spin: state.spin };
+  state.dartsLeft--;
+  state.power = 0;
+}
+function resolveLanding(f) {
+  state.flying = null;
+  state.trails.push({ pts: f.pts, age: 0 });
+  if (state.trails.length > 6) state.trails.shift();
+  if (!f.hit) { registerMiss("飞出场地"); return; }
+  const dy = f.y - BOARD.y;
+  if (f.dist > BOARD.r + 9) { registerMiss("脱靶"); return; }
+  if (f.dist > BOARD.r) {           // 金属边框
+    sfxClang(); registerMiss("撞上金属边框，弹开了！");
+    bounceOff(f); return;
+  }
+  // 钢丝边界 ±2.5px 内有概率弹飞
+  const nearWire = ZONES.some(z => Math.abs(f.dist - z.r1) < 2.5);
+  if (nearWire && Math.random() < 0.45) {
+    sfxClang(); registerMiss("镖针打在钢丝上，弹飞了！");
+    bounceOff(f); return;
+  }
+  const zi = ZONES.findIndex(z => f.dist >= z.r0 && f.dist < z.r1);
+  sfxHit(zi <= 1);
+  const ang = Math.atan2(f.vy, f.vx);
+  state.stuck.push({ x: BOARD.x - 2, y: f.y, angle: ang });
+  if (state.usedZones.has(zi)) {
+    flashMsg(`「${ZONES[zi].name}」已得过分，本次 0 分`);
+  } else {
+    state.usedZones.add(zi);
+    state.score += ZONES[zi].score;
+    flashMsg(`命中「${ZONES[zi].name}」 +${ZONES[zi].score} 分！`);
+  }
+  afterThrow();
+}
+function bounceOff(f) {
+  state.bounces.push({ x: BOARD.x - 6, y: f.y, vx: -120 - Math.random() * 60, vy: -80, rot: 0 });
+}
+function stepBounces(dt) {
+  for (let i = state.bounces.length - 1; i >= 0; i--) {
+    const b = state.bounces[i];
+    b.vy += G * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.rot += 14 * dt;
+    if (b.y > FLOOR - 4) { b.y = FLOOR - 4; b.vy = 0; b.vx = 0; }
+    drawDartShape(b.x, b.y, b.rot, 0.8);
+  }
+}
+function registerMiss(why) {
+  state.misses++;
+  flashMsg(`脱靶：${why}`);
+  afterThrow();
+}
+function afterThrow() {
+  updateHUD();
+  if (state.score >= TARGET_SCORE) return endGame(true);
+  if (state.misses >= MAX_MISS) return endGame(false, "脱靶过多");
+  if (state.dartsLeft <= 0)
+    return endGame(state.score >= TARGET_SCORE, "飞镖用尽，分数不足");
+  randomizeWind();   // 投掷间隙风向改变
+}
+function endGame(win, reason) {
+  state.over = true;
+  sfxJingle(win);
+  document.getElementById("bannerTitle").textContent = win ? "🏆 胜利！" : "失败…";
+  document.getElementById("bannerText").textContent =
+    win ? `总分 ${state.score}，达成目标！` : `${reason || ""}（得分 ${state.score} / ${TARGET_SCORE}）`;
+  document.getElementById("banner").style.display = "flex";
+}
+// 顶部浮动提示
+let msgTimer = null;
+function flashMsg(text) {
+  let el = document.getElementById("msg");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "msg";
+    el.style.cssText = "position:absolute;top:14px;left:50%;transform:translateX(-50%);" +
+      "background:rgba(20,14,8,.85);border:1px solid #6a5636;border-radius:6px;" +
+      "padding:6px 18px;font-size:14px;color:#f0c060;z-index:4;pointer-events:none";
+    document.getElementById("stage").appendChild(el);
+  }
+  el.textContent = text;
+  el.style.opacity = 1;
+  clearTimeout(msgTimer);
+  msgTimer = setTimeout(() => el.style.opacity = 0, 2200);
+}
+
+/* ================= 输入 ================= */
+const keys = {};
+window.addEventListener("keydown", e => {
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+  if (e.repeat) return;
+  keys[e.key] = true;
+  if (e.key === " " && !state.flying && !state.over) { state.charging = true; state.chargeDir = 1; }
+});
+window.addEventListener("keyup", e => {
+  keys[e.key] = false;
+  if (e.key === " " && state.charging) { state.charging = false; throwDart(); }
+});
+document.getElementById("restartBtn").addEventListener("click", resetGame);
+function handleKeys(dt) {
+  if (state.over) return;
+  if (keys.ArrowUp)   state.angle = Math.min(80, state.angle + 45 * dt);
+  if (keys.ArrowDown) state.angle = Math.max(0,  state.angle - 45 * dt);
+  if (keys.ArrowRight) state.spin = Math.min(3,  state.spin + 4 * dt);
+  if (keys.ArrowLeft)  state.spin = Math.max(-3, state.spin - 4 * dt);
+  if (state.charging) {
+    state.power += state.chargeDir * 90 * dt;
+    if (state.power >= 100) { state.power = 100; state.chargeDir = -1; }
+    if (state.power <= 0)   { state.power = 0;   state.chargeDir = 1; }
+  }
+}
+function resetGame() {
+  Object.assign(state, {
+    angle: 45, spin: 0, power: 0, charging: false, chargeDir: 1,
+    dartsLeft: MAX_DARTS, score: 0, misses: 0,
+    flying: null, stuck: [], trails: [], bounces: [], over: false, time: 0,
+  });
+  state.usedZones = new Set();
+  randomizeWind();
+  document.getElementById("banner").style.display = "none";
+  updateHUD();
+}
+
+/* ================= HUD 与主循环 ================= */
+function updateHUD() {
+  document.getElementById("mAngle").textContent = state.angle.toFixed(0);
+  document.getElementById("mSpin").textContent = state.spin.toFixed(1);
+  document.getElementById("mPower").textContent = state.power.toFixed(0);
+  document.getElementById("mPowerBar").style.width = state.power + "%";
+  document.getElementById("mScore").textContent = state.score;
+  document.getElementById("mTarget").textContent = TARGET_SCORE;
+  document.getElementById("mDarts").textContent = state.dartsLeft;
+  document.getElementById("mMiss").textContent = state.misses;
+}
+function drawWindInfo() {
+  const w = state.wind;
+  ctx.fillStyle = "rgba(16,12,8,0.7)";
+  ctx.fillRect(12, 12, 230, 52);
+  ctx.strokeStyle = "#4a3a26"; ctx.strokeRect(12, 12, 230, 52);
+  ctx.fillStyle = "#9fc4e8"; ctx.font = "13px sans-serif"; ctx.textAlign = "left";
+  const dir = w.door > 0 ? "→" : "←";
+  ctx.fillText(`门口风 ${dir} ${Math.abs(w.door).toFixed(0)}  风扇 ${w.fan} 档`, 22, 32);
+  ctx.fillStyle = "#8a97a5"; ctx.font = "11px sans-serif";
+  ctx.fillText("风会在每次投掷后变化", 22, 52);
+}
+function drawTrails(dt) {
+  for (const tr of state.trails) {
+    tr.age += dt;
+    const a = Math.max(0.12, 0.55 - tr.age * 0.05);
+    ctx.strokeStyle = `rgba(240,192,96,${a})`;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    tr.pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
+    ctx.stroke();
+  }
+}
+function stepFlying(dt) {
+  const f = state.flying;
+  if (!f) return;
+  f.i += dt * 80;   // 轨迹点采样率为 80 点/秒，按真实时间播放
+  const idx = Math.min(Math.floor(f.i), f.pts.length - 1);
+  const p = f.pts[idx];
+  const pn = f.pts[Math.min(idx + 1, f.pts.length - 1)];
+  drawDartShape(p.x, p.y, Math.atan2(pn.y - p.y, pn.x - p.x), 0.9);
+  if (f.i >= f.pts.length - 1) resolveLanding(f);
+}
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  state.time += dt;
+  handleKeys(dt);
+  spawnStreaks(dt);
+  ctx.clearRect(0, 0, W, H);
+  drawRoom();
+  drawStreaks();
+  drawBoard();
+  drawTrails(dt);
+  drawPlayer();
+  stepFlying(dt);
+  stepBounces(dt);
+  drawWindInfo();
+  updateHUD();
+  requestAnimationFrame(loop);
+}
+randomizeWind();
+updateHUD();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
