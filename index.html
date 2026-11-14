@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>音频工作站 · 信号链路排障</title>
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <div class="toolbar">
+        <button id="start-btn" class="btn primary">通电监听</button>
+        <button id="reset-btn" class="btn">复位故障板</button>
+        <div id="banner" class="banner warn">等待通电：板上是固定故障接法</div>
+      </div>
+      <canvas id="stage"></canvas>
+      <section class="help">
+        <h3>排障说明</h3>
+        <p>输入信号经延迟、增益、滤波后出现尖峰。节点只能<strong>旋转</strong>（点击同一节点切换档位）或<strong>交换</strong>（依次点击两个节点）。</p>
+        <p>目标：把错误连接替换为正确节点顺序，使主信号恢复干净，同时回声仍然保留。错误接法持续过载满 5 秒即判定失败并静音。</p>
+      </section>
+    </main>
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
