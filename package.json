@@ -1,0 +1,10 @@
+{
+  "name": "reverse-rescue",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "弹性缆绳双船反向救援 Canvas + Web Audio 游戏",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>弹性缆绳 · 双船反向救援</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>弹性缆绳 · 双船反向救援</h1>
+
+  <main class="stage">
+    <section class="hud">
+      <div class="tension-row">
+        <span id="tensionText">缆绳张力 0 / 安全 400</span>
+      </div>
+      <div class="bar"><div id="tensionBar" class="fill"></div><div class="safe-mark"></div></div>
+      <div class="hud-line">
+        <span id="ropeState">缆绳松弛</span>
+      </div>
+      <div class="hud-line">
+        <span id="hpText">前船 HP 100　后船 HP 100　用时 0.0s</span>
+      </div>
+      <div class="hud-line" id="pilotLine">自动驾驶：关</div>
+    </section>
+
+    <div class="canvas-wrap">
+      <canvas id="game" width="1280" height="720"></canvas>
+      <div id="overlay" class="overlay">
+        <div class="overlay-card">
+          <h2 id="overlayTitle">反向救援简报</h2>
+          <p id="overlayBody">海流正把两艘救援船推离沉船。左玩家用前船动力逆流朝沉船拖，
+            右玩家控制后船横移避开岩礁与涡旋；同一时刻只能锚定一艘船，交替锚定才能把两船绞回安全区。
+            缆绳过松无法施力，过紧（超过 400）会拉伤船体。</p>
+          <p class="keys">左玩家：W/S 前进·反推　左 Shift 锚定前船<br>
+            右玩家：↑/↓ 后船横移　右 Shift 锚定后船<br>
+            R 重新开始　P 自动驾驶演示　M 静音</p>
+          <button id="startBtn">开始救援（任意按键）</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="pilotBtn">切换自动驾驶演示 (P)</button>
+      <button id="restartBtn">重新开始 (R)</button>
+      <button id="muteBtn">静音 (M)</button>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-card left">
+        <b>左侧玩家 · 前船动力（沿航道朝沉船）</b>
+        <span>W 逆流推进　S 反推卸力　左 Shift 锚定前船</span>
+      </div>
+      <div class="ctrl-card right">
+        <b>右侧玩家 · 后船横移（避开岩礁与涡旋）</b>
+        <span>↑ 向上横移　↓ 向下横移　右 Shift 锚定后船</span>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
