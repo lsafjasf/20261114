@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08141d">
+  <meta name="description" content="山谷索道四人救援：控制吊篮、配平与防风绳，完成撤离。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307131c'/%3E%3Cpath d='M4 9h24M16 9v10m-7 0h14l-3 8H12z' stroke='%23ffbd64' fill='none' stroke-width='1.5'/%3E%3C/svg%3E">
+  <title>索道 07:42 · 山谷救援</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="app" aria-label="索道救援游戏">
+    <canvas id="scene" aria-label="索道、车厢、吊篮与四名待救乘客的动画场景"></canvas>
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <header class="hud-top">
+      <div class="brand-block">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">LINE VALLEY / RESCUE 04</p>
+          <h1>索道 <span>07:42</span></h1>
+        </div>
+      </div>
+
+      <div class="mission-block" aria-live="polite">
+        <p class="eyebrow">撤离进度</p>
+        <div class="progress-row">
+          <strong id="rescue-count">00<span>/04</span></strong>
+          <div id="progress-pips" class="progress-pips" aria-label="四名乘客撤离进度"></div>
+        </div>
+        <p id="mission-label" class="mission-label">吊篮就绪 · 前往 1 号转移点</p>
+      </div>
+
+      <div class="wind-block">
+        <div class="wind-heading">
+          <div>
+            <p class="eyebrow">实时风况</p>
+            <p id="wind-readout" class="wind-readout"><span id="wind-speed">6.2</span> m/s</p>
+          </div>
+          <div id="wind-arrow" class="wind-arrow" aria-hidden="true">→</div>
+        </div>
+        <div class="wind-track"><i id="wind-fill"></i></div>
+        <div class="wind-foot">
+          <span id="wind-state">侧风稳定</span>
+          <span id="wind-forecast">阵风 --</span>
+        </div>
+        <div id="gust-badge" class="gust-badge" hidden>阵风 · 容差收窄</div>
+      </div>
+    </header>
+
+    <aside class="telemetry" aria-label="吊篮对接遥测">
+      <div class="telemetry-head">
+        <p class="eyebrow">吊篮姿态</p>
+        <span id="dock-state" class="dock-state">巡航</span>
+      </div>
+      <div class="meter-row">
+        <span>横向</span>
+        <div class="meter"><i id="meter-x"></i><b></b></div>
+        <output id="error-x">--</output>
+      </div>
+      <div class="meter-row">
+        <span>高度</span>
+        <div class="meter"><i id="meter-y"></i><b></b></div>
+        <output id="error-y">--</output>
+      </div>
+      <div class="meter-row">
+        <span>倾角</span>
+        <div class="meter tilt"><i id="meter-tilt"></i><b></b></div>
+        <output id="error-tilt">--</output>
+      </div>
+      <div class="tolerance-row">
+        <span>对接容差</span>
+        <strong id="tolerance-readout">±40 / 12°</strong>
+      </div>
+      <div class="cog-row">
+        <span>重心偏移</span>
+        <strong id="cog-readout">平衡</strong>
+      </div>
+    </aside>
+
+    <section id="transfer-panel" class="transfer-panel" aria-live="polite">
+      <div class="passenger-tag"><span id="passenger-number">01</span></div>
+      <div class="transfer-copy">
+        <p class="eyebrow">下一名撤离者</p>
+        <h2 id="passenger-name">林岚</h2>
+        <p id="passenger-meta">58 kg · 西侧车厢 / 左门</p>
+      </div>
+      <div id="alignment-lamp" class="alignment-lamp">
+        <span></span>
+        <b>待对准</b>
+      </div>
+    </section>
+
+    <div id="action-hint" class="action-hint">
+      <kbd>SPACE</kbd>
+      <span>对准后开始转移</span>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <footer class="controls">
+      <div class="control-cluster keyboard-controls" aria-label="键盘控制">
+        <div class="key-group">
+          <span class="control-label">移动 / 升降</span>
+          <div class="keys">
+            <kbd data-key="KeyA">A</kbd><kbd data-key="KeyD">D</kbd>
+            <kbd data-key="KeyW">W</kbd><kbd data-key="KeyS">S</kbd>
+          </div>
+        </div>
+        <div class="key-group">
+          <span class="control-label">防风绳</span>
+          <div class="keys"><kbd data-key="KeyQ">Q</kbd><kbd data-key="KeyE">E</kbd></div>
+        </div>
+        <div class="key-group">
+          <span class="control-label">交接</span>
+          <div class="keys"><kbd data-key="Space">SPACE</kbd></div>
+        </div>
+      </div>
+
+      <div class="control-cluster touch-controls">
+        <div class="touch-pad">
+          <button data-control="KeyW" aria-label="升高吊篮">▲</button>
+          <button data-control="KeyA" aria-label="向左移动">◀</button>
+          <button data-control="KeyS" aria-label="降低吊篮">▼</button>
+          <button data-control="KeyD" aria-label="向右移动">▶</button>
+        </div>
+        <div class="rope-pad">
+          <button data-control="KeyQ" aria-label="拉紧左防风绳">Q<br><small>左绳</small></button>
+          <button data-control="Space" class="transfer-button" aria-label="开始转移">交接</button>
+          <button data-control="KeyE" aria-label="拉紧右防风绳">E<br><small>右绳</small></button>
+        </div>
+      </div>
+
+      <div class="utility-controls">
+        <button id="mute-button" class="icon-button" aria-label="切换声音" title="声音 (M)">声</button>
+        <button id="pause-button" class="icon-button" aria-label="暂停游戏" title="暂停 (P)">Ⅱ</button>
+      </div>
+    </footer>
+
+    <section id="start-screen" class="screen start-screen">
+      <div class="start-card">
+        <p class="start-kicker">山谷索道 · 紧急救援指令</p>
+        <h2>风谷之上，<br><em>四个人</em>仍在等。</h2>
+        <p class="start-lead">缆车停在两塔之间。操纵救援吊篮依次接回四名乘客，并在阵风撕开对接窗口前保持姿态。</p>
+        <div class="brief-grid">
+          <div><b>01</b><p><strong>移动与卷扬</strong><span>WASD / 方向键控制吊篮位置</span></p></div>
+          <div><b>02</b><p><strong>防风绳配平</strong><span>Q / E 抵消倾斜与风载</span></p></div>
+          <div><b>03</b><p><strong>依次交接</strong><span>对准发光转移点，按空格</span></p></div>
+          <div><b>04</b><p><strong>守住边界</strong><span>阵风会缩小容差，越界即中止</span></p></div>
+        </div>
+        <div class="start-actions">
+          <button id="start-button" class="primary-button">开始救援 <span>↗</span></button>
+          <p>建议开启声音 · 支持触屏</p>
+        </div>
+      </div>
+      <div class="start-aside" aria-hidden="true">
+        <span>ALT.</span>
+        <strong>2,140 m</strong>
+        <p>能见度 62%<br>西北风 6 m/s<br>索道 04 号</p>
+        <i></i>
+      </div>
+    </section>
+
+    <section id="pause-screen" class="screen pause-screen" hidden>
+      <div class="result-card compact">
+        <p class="eyebrow">救援已暂停</p>
+        <h2>风还在吹。</h2>
+        <p>回到吊篮，保持姿态。</p>
+        <button id="resume-button" class="primary-button">继续救援 <span>↗</span></button>
+      </div>
+    </section>
+
+    <section id="result-screen" class="screen result-screen" hidden>
+      <div class="result-card">
+        <p id="result-kicker" class="eyebrow">04 / 04 · 全员撤离</p>
+        <h2 id="result-title">山谷重新<br><em>安静下来。</em></h2>
+        <p id="result-copy">四名乘客已转移至东塔平台。</p>
+        <div class="result-stats">
+          <div><span>行动用时</span><strong id="result-time">00:00</strong></div>
+          <div><span>姿态评分</span><strong id="result-score">A</strong></div>
+          <div><span>阵风次数</span><strong id="result-gusts">0</strong></div>
+        </div>
+        <div id="result-rule" class="result-rule"></div>
+        <button id="retry-button" class="primary-button">再次救援 <span>↻</span></button>
+        <p class="result-note">R 键快速重试</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/audio.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+Noto Sans SC
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name "Source".
+
+The bundled Noto Sans SC subset is distributed under the SIL Open Font License 1.1:
+https://openfontlicense.org/open-font-license-official-text/
+
+The font file was subset to the interface glyphs used by this project.
