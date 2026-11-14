@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#151914" />
+    <title>Underwood 04 型 · 打字机修缮室</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span>U</span>
+          </div>
+          <div class="brand-copy">
+            <p class="eyebrow">THE UNDERWOOD · REPAIR BUREAU</p>
+            <h1>打字机修缮室</h1>
+          </div>
+        </div>
+
+        <div class="work-order" aria-label="当前工单">
+          <span class="work-order-label">WORK ORDER</span>
+          <strong>No. 047</strong>
+          <span class="divider"></span>
+          <span>卡涩 · 错位 · 跳带</span>
+        </div>
+
+        <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">
+          <span class="sound-icon" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="sound-label">声音已静音</span>
+        </button>
+      </header>
+
+      <section class="workspace">
+        <div class="scene-pane">
+          <canvas id="scene" aria-label="一台老式 Underwood 打字机，纸面上留有试打字符"></canvas>
+
+          <div class="scene-caption">
+            <span class="live-dot"></span>
+            <span>工位 03</span>
+            <span class="caption-rule"></span>
+            <span id="machineState">待检查</span>
+          </div>
+
+          <div class="paper-tag" id="paperTag">
+            <span>FEED</span>
+            <strong>三号棉纸</strong>
+          </div>
+
+          <div class="inspection-lens" id="inspectionLens" aria-live="polite">
+            <div class="lens-crosshair" aria-hidden="true"></div>
+            <p class="lens-kicker">检查记录</p>
+            <h2 id="lensTitle">选择一处机械</h2>
+            <p id="lensCopy">点击右侧检查卡，靠近连杆、字锤或卷轴间隙。</p>
+          </div>
+
+          <div class="type-hint" id="typeHint">
+            <span class="keycap">SPACE</span>
+            <span>调整后按空格试打</span>
+          </div>
+
+          <div class="result-stamp" id="resultStamp" aria-hidden="true">
+            <span>QUALITY</span>
+            <strong>PASSED</strong>
+            <span>14 · XI · 2026</span>
+          </div>
+        </div>
+
+        <aside class="bench" aria-label="修缮工作台">
+          <div class="bench-heading">
+            <div>
+              <p class="eyebrow">SERVICE BENCH</p>
+              <h2>逐项校准</h2>
+            </div>
+            <div class="adjustment-counter" id="adjustmentCounter">
+              <span>调整余量</span>
+              <strong id="adjustmentsLeft">09</strong>
+            </div>
+          </div>
+
+          <section class="target-card">
+            <div class="target-topline">
+              <span>目标样张 / PROOF</span>
+              <span id="targetProgress">0 / 12</span>
+            </div>
+            <p class="target-copy">PRINT CLEANLY</p>
+            <div class="target-progress" aria-hidden="true">
+              <span id="targetProgressBar"></span>
+            </div>
+          </section>
+
+          <section class="inspection-section">
+            <div class="section-label">
+              <span>01 · 检查</span>
+              <span id="checkedCount">0 / 3</span>
+            </div>
+
+            <button class="inspection-card" type="button" data-part="linkage">
+              <span class="part-index">A</span>
+              <span class="part-copy">
+                <strong>连杆与卡键</strong>
+                <small>LINKAGE CLEARANCE</small>
+              </span>
+              <span class="part-state">待检查</span>
+              <span class="chevron" aria-hidden="true">↗</span>
+            </button>
+            <p class="inspection-note" id="noteLinkage" hidden></p>
+
+            <button class="inspection-card" type="button" data-part="hammer">
+              <span class="part-index">B</span>
+              <span class="part-copy">
+                <strong>字锤行程</strong>
+                <small>TYPEBAR REGISTRATION</small>
+              </span>
+              <span class="part-state">待检查</span>
+              <span class="chevron" aria-hidden="true">↗</span>
+            </button>
+            <p class="inspection-note" id="noteHammer" hidden></p>
+
+            <button class="inspection-card" type="button" data-part="ribbon">
+              <span class="part-index">C</span>
+              <span class="part-copy">
+                <strong>卷轴与色带</strong>
+                <small>RIBBON TRACKING</small>
+              </span>
+              <span class="part-state">待检查</span>
+              <span class="chevron" aria-hidden="true">↗</span>
+            </button>
+            <p class="inspection-note" id="noteRibbon" hidden></p>
+          </section>
+
+          <section class="controls-section">
+            <div class="section-label">
+              <span>02 · 调校</span>
+              <span>SPEC RANGE</span>
+            </div>
+
+            <div class="control-row" data-control="linkage">
+              <div class="control-heading">
+                <label for="linkageRange">连杆张力</label>
+                <output id="linkageValue">18</output>
+              </div>
+              <div class="range-wrap">
+                <span class="range-zone" data-zone="linkage"></span>
+                <input id="linkageRange" class="control-range" type="range" min="0" max="100" step="1" value="18" />
+                <span class="range-ticks" aria-hidden="true"></span>
+              </div>
+              <div class="control-meta">
+                <span>松弛</span>
+                <span class="control-status" id="linkageStatus">未校准</span>
+                <span>紧咬</span>
+              </div>
+            </div>
+
+            <div class="control-row" data-control="hammer">
+              <div class="control-heading">
+                <label for="hammerRange">字锤行程</label>
+                <output id="hammerValue">86</output>
+              </div>
+              <div class="range-wrap">
+                <span class="range-zone" data-zone="hammer"></span>
+                <input id="hammerRange" class="control-range" type="range" min="0" max="100" step="1" value="86" />
+                <span class="range-ticks" aria-hidden="true"></span>
+              </div>
+              <div class="control-meta">
+                <span>过浅</span>
+                <span class="control-status" id="hammerStatus">未校准</span>
+                <span>过深</span>
+              </div>
+            </div>
+
+            <div class="control-row" data-control="ribbon">
+              <div class="control-heading">
+                <label for="ribbonRange">卷轴间隙</label>
+                <output id="ribbonValue">32</output>
+              </div>
+              <div class="range-wrap">
+                <span class="range-zone" data-zone="ribbon"></span>
+                <input id="ribbonRange" class="control-range" type="range" min="0" max="100" step="1" value="32" />
+                <span class="range-ticks" aria-hidden="true"></span>
+              </div>
+              <div class="control-meta">
+                <span>轻擦</span>
+                <span class="control-status" id="ribbonStatus">未校准</span>
+                <span>跳带</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="action-section">
+            <div class="action-copy">
+              <span class="eyebrow">03 · 试打</span>
+              <p id="actionHint">先完成三处检查，再调整参数。</p>
+            </div>
+            <div class="action-buttons">
+              <button class="sheet-button" id="newSheetButton" type="button">换纸</button>
+              <button class="type-button" id="typeButton" type="button">
+                <span class="keycap">SPACE</span>
+                <span>试打一字</span>
+              </button>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <footer class="statusbar">
+        <div class="status-message" id="statusMessage">
+          <span class="status-led"></span>
+          <span>机器已装纸。先检查三处机械，读取标定区间。</span>
+        </div>
+        <div class="status-meta">
+          <span>INK · CARBON</span>
+          <span>PLATEN · 11 IN</span>
+          <span id="clock">18:42</span>
+        </div>
+      </footer>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
