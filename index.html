@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07110c" />
+    <title>谷仓呼吸监控 · Grain Watch</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" role="img">
+              <path d="M20 4c5 5 8 11 8 17v15H12V21c0-6 3-12 8-17Z" />
+              <path d="M20 9v23M15 17l5-3 5 3M14 24l6-3 6 3" />
+            </svg>
+          </div>
+          <div>
+            <div class="eyebrow">GRAIN RESPIRATION / NIGHT SHIFT 06</div>
+            <h1>谷仓呼吸监控</h1>
+          </div>
+        </div>
+        <div class="top-status">
+          <div class="clock-block">
+            <span>模拟剩余</span>
+            <strong id="clock">10:00</strong>
+          </div>
+          <div class="status-pill is-warning" id="statusPill">
+            <i></i><span id="statusText">升温中</span>
+          </div>
+          <button class="utility-button" id="soundButton" type="button" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10v4h4l5 4V6L8 10H4Zm12-2c2 2 2 6 0 8M18.5 5.5c4 4 4 9 0 13" />
+            </svg>
+            <span>声音开</span>
+          </button>
+          <button class="utility-button" id="helpButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.8 9a2.4 2.4 0 0 1 4.6.8c0 1.8-2.3 2-2.3 3.5M12 17.2v.2" />
+            </svg>
+            <span>操作</span>
+          </button>
+          <button class="utility-button" id="validateButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m5 12 4 4L19 6M5 20h14" />
+            </svg>
+            <span>验证剧本</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="scene-panel" aria-label="粮仓剖面监控">
+          <div class="scene-header">
+            <div>
+              <div class="eyebrow">CROSS-SECTION / LIVE TELEMETRY</div>
+              <h2>三仓联动 · 新粮入仓第 1 小时</h2>
+            </div>
+            <div class="scene-tools">
+              <div class="legend" aria-label="图例">
+                <span><i class="legend-dot air"></i>冷风</span>
+                <span><i class="legend-dot heat"></i>热区</span>
+                <span><i class="legend-dot wet"></i>湿区</span>
+              </div>
+              <div class="speed-group" aria-label="模拟速度">
+                <button type="button" data-speed="1">1×</button>
+                <button type="button" data-speed="2">2×</button>
+                <button type="button" data-speed="4" class="is-active">4×</button>
+                <button type="button" data-speed="8">8×</button>
+              </div>
+              <button class="pause-button" id="pauseButton" type="button">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M14 4v12" /></svg>
+                <span>暂停</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="sceneCanvas" aria-label="三格粮堆剖面、热点、湿区与气流动态图"></canvas>
+            <div class="canvas-corner top-left">SILO 03 / SECTION A–A</div>
+            <div class="canvas-corner top-right"><i></i> 2.0 HZ</div>
+            <div class="canvas-hint" id="canvasHint">选择风窗，再调节风机负载</div>
+          </div>
+
+          <div class="bin-strip" id="binStrip"></div>
+
+          <div class="lower-grid">
+            <section class="log-panel">
+              <div class="panel-title">
+                <span>调度记录</span>
+                <span class="live-label"><i></i>LIVE</span>
+              </div>
+              <div class="event-log" id="eventLog" aria-live="polite"></div>
+            </section>
+            <section class="mission-panel">
+              <div class="panel-title">
+                <span>处置目标</span>
+                <span id="missionState">进行中</span>
+              </div>
+              <div class="mission-list">
+                <div class="mission-item" id="missionBins">
+                  <span class="mission-icon">01</span>
+                  <div><strong>保住至少两格谷物</strong><small id="safeBinsText">当前 3 格未失守</small></div>
+                  <b id="safeBinsCount">0/2</b>
+                </div>
+                <div class="mission-item" id="missionHotspot">
+                  <span class="mission-icon">02</span>
+                  <div><strong>处理一处内部热点</strong><small id="hotspotText">扫描中 · 未发现异常</small></div>
+                  <b id="hotspotCount">0/1</b>
+                </div>
+              </div>
+              <div class="energy-line">
+                <span>风机能耗 <b id="fanEnergy">0.0 kWh</b></span>
+                <span>翻谷能耗 <b id="turnerEnergy">0.0 kWh</b></span>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="通风调度控制台">
+          <div class="control-heading">
+            <div>
+              <div class="eyebrow">MANUAL CONTROL</div>
+              <h2>通风调度台</h2>
+            </div>
+            <span class="mode-tag">手动</span>
+          </div>
+
+          <section class="control-section fan-section">
+            <div class="control-label">
+              <span>主风机负载</span>
+              <strong id="fanValue">34<small>%</small></strong>
+            </div>
+            <div class="fan-gauge">
+              <div class="fan-ticks" aria-hidden="true"></div>
+              <input id="fanRange" type="range" min="0" max="100" step="1" value="34" aria-label="主风机负载" />
+            </div>
+            <div class="range-labels"><span>停</span><span>经济</span><span>强风</span></div>
+            <div class="fan-readout">
+              <div><span>总风量</span><b id="airflowValue">646 m³/h</b></div>
+              <div><span>静压</span><b id="pressureValue">0.42 kPa</b></div>
+              <div><span>状态</span><b class="tone-good" id="fanState">平稳</b></div>
+            </div>
+          </section>
+
+          <section class="control-section vent-section">
+            <div class="control-label">
+              <span>仓格通风窗</span>
+              <strong class="small-strong"><i id="openVentCount">2</i> / 3 开启</strong>
+            </div>
+            <div class="vent-list" id="ventList"></div>
+            <p class="micro-copy">关闭低湿仓风窗，可避免高速气流造成局部干裂。</p>
+          </section>
+
+          <section class="control-section turner-section">
+            <div class="control-label">
+              <span>翻谷机</span>
+              <strong class="machine-state" id="turnerState">待机</strong>
+            </div>
+            <div class="turner-machine">
+              <div class="coil" id="turnerCoil" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="machine-copy">
+                <b id="turnerClock">READY</b>
+                <span id="turnerHint">单次翻谷 30 秒 · 冷却 45 秒</span>
+                <div class="charge-track"><i id="turnerCharge"></i></div>
+              </div>
+            </div>
+            <div class="turner-targets" id="turnerTargets"></div>
+            <p class="micro-copy">翻谷能打散湿热层和热点，但能耗高；每次运行后必须冷却。</p>
+          </section>
+
+          <section class="control-section risk-section">
+            <div class="control-label"><span>系统风险</span><strong id="riskScore">中等</strong></div>
+            <div class="risk-meter">
+              <div class="risk-row"><span>霉变扩散</span><div class="risk-track"><i id="moldRisk"></i></div><b id="moldRiskText">低</b></div>
+              <div class="risk-row"><span>通风干裂</span><div class="risk-track"><i id="crackRisk"></i></div><b id="crackRiskText">低</b></div>
+              <div class="risk-row"><span>热点升温</span><div class="risk-track"><i id="heatRisk"></i></div><b id="heatRiskText">低</b></div>
+            </div>
+          </section>
+
+          <div class="control-footer">
+            <span>快捷键</span>
+            <b>空格 暂停</b>
+            <b>← → 调风</b>
+            <b>1 / 2 / 3 风窗</b>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="page-footer">
+        <span>GRAIN WATCH / MODEL 3B-07</span>
+        <span>呼吸热 · 湿分迁移 · 局部热点扩散</span>
+        <span id="modelClock">SIM 00:00</span>
+      </footer>
+    </div>
+
+    <div class="modal-backdrop" id="resultModal" hidden>
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <div class="eyebrow" id="resultEyebrow">SHIFT COMPLETE</div>
+        <h2 id="resultTitle">值班结束</h2>
+        <p id="resultSummary"></p>
+        <div class="result-grid" id="resultGrid"></div>
+        <div class="modal-actions">
+          <button class="primary-button" id="restartButton" type="button">重新值班</button>
+          <button class="ghost-button" id="closeResultButton" type="button">查看粮仓</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="validationModal" hidden>
+      <section class="modal-card validation-card" role="dialog" aria-modal="true" aria-labelledby="validationTitle">
+        <button class="modal-close" id="closeValidationButton" type="button" aria-label="关闭">×</button>
+        <div class="eyebrow">DETERMINISTIC REPLAY</div>
+        <h2 id="validationTitle">两套剧本自检</h2>
+        <p class="validation-intro">在独立模拟实例中重放 600 秒，检验救火调节与放任湿区两种结局。</p>
+        <div id="validationResults"></div>
+        <div class="modal-actions">
+          <button class="primary-button" id="runValidationButton" type="button">重新运行</button>
+          <button class="ghost-button" id="dismissValidationButton" type="button">关闭</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="helpModal" hidden>
+      <section class="modal-card help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <button class="modal-close" id="closeHelpButton" type="button" aria-label="关闭">×</button>
+        <div class="eyebrow">OPERATOR BRIEF</div>
+        <h2 id="helpTitle">值班要点</h2>
+        <div class="help-grid">
+          <article><b>01 建立风路</b><p>开启需要降温仓格的风窗，再提高主风机。总风量不会自动均匀分配。</p></article>
+          <article><b>02 管住含水</b><p>湿区超过安全边界会持续扩张。高湿仓应以中高风量排湿，并定期翻谷。</p></article>
+          <article><b>03 打散热点</b><p>热点出现后，只有对热点所在仓翻谷才能彻底打散。单靠吹风只能压住温度。</p></article>
+          <article><b>04 避免过吹</b><p>低含水谷物遇到强风会产生局部干裂。关闭低湿仓风窗是更稳妥的做法。</p></article>
+        </div>
+        <div class="modal-actions"><button class="primary-button" id="startShiftButton" type="button">开始调度</button></div>
+      </section>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+    <script src="js/sim.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

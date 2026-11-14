@@ -1,0 +1,14 @@
+{
+  "name": "grain-respiration-sim",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Three-bin grain aeration simulation",
+  "scripts": {
+    "start": "node scripts/server.cjs",
+    "test": "node --test tests/sim.test.cjs",
+    "test:ui": "node tests/ui.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}
