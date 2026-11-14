@@ -1,0 +1,11 @@
+{
+  "name": "temperature-repair-console",
+  "version": "1.0.0",
+  "private": true,
+  "description": "温度传感器序列断点/尖峰修复工具：Canvas 可视化 + 三种替换策略 + CSV 导出",
+  "scripts": {
+    "test": "node test/test-core.js && node test/test-app-smoke.js",
+    "test:render": "NODE_PATH=/tmp/canvas-check/node_modules node test/test-chart-render.js",
+    "serve": "python3 -m http.server 8080"
+  }
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>温度序列修复台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>温度序列修复台</h1>
+    <p class="subtitle">短时断点 / 错误尖峰 / 长时缺失 / 传感器卡死 — 在时间线上选择替换策略并导出 CSV</p>
+  </header>
+
+  <main>
+    <section class="toolbar">
+      <label>随机种子 <input id="seed" type="number" value="20261114" min="1"></label>
+      <button id="regen" type="button">重新生成数据</button>
+      <label>批量策略
+        <select id="bulk-strategy">
+          <option value="linear">线性插值</option>
+          <option value="neighbor">邻居平均</option>
+          <option value="fforward">保持前值</option>
+        </select>
+      </label>
+      <button id="apply-all" type="button">应用到全部区间</button>
+      <button id="compare" type="button">原始/修复对照</button>
+      <button id="download" type="button" class="primary">下载修复 CSV</button>
+    </section>
+
+    <section class="chart-card">
+      <div class="legend">
+        <span id="legend-raw"><i class="swatch raw"></i>原始数据（含断点/尖峰）</span>
+        <span><i class="swatch repaired"></i>修复后曲线</span>
+        <span><i class="swatch dot"></i>被替代点</span>
+        <span><i class="swatch band"></i>异常区间</span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="chart"></canvas>
+        <div id="tooltip" class="tooltip" style="display:none"></div>
+      </div>
+    </section>
+
+    <div class="two-col">
+      <section class="panel">
+        <h2>区间替换策略</h2>
+        <div id="segment-list"></div>
+      </section>
+      <section class="panel">
+        <h2>替换统计与差异</h2>
+        <div id="stats"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/core.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
