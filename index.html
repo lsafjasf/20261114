@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夜间短波测向 · Night Direction Finding</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="boot-overlay">
+  <div class="boot-card">
+    <h1>夜间短波测向</h1>
+    <p>转动定向天线、调整调谐与滤波，找到三个断续出现的信标并记录频率。</p>
+    <p class="hint">当心：频段中游荡着一个会误锁的干扰源。</p>
+    <button id="btn-boot">开机监听</button>
+    <p class="hint">建议佩戴耳机 · 需要支持 Web Audio 的浏览器</p>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="brand">夜间短波测向 <span class="sub">HF / NIGHT WATCH</span></div>
+  <div class="readouts">
+    <div class="readout"><span class="lbl">现场时间</span><span id="ro-clock" class="val mono">22:00:00</span></div>
+    <div class="readout"><span class="lbl">调谐频率</span><span id="ro-freq" class="val mono">5.8500 MHz</span></div>
+    <div class="readout"><span class="lbl">天线方位</span><span id="ro-angle" class="val mono">090°</span></div>
+    <div class="readout"><span class="lbl">滤波带宽</span><span id="ro-bw" class="val mono">1.2 kHz</span></div>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel scope-panel">
+    <div class="panel-title">频谱瀑布 <span class="panel-note">窗口 ±4.0 kHz · 中心为调谐点</span></div>
+    <canvas id="waterfall" height="260"></canvas>
+    <div class="meter-row">
+      <span class="meter-label">信号强度</span>
+      <div class="meter-track"><div id="meter-fill" class="meter-fill"></div></div>
+      <span id="meter-db" class="mono meter-db">-∞ dB</span>
+    </div>
+    <div class="compass-row">
+      <canvas id="compass" width="220" height="220"></canvas>
+      <div class="compass-side">
+        <div class="panel-title">方位指示</div>
+        <ul class="legend">
+          <li><i class="dot dot-beacon"></i>未定位信标（当前可闻）</li>
+          <li><i class="dot dot-locked"></i>已记录信标方位</li>
+          <li><i class="dot dot-decoy"></i>可疑 / 游动干扰</li>
+        </ul>
+        <p class="hint">天线主瓣指向顶部方位，越接近信标方位信号越清晰。</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel side-panel">
+    <div class="panel-title">控制台</div>
+    <div class="control">
+      <label>天线方位 <b id="ctl-angle-val" class="mono">090°</b></label>
+      <div class="ctl-line">
+        <button class="btn-step" data-step="-10">−10°</button>
+        <button class="btn-step" data-step="-1">−1°</button>
+        <input id="ctl-angle" type="range" min="0" max="359" step="1" value="90">
+        <button class="btn-step" data-step="1">+1°</button>
+        <button class="btn-step" data-step="10">+10°</button>
+      </div>
+    </div>
+    <div class="control">
+      <label>调谐频率 <b id="ctl-freq-val" class="mono">5.8500 MHz</b></label>
+      <input id="ctl-freq" type="range" min="3000" max="12000" step="1" value="5850">
+      <div class="ctl-line">
+        <button class="btn-step" data-fstep="-10">−10k</button>
+        <button class="btn-step" data-fstep="-1">−1k</button>
+        <button class="btn-step" data-fstep="1">+1k</button>
+        <button class="btn-step" data-fstep="10">+10k</button>
+      </div>
+    </div>
+    <div class="control">
+      <label>滤波带宽 <b id="ctl-bw-val" class="mono">1.2 kHz</b></label>
+      <input id="ctl-bw" type="range" min="200" max="3000" step="100" value="1200">
+      <div class="ctl-line">
+        <button class="btn-step" data-bw="-100">窄 0.1</button>
+        <button class="btn-step" data-bw="100">宽 0.1</button>
+      </div>
+    </div>
+    <div class="control">
+      <label>监听音量 <b id="ctl-vol-val" class="mono">60%</b></label>
+      <input id="ctl-vol" type="range" min="0" max="100" step="1" value="60">
+    </div>
+    <button id="btn-record" class="btn-primary">记录频率 / 定位</button>
+    <button id="btn-reset" class="btn-ghost">重置任务</button>
+
+    <div class="panel-title checklist-title">任务清单</div>
+    <ul id="checklist" class="checklist">
+      <li data-id="B1"><i class="box"></i>信标 α 定位</li>
+      <li data-id="B2"><i class="box"></i>信标 β 定位</li>
+      <li data-id="B3"><i class="box"></i>信标 γ 定位</li>
+      <li data-id="D0"><i class="box"></i>误锁干扰验证</li>
+    </ul>
+    <div id="mission-done" class="mission-done hidden">任务完成：三次定位与误锁验证均已确认。</div>
+
+    <div class="panel-title log-title">操作日志</div>
+    <ul id="log" class="log"></ul>
+  </aside>
+</main>
+
+<script src="js/model.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
