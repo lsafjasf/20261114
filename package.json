@@ -1,0 +1,10 @@
+{
+  "name": "gripper-grasp-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "三指机械手抓握策略调试台：调指力/闭合速度/接触反馈阈值，完成三种软硬物体的无损伤抓取",
+  "scripts": {
+    "test": "node --test test/sim.test.js test/e2e.test.js && node test/browser.smoke.js && node test/render.smoke.js",
+    "start": "node server.js"
+  }
+}
