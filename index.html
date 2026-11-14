@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>书架层叠阴影 · 几何投影 + 模糊遮罩</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: system-ui, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        background: #efe7d8;
+      }
+      canvas {
+        background: #f4efe6;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(40, 30, 15, 0.18);
+        touch-action: none;
+      }
+      .panel {
+        width: 280px;
+        background: #fffaf0;
+        border: 1px solid #ddcfb6;
+        border-radius: 10px;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 17px;
+        margin: 0 0 12px;
+      }
+      button {
+        font: inherit;
+        padding: 7px 12px;
+        border-radius: 8px;
+        border: 1px solid #b79a6c;
+        background: #f0e2c6;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e6d2ab;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .light-card {
+        border: 1px solid #e0d3ba;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #fff;
+      }
+      .light-card.selected {
+        outline: 2px solid #c98a2e;
+      }
+      .light-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: #5b4d38;
+        margin-top: 6px;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      .hint {
+        font-size: 12px;
+        color: #7d6f57;
+        line-height: 1.5;
+      }
+      .stats {
+        font-size: 13px;
+        line-height: 1.7;
+        background: #2a241c;
+        color: #f7ecd4;
+        border-radius: 8px;
+        padding: 10px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage" width="760" height="720"></canvas>
+    <div class="panel">
+      <h1>书架光源与阴影</h1>
+      <div class="row">
+        <button id="add-light">添加一盏灯</button>
+        <button id="export-png">导出 PNG</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <p class="hint">
+        拖动画布上的灯可移动光源；点击灯在下方选中。每盏灯可独立调节柔和度与强度，
+        所有阴影由点光源几何投影实时计算，再经高斯模糊遮罩叠加，不是固定贴图。
+      </p>
+      <div id="light-list"></div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

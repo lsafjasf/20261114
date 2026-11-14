@@ -1,0 +1,28 @@
+{
+  "name": "uid175",
+  "version": "1.0.0",
+  "description": "Bookshelf layered shadows via geometric light projection and blurred masks (Canvas 2D)",
+  "main": "src/main.js",
+  "scripts": {
+    "export": "node scripts/export-scene.js",
+    "test": "node scripts/export-scene.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "dependencies": {
+    "canvas": "^3.2.3"
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true
+  }
+}
