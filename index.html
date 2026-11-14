@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>海岛净水站模拟</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">12 分钟反渗透运行训练</p>
+        <h1>海岛净水站</h1>
+      </div>
+      <div class="header-actions">
+        <button id="soundToggle" class="secondary" type="button">启动泵音</button>
+        <button id="restartButton" type="button">重新开始</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <section class="canvas-card">
+        <canvas id="stationCanvas" width="900" height="620" aria-label="净水站管线、膜压、浊度和储水量图"></canvas>
+      </section>
+
+      <aside class="control-panel">
+        <div class="status-grid">
+          <article>
+            <span>剩余时间</span>
+            <strong id="timeValue">12:00</strong>
+          </article>
+          <article>
+            <span>海水浊度</span>
+            <strong id="turbidityValue">18 NTU</strong>
+          </article>
+          <article>
+            <span>储水量</span>
+            <strong id="storageValue">850 L</strong>
+          </article>
+          <article>
+            <span>最低储水</span>
+            <strong id="minStorageValue">850 L</strong>
+          </article>
+          <article>
+            <span>产水流量</span>
+            <strong id="flowValue">0 L/s</strong>
+          </article>
+          <article>
+            <span>累计反洗耗水</span>
+            <strong id="backwashWaterValue">0 L</strong>
+          </article>
+        </div>
+
+        <div id="resultBanner" class="banner idle">等待启动</div>
+
+        <label class="range-row">
+          <span>预处理旁路 <b id="bypassValue">20%</b></span>
+          <input id="bypassInput" type="range" min="0" max="100" value="20">
+          <small>旁路越高，进入膜组件的浊度负荷越高</small>
+        </label>
+
+        <label class="range-row">
+          <span>高压泵压力 <b id="pressureValue">65 bar</b></span>
+          <input id="pressureInput" type="range" min="40" max="100" value="65">
+          <small>高压提高产水，也加速堵塞并缩短寿命</small>
+        </label>
+
+        <label class="range-row">
+          <span>自动反洗周期 <b id="cycleValue">150 s</b></span>
+          <input id="cycleInput" type="range" min="60" max="360" step="10" value="150">
+          <small>每次反洗 6 秒，消耗 54 L 储水</small>
+        </label>
+
+        <div class="button-grid">
+          <button id="startButton" type="button">开始模拟</button>
+          <button id="backwashButton" class="secondary" type="button">立即反洗</button>
+        </div>
+
+        <label class="speed-row">
+          模拟速度
+          <select id="speedSelect">
+            <option value="1">1× 实时</option>
+            <option value="4">4× 加速</option>
+            <option value="10">10× 快速验收</option>
+          </select>
+        </label>
+
+        <label class="check-row">
+          <input id="autoBackwashInput" type="checkbox" checked>
+          按周期自动反洗
+        </label>
+
+        <button id="turbidityEventButton" class="secondary wide" type="button">注入高浊度来水（测试）</button>
+
+        <section class="membrane-panel">
+          <h2>双膜组件状态</h2>
+          <div id="membraneA" class="membrane-stat"></div>
+          <div id="membraneB" class="membrane-stat"></div>
+        </section>
+
+        <section class="log-panel">
+          <h2>运行日志</h2>
+          <ul id="logList"></ul>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
