@@ -1,0 +1,114 @@
+:root {
+  --bg: #eef0f3;
+  --panel: #ffffff;
+  --ink: #23272e;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --plate: #f7f3ea;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+header {
+  padding: 18px 28px 10px;
+}
+
+header h1 { margin: 0; font-size: 22px; }
+header .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+main {
+  display: flex;
+  gap: 18px;
+  padding: 12px 28px 28px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.controls { width: 340px; flex: 0 0 auto; }
+.previews { flex: 1 1 480px; min-width: 420px; }
+
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+
+h2:first-child { margin-top: 0; }
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  font-size: 15px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+
+.check { font-size: 13px; display: inline-flex; gap: 4px; align-items: center; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+
+.grid label { font-size: 12px; color: var(--muted); display: block; }
+.grid output { float: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.grid input[type="range"] { width: 100%; }
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:hover { background: #1d4ed8; }
+
+#sampleBtn { background: #64748b; }
+#sampleBtn:hover { background: #475569; }
+
+.hint { font-size: 12px; color: var(--muted); min-height: 1em; }
+
+.info { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+
+.preview {
+  background: #dfe3e8;
+  border-radius: 10px;
+  padding: 14px;
+  overflow: auto;
+}
+
+.preview svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+
+#heightmap { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 4px; }
+
+.unicode {
+  background: #111827;
+  color: #a5f3fc;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  margin: 0;
+}

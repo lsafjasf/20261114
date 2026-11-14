@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>盲文标牌排版器 · Braille Signage Layout</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>盲文标牌排版器</h1>
+    <p class="subtitle">六点盲文 · 中英数字混排 · 可编辑参数 · SVG / PNG 导出</p>
+  </header>
+
+  <main>
+    <section class="panel controls">
+      <h2>文本</h2>
+      <textarea id="inputText" rows="4" spellcheck="false"></textarea>
+      <div class="row">
+        <button id="sampleBtn" type="button">载入混排示例</button>
+        <label class="check"><input type="checkbox" id="withTone" checked> 标调</label>
+        <label class="check"><input type="checkbox" id="showEmpty" checked> 显示空方</label>
+      </div>
+
+      <h2>版面（毫米）</h2>
+      <div class="grid">
+        <label>每行方数 <output id="o_maxCells">16</output>
+          <input type="range" id="maxCells" min="4" max="40" step="1" value="16">
+        </label>
+        <label>点径 <output id="o_dotDia">1.5</output>
+          <input type="range" id="dotDia" min="0.8" max="2.5" step="0.1" value="1.5">
+        </label>
+        <label>点距 <output id="o_dotPitch">2.5</output>
+          <input type="range" id="dotPitch" min="2.0" max="4.0" step="0.1" value="2.5">
+        </label>
+        <label>字距 <output id="o_cellPitch">6.0</output>
+          <input type="range" id="cellPitch" min="4.0" max="9.0" step="0.1" value="6.0">
+        </label>
+        <label>行距 <output id="o_linePitch">10.0</output>
+          <input type="range" id="linePitch" min="7.0" max="16.0" step="0.5" value="10.0">
+        </label>
+        <label>边距 <output id="o_margin">10</output>
+          <input type="range" id="margin" min="2" max="30" step="1" value="10">
+        </label>
+      </div>
+
+      <h2>凸起样式</h2>
+      <div class="row" id="embossStyle">
+        <label class="check"><input type="radio" name="emboss" value="dome" checked> 圆顶</label>
+        <label class="check"><input type="radio" name="emboss" value="flat"> 平顶</label>
+        <label class="check"><input type="radio" name="emboss" value="cone"> 圆锥</label>
+      </div>
+
+      <h2>导出</h2>
+      <div class="row">
+        <button id="exportSvg" type="button">SVG 点阵</button>
+        <button id="exportPng" type="button">PNG 点阵</button>
+        <button id="exportHeight" type="button">PNG 高度图</button>
+      </div>
+      <p class="hint" id="status"></p>
+    </section>
+
+    <section class="panel previews">
+      <div class="info" id="plateInfo"></div>
+      <h2>视觉点阵预览</h2>
+      <div class="preview" id="svgHost"></div>
+      <h2>触觉高度图（灰度模拟）</h2>
+      <div class="preview"><canvas id="heightmap"></canvas></div>
+      <h2>盲文 Unicode</h2>
+      <pre class="unicode" id="unicodeOut"></pre>
+    </section>
+  </main>
+
+  <script src="lib/pinyin-pro.umd.js"></script>
+  <script src="js/braille-data.js"></script>
+  <script src="js/braille.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

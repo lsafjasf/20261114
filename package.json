@@ -1,0 +1,27 @@
+{
+  "name": "braille-signage-layout",
+  "version": "1.0.0",
+  "description": "六点盲文标牌排版器",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/braille.test.mjs",
+    "test:e2e": "node test/e2e.mjs",
+    "serve": "http-server . -p 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "playwright": "^1.65.1"
+  }
+}
