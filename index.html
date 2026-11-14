@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>减色配色练习 · 颜料调色师</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <h1>颜料调色师</h1>
+    <div class="round-info">
+      第 <span id="roundNo">1</span> / 5 组 ·
+      本组剩余提交 <span id="leftCount">3</span> 次 ·
+      容差 ΔE ≤ <span id="tolLabel">6</span>
+    </div>
+    <button id="muteBtn" class="ghost" type="button">🔊 音效开</button>
+  </header>
+
+  <main class="board">
+    <section class="canvas-col">
+      <div class="card">
+        <h2>色轮</h2>
+        <canvas id="wheelCanvas" class="wheel"></canvas>
+      </div>
+      <div class="card">
+        <h2>调色盘</h2>
+        <canvas id="paletteCanvas" class="palette"></canvas>
+      </div>
+    </section>
+
+    <section class="control-col">
+      <div class="card">
+        <h2>目标 / 当前</h2>
+        <canvas id="swatchCanvas" class="swatches"></canvas>
+        <div id="deBarWrap" class="de-bar-wrap">
+          <div id="deBar" class="de-bar"></div>
+        </div>
+        <p id="deText" class="de-text">实时色差 ΔE：—</p>
+      </div>
+
+      <div class="card">
+        <h2>颜料配比</h2>
+        <div id="sliders"></div>
+        <div class="total-row">
+          混合总量 <strong id="totalVal">0</strong>
+          <span class="hint">总量越低颜色越淡（白底色透出）</span>
+        </div>
+      </div>
+
+      <div class="card actions">
+        <button id="submitBtn" class="primary" type="button">提交当前配比</button>
+        <button id="autoBtn" class="secondary" type="button">自动试色一次</button>
+        <button id="resetBtn" class="ghost" type="button">归零</button>
+      </div>
+
+      <div class="card">
+        <h2>本组提交记录</h2>
+        <ol id="attemptList" class="attempts"></ol>
+      </div>
+    </section>
+  </main>
+
+  <section id="resultPanel" class="result-panel hidden">
+    <h2>五组配色结果</h2>
+    <table>
+      <thead><tr>
+        <th>组</th><th>目标</th><th>最终配比 C/M/Y/K</th>
+        <th>最终色</th><th>提交次数</th><th>ΔE</th><th>结果</th>
+      </tr></thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+    <button id="restartBtn" class="primary" type="button">重新开始五组</button>
+  </section>
+</div>
+
+<script src="js/mixing.js"></script>
+<script src="js/solver.js"></script>
+<script src="js/views.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
