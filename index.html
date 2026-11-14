@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>双笔协作 · 绳结画布</title>
+<style>
+  html,body{margin:0;background:#0b0e14;color:#dfe6f3;font-family:"Segoe UI",system-ui,sans-serif;}
+  #wrap{width:960px;margin:14px auto;}
+  #hud{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;font-size:15px;}
+  #hud .pill{background:#171c27;border:1px solid #2a3346;border-radius:8px;padding:4px 12px;}
+  #msg{text-align:center;height:22px;color:#9fb2d0;font-size:14px;}
+  canvas{display:block;background:#10141d;border:1px solid #2a3346;border-radius:10px;}
+  #help{margin-top:8px;font-size:13px;color:#7c8aa5;text-align:center;}
+  kbd{background:#222a3a;border:1px solid #3a4560;border-radius:4px;padding:0 6px;font-size:12px;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <span class="pill" id="stage">第 1 / 3 幅</span>
+    <span class="pill" id="prog">P1 0% · P2 0%</span>
+    <span class="pill" id="cps">检查点 0/2</span>
+    <span class="pill" id="breaks">断裂 0 / 2</span>
+  </div>
+  <div id="msg">两人同时沿各自颜色的轨迹前进，在检查点汇合</div>
+  <canvas id="game" width="960" height="640"></canvas>
+  <div id="help">
+    P1：<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动　
+    P2：<kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> 移动　
+    按住 <kbd>空格</kbd> 冻结交汇点（另一人拉动会绷紧绳子，超过绳长即断裂）
+  </div>
+</div>
+<script>
+"use strict";
+const W = 960, H = 640, ROPE = 260, SPEED = 3;
+const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+const art = document.createElement('canvas'); art.width = W; art.height = H;
+const actx = art.getContext('2d');
+actx.lineCap = actx.lineJoin = 'round';
+
+function catmull(pts, step) {
+  const out = [];
+  const P = i => pts[Math.max(0, Math.min(pts.length - 1, i))];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+    const seg = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+    const n = Math.max(2, Math.ceil(seg / step));
+    for (let j = 0; j < n; j++) {
+      const t = j / n, t2 = t * t, t3 = t2 * t;
+      out.push({
+        x: 0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2*p0[0]-5*p1[0]+4*p2[0]-p3[0]) * t2 + (-p0[0]+3*p1[0]-3*p2[0]+p3[0]) * t3),
+        y: 0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2*p0[1]-5*p1[1]+4*p2[1]-p3[1]) * t2 + (-p0[1]+3*p1[1]-3*p2[1]+p3[1]) * t3)
+      });
+    }
+  }
+  out.push({x: pts[pts.length-1][0], y: pts[pts.length-1][1]});
+  return out;
+}
+
+const STAGES = [
+  { name: '山谷回声', c1: '#ff9f43', c2: '#45d6e8',
+    p1: [[60,180],[300,300],[480,140],[660,300],[900,180]],
+    p2: [[60,460],[300,300],[480,500],[660,300],[900,460]],
+    cps: [[300,300],[660,300]] },
+  { name: '双河交汇', c1: '#ff5fa2', c2: '#8dff57',
+    p1: [[40,540],[200,540],[360,300],[480,380],[600,300],[760,540],[920,540]],
+    p2: [[40,420],[200,360],[360,300],[480,240],[600,300],[760,360],[920,420]],
+    cps: [[360,300],[600,300]] },
+  { name: '气球之环', c1: '#ffd93d', c2: '#b18cff',
+    p1: [[60,320],[280,180],[480,200],[680,180],[900,320],[680,460],[480,440],[280,460],[60,320]],
+    p2: [[480,40],[480,200],[420,320],[480,440],[480,600]],
+    cps: [[480,200],[480,440]] },
+];
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+// ---------- 音频：哼声随两笔距离变化 ----------
+let AC = null, humOsc = null, humGain = null;
+function ensureAudio() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  humOsc = AC.createOscillator(); humOsc.type = 'triangle';
+  humGain = AC.createGain(); humGain.gain.value = 0;
+  humOsc.connect(humGain).connect(AC.destination);
+  humOsc.start();
+}
+function updateHum(d) {
+  if (!AC) return;
+  const t = Math.min(1, d / ROPE);
+  humOsc.frequency.setTargetAtTime(150 + 380 * t, AC.currentTime, 0.05);
+  humGain.gain.setTargetAtTime(0.03 + 0.11 * t, AC.currentTime, 0.05);
+}
+function beep(freq, dur, type, vol, slideTo) {
+  if (!AC) return;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, AC.currentTime + dur);
+  g.gain.setValueAtTime(vol || 0.15, AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+  o.connect(g).connect(AC.destination);
+  o.start(); o.stop(AC.currentTime + dur);
+}
+const sndCheck = () => { beep(660, .18, 'sine', .18); setTimeout(() => beep(990, .25, 'sine', .15), 90); };
+const sndBreak = () => beep(320, .5, 'sawtooth', .25, 60);
+const sndStage = () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .22, 'sine', .16), i * 110));
+
+// ---------- 游戏状态 ----------
+const keys = new Set();
+let stage = 0, breaks = 0, frozen = false, J = {x: 0, y: 0};
+let brushes = [], paths = [], covered = [], cpHit = [], cps = [];
+let over = false, win = false, flash = 0, banner = 0, coveredCount = [0, 0];
+
+function loadStage(i) {
+  stage = i;
+  const s = STAGES[i];
+  paths = [catmull(s.p1, 6), catmull(s.p2, 6)];
+  covered = [new Array(paths[0].length).fill(false), new Array(paths[1].length).fill(false)];
+  cps = s.cps.map(c => ({x: c[0], y: c[1]}));
+  cpHit = cps.map(() => false);
+  coveredCount = [0, 0];
+  brushes = [
+    {x: paths[0][0].x, y: paths[0][0].y, px: paths[0][0].x, py: paths[0][0].y},
+    {x: paths[1][0].x, y: paths[1][0].y, px: paths[1][0].x, py: paths[1][0].y},
+  ];
+  frozen = false; banner = 120;
+  setMsg(`第 ${i + 1} 幅「${s.name}」开始：沿各自颜色轨迹前进`);
+}
+
+const $ = id => document.getElementById(id);
+function setMsg(t) { $('msg').textContent = t; }
+
+addEventListener('keydown', e => {
+  ensureAudio();
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+  keys.add(e.code);
+});
+addEventListener('keyup', e => keys.delete(e.code));
+
+function moveBrush(b, code) {
+  let dx = 0, dy = 0;
+  const K = code === 0
+    ? {l: 'KeyA', r: 'KeyD', u: 'KeyW', d: 'KeyS'}
+    : {l: 'ArrowLeft', r: 'ArrowRight', u: 'ArrowUp', d: 'ArrowDown'};
+  if (keys.has(K.l)) dx -= 1;
+  if (keys.has(K.r)) dx += 1;
+  if (keys.has(K.u)) dy -= 1;
+  if (keys.has(K.d)) dy += 1;
+  if (dx || dy) {
+    const m = Math.hypot(dx, dy);
+    b.x = Math.max(8, Math.min(W - 8, b.x + dx / m * SPEED));
+    b.y = Math.max(8, Math.min(H - 8, b.y + dy / m * SPEED));
+  }
+}
+
+function update() {
+  if (over) return;
+  const s = STAGES[stage];
+  const cols = [s.c1, s.c2];
+  for (let p = 0; p < 2; p++) {
+    const b = brushes[p];
+    b.px = b.x; b.py = b.y;
+    moveBrush(b, p);
+    if (b.x !== b.px || b.y !== b.py) {
+      actx.strokeStyle = cols[p]; actx.globalAlpha = 0.92; actx.lineWidth = 7;
+      actx.beginPath(); actx.moveTo(b.px, b.py); actx.lineTo(b.x, b.y); actx.stroke();
+      actx.globalAlpha = 1;
+    }
+    const pts = paths[p], cov = covered[p];
+    for (let i = 0; i < pts.length; i++) {
+      if (!cov[i] && Math.hypot(pts[i].x - b.x, pts[i].y - b.y) < 20) { cov[i] = true; coveredCount[p]++; }
+    }
+  }
+  // 检查点：两笔同时到达即交汇成功
+  cps.forEach((cp, k) => {
+    if (!cpHit[k] && dist(brushes[0], cp) < 28 && dist(brushes[1], cp) < 28) {
+      cpHit[k] = true; sndCheck();
+      setMsg(`检查点 ${k + 1} 交汇成功！`);
+    }
+  });
+  // 空格冻结交汇点；移动者拉动冻结点；超过绳长断裂
+  if (keys.has('Space') && !frozen) {
+    frozen = true;
+    J = {x: (brushes[0].x + brushes[1].x) / 2, y: (brushes[0].y + brushes[1].y) / 2};
+    setMsg('交汇点已冻结：另一人移动会拉动冻结点，小心绳长！');
+  }
+  if (!keys.has('Space') && frozen) { frozen = false; setMsg(''); }
+  if (frozen) {
+    for (const b of brushes) {
+      if (Math.hypot(b.x - b.px, b.y - b.py) > 0.1) {
+        J.x += (b.x - J.x) * 0.01; J.y += (b.y - J.y) * 0.01;
+      }
+    }
+    if (dist(J, brushes[0]) > ROPE || dist(J, brushes[1]) > ROPE) {
+      frozen = false; breaks++; flash = 30; sndBreak();
+      if (breaks > 2) { over = true; win = false; setMsg('断裂超过两次，失败！刷新重试。'); }
+      else setMsg(`绳子断裂！（${breaks}/2）`);
+    }
+  }
+  // 完成判定
+  const cov = p => coveredCount[p] / paths[p].length;
+  if (cov(0) >= 0.92 && cov(1) >= 0.92 && cpHit.every(Boolean)) {
+    sndStage();
+    if (stage === STAGES.length - 1) {
+      over = true; win = true;
+      setMsg(breaks <= 2 ? `成功！三幅轨迹完成，断裂 ${breaks} 次。` : '失败。');
+    } else {
+      setMsg(`「${s.name}」完成！`);
+      loadStage(stage + 1);
+    }
+  }
+  updateHum(dist(brushes[0], brushes[1]));
+  if (flash > 0) flash--;
+  if (banner > 0) banner--;
+}
+
+// ---------- 渲染 ----------
+function render() {
+  ctx.fillStyle = '#10141d'; ctx.fillRect(0, 0, W, H);
+  const s = STAGES[stage], cols = [s.c1, s.c2];
+  // 引导轨迹（未覆盖处更亮）
+  for (let p = 0; p < 2; p++) {
+    const pts = paths[p], cov = covered[p];
+    ctx.lineWidth = 3;
+    for (let i = 1; i < pts.length; i++) {
+      ctx.strokeStyle = cols[p];
+      ctx.globalAlpha = cov[i] ? 0.10 : 0.38;
+      ctx.beginPath(); ctx.moveTo(pts[i-1].x, pts[i-1].y); ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+  ctx.drawImage(art, 0, 0);
+  // 检查点
+  cps.forEach((cp, k) => {
+    const pulse = 4 + 3 * Math.sin(performance.now() / 200);
+    ctx.beginPath(); ctx.arc(cp.x, cp.y, 14 + (cpHit[k] ? 0 : pulse), 0, 7);
+    ctx.strokeStyle = cpHit[k] ? '#5dff8f' : '#ffffff';
+    ctx.lineWidth = 2.5; ctx.globalAlpha = cpHit[k] ? 0.9 : 0.75; ctx.stroke();
+    if (cpHit[k]) {
+      ctx.fillStyle = '#5dff8f'; ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('✓', cp.x, cp.y);
+    }
+  });
+  ctx.globalAlpha = 1;
+  const b0 = brushes[0], b1 = brushes[1];
+  const d = dist(b0, b1), t = Math.min(1, d / ROPE);
+  // 张力线（冻结时画冻结点与两笔的连线）
+  const ropeColor = `hsl(${120 - 120 * t}, 90%, 55%)`;
+  ctx.lineWidth = 2 + 3 * t;
+  ctx.strokeStyle = ropeColor;
+  if (frozen) {
+    ctx.setLineDash([7, 6]);
+    ctx.beginPath(); ctx.moveTo(b0.x, b0.y); ctx.lineTo(J.x, J.y); ctx.lineTo(b1.x, b1.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(J.x, J.y, 8, 0, 7);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.beginPath(); ctx.arc(J.x, J.y, ROPE, 0, 7);
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1; ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.moveTo(b0.x, b0.y); ctx.lineTo(b1.x, b1.y); ctx.stroke();
+  }
+  // 画笔
+  [b0, b1].forEach((b, p) => {
+    ctx.beginPath(); ctx.arc(b.x, b.y, 10, 0, 7);
+    ctx.fillStyle = cols[p]; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    ctx.fillStyle = '#0b0e14'; ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('P' + (p + 1), b.x, b.y);
+  });
+  if (flash > 0) { ctx.fillStyle = `rgba(255,60,60,${flash / 90})`; ctx.fillRect(0, 0, W, H); }
+  if (banner > 0) {
+    ctx.fillStyle = 'rgba(10,13,20,0.55)'; ctx.fillRect(0, H/2 - 40, W, 80);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(`第 ${stage + 1} 幅 · ${s.name}`, W/2, H/2);
+  }
+  if (over) {
+    ctx.fillStyle = 'rgba(10,13,20,0.72)'; ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(art, 0, 0);
+    ctx.fillStyle = win ? '#5dff8f' : '#ff6b6b';
+    ctx.font = 'bold 44px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(win ? '成功！' : '失败', W/2, 60);
+    ctx.font = '20px sans-serif'; ctx.fillStyle = '#dfe6f3';
+    ctx.fillText(win ? `三幅轨迹全部完成 · 断裂 ${breaks} 次（≤2）` : '断裂次数超过两次', W/2, 104);
+  }
+  // HUD
+  $('stage').textContent = `第 ${stage + 1} / 3 幅 · ${s.name}`;
+  $('prog').textContent = `P1 ${Math.round(coveredCount[0] / paths[0].length * 100)}% · P2 ${Math.round(coveredCount[1] / paths[1].length * 100)}%`;
+  $('cps').textContent = `检查点 ${cpHit.filter(Boolean).length}/${cps.length}`;
+  $('breaks').textContent = `断裂 ${breaks} / 2`;
+  $('breaks').style.color = breaks > 0 ? '#ff9f43' : '';
+}
+
+loadStage(0);
+(function loop() { update(); render(); requestAnimationFrame(loop); })();
+
+// 供自动演示/测试读取
+window.GAME = {
+  state: () => ({
+    stage, breaks, frozen, over, win,
+    audio: AC ? AC.state : 'none',
+    freq: humOsc ? Math.round(humOsc.frequency.value) : 0,
+    J: {...J},
+    brushes: brushes.map(b => ({x: b.x, y: b.y})),
+    cps: cps.map((c, k) => ({x: c.x, y: c.y, hit: cpHit[k]})),
+    coverage: [coveredCount[0] / paths[0].length, coveredCount[1] / paths[1].length],
+  }),
+  nav: p => ({pts: paths[p], cov: covered[p]}),
+};
+</script>
+</body>
+</html>
