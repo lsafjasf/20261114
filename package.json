@@ -1,0 +1,11 @@
+{
+  "name": "strata-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Canvas 2D interactive terrain sandbox with a live geological section.",
+  "scripts": {
+    "serve": "python3 -m http.server 9000 --bind 127.0.0.1",
+    "test": "node tests/section-consistency.mjs"
+  }
+}

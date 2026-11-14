@@ -1,0 +1,4 @@
+Noto Sans SC is part of the Noto CJK project by Google.
+Source: https://github.com/notofonts/noto-cjk
+License: SIL Open Font License 1.1
+This file is a glyph subset containing only the characters used by this interface.

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ece8dc" />
+    <title>山体剖面沙盘 · Strata Lab</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" aria-hidden="true">
+      <symbol id="icon-raise" viewBox="0 0 24 24">
+        <path d="M4 18h16M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
+      </symbol>
+      <symbol id="icon-lower" viewBox="0 0 24 24">
+        <path d="M4 6h16M12 8v12m0 0 4.5-4.5M12 20l-4.5-4.5" />
+      </symbol>
+      <symbol id="icon-carve" viewBox="0 0 24 24">
+        <path d="M4 15.5 9 11l3.2 3.1L20 5.5M14 5.5h6v6M4 20h7" />
+      </symbol>
+      <symbol id="icon-smooth" viewBox="0 0 24 24">
+        <path d="M3 16c3-7 5 3 8-3s5 4 10-2M3 20c3-5 5 2 8-2s5 3 10-1" />
+      </symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24">
+        <path d="M8 7 3 11.5 8 16M4 11.5h9a6 6 0 0 1 0 12" transform="translate(0 -3)" />
+      </symbol>
+      <symbol id="icon-reset" viewBox="0 0 24 24">
+        <path d="M20 7v5h-5M4.8 17A8 8 0 1 0 5 7.3" />
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16" />
+      </symbol>
+      <symbol id="icon-scan" viewBox="0 0 24 24">
+        <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5M7 12h10" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Strata Lab 首页">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-copy">
+            <strong>STRATA<span>/</span>LAB</strong>
+            <small>山体剖面沙盘</small>
+          </span>
+        </a>
+
+        <div class="topbar-center">
+          <span class="project-id">PROJECT 0142</span>
+          <span class="divider"></span>
+          <span class="project-name">断块山体 · 实验性地形</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="sync-chip" id="syncChip" type="button" title="重新运行剖面一致性校验">
+            <span class="sync-dot"></span>
+            <span id="syncLabel">剖面同步 2/2</span>
+          </button>
+          <button class="icon-button" id="undoButton" type="button" aria-label="撤销" title="撤销">
+            <svg><use href="#icon-undo"></use></svg>
+          </button>
+          <button class="text-button" id="resetButton" type="button">
+            <svg><use href="#icon-reset"></use></svg>
+            <span>重置</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-card" aria-label="山体编辑沙盘">
+          <div class="stage-head">
+            <div>
+              <p class="eyebrow"><span>01</span> SANDBOX / 地形沙盘</p>
+              <h1>塑造山体，切开它的时间。</h1>
+            </div>
+            <div class="stage-meta">
+              <span class="live-pill"><i></i> 实时剖面</span>
+              <span id="editState">等待编辑</span>
+            </div>
+          </div>
+
+          <div class="canvas-shell" id="canvasShell">
+            <canvas id="stageCanvas" aria-label="可交互三维山体与实时剖面"></canvas>
+
+            <div class="canvas-label label-axes" aria-hidden="true">
+              <span>N</span>
+              <i></i>
+              <b>0</b><b>20</b><b>40 m</b>
+            </div>
+            <div class="section-pin" id="sectionPin" aria-hidden="true">
+              <span class="pin-line"></span>
+              <span class="pin-label"><b>A</b> 剖切 A—A′</span>
+            </div>
+            <div class="canvas-note">
+              <span class="note-key">操作</span>
+              <span>在网格上拖动<br />滚轮调笔刷</span>
+            </div>
+            <div class="cut-readout">
+              <span class="readout-label">CUT PLANE</span>
+              <strong id="cutReadout">A—A′ · 0.68</strong>
+            </div>
+            <div class="brush-cursor" id="brushCursor" hidden></div>
+            <div class="toast" id="toast" role="status"></div>
+          </div>
+
+          <div class="stage-bottom">
+            <div class="tool-dock" role="toolbar" aria-label="地形工具">
+              <button class="tool-button is-active" data-tool="raise" type="button" title="抬升地形 (1)">
+                <svg><use href="#icon-raise"></use></svg>
+                <span>抬升</span>
+                <kbd>1</kbd>
+              </button>
+              <button class="tool-button" data-tool="lower" type="button" title="压低地形 (2)">
+                <svg><use href="#icon-lower"></use></svg>
+                <span>压低</span>
+                <kbd>2</kbd>
+              </button>
+              <button class="tool-button" data-tool="carve" type="button" title="削切成台 (3)">
+                <svg><use href="#icon-carve"></use></svg>
+                <span>削切</span>
+                <kbd>3</kbd>
+              </button>
+              <button class="tool-button" data-tool="smooth" type="button" title="平滑网格 (4)">
+                <svg><use href="#icon-smooth"></use></svg>
+                <span>平滑</span>
+                <kbd>4</kbd>
+              </button>
+            </div>
+
+            <label class="brush-control">
+              <span>笔刷 <b id="brushSizeLabel">38</b></span>
+              <input id="brushSize" type="range" min="12" max="76" value="38" />
+            </label>
+
+            <div class="legend">
+              <span><i class="legend-contour"></i> 等高线 5 m</span>
+              <span><i class="legend-water"></i> 水位</span>
+              <span><i class="legend-fault"></i> 断层</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector" aria-label="剖面与地层控制">
+          <div class="inspector-head">
+            <div>
+              <p class="eyebrow"><span>02</span> SECTION / 剖切</p>
+              <h2>断面控制</h2>
+            </div>
+            <span class="section-code">A—A′</span>
+          </div>
+
+          <section class="panel-block cut-block">
+            <div class="block-heading">
+              <label for="cutPosition">剖切位置</label>
+              <output id="cutValue">68%</output>
+            </div>
+            <input class="styled-range cut-range" id="cutPosition" type="range" min="28" max="88" value="68" />
+            <div class="range-scale"><span>近端</span><span>山脊</span><span>远端</span></div>
+            <div class="profile-wrap">
+              <canvas id="profileCanvas" aria-label="当前剖面的二维同步预览"></canvas>
+              <span class="profile-label">实算剖面</span>
+              <span class="profile-elev" id="profileElevation">+42 m</span>
+            </div>
+          </section>
+
+          <section class="panel-block">
+            <div class="block-heading">
+              <span>岩层色带</span>
+              <span class="tiny-status">4 LAYERS</span>
+            </div>
+            <div class="layer-list" id="layerList"></div>
+          </section>
+
+          <section class="panel-block water-block">
+            <div class="block-heading">
+              <label for="waterLevel">水位</label>
+              <output id="waterValue">12 m</output>
+            </div>
+            <input class="styled-range water-range" id="waterLevel" type="range" min="0" max="60" value="12" />
+            <div class="water-scale">
+              <span>干谷</span>
+              <span class="water-mark">当前水面</span>
+              <span>淹没</span>
+            </div>
+          </section>
+
+          <section class="panel-block presets-block">
+            <div class="block-heading">
+              <span>地形预设</span>
+              <span class="tiny-status">确定性网格生成</span>
+            </div>
+            <div class="preset-list" id="presetList"></div>
+          </section>
+
+          <button class="export-button" id="exportButton" type="button">
+            <span class="export-icon"><svg><use href="#icon-download"></use></svg></span>
+            <span><strong>导出当前视图</strong><small>PNG · 高清构图 · 含剖面</small></span>
+            <span class="export-arrow">↗</span>
+          </button>
+        </aside>
+      </main>
+
+      <footer class="statusbar">
+        <span><i class="status-led"></i> <b id="gridStatus">33 × 33</b> 网格地块</span>
+        <span>高度 <b id="heightStatus">0—48 m</b></span>
+        <span>剖面点 <b id="profileStatus">67</b></span>
+        <span class="statusbar-spacer"></span>
+        <span id="seedStatus">SEED / ALPINE-04</span>
+        <span>Canvas 2D · 无贴图</span>
+      </footer>
+    </div>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
