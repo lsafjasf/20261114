@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>30 秒提示音字幕编辑器</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <h1>30 秒程序化动画 · 提示音字幕编辑器</h1>
+      <p class="subtitle">五个合成提示音，共享 AudioContext 时钟；拖动 / 0.1 秒微调字幕，重叠时阻止保存，支持 WebVTT 导出与重新导入。</p>
+    </header>
+
+    <section class="stage-panel">
+      <canvas id="stage" width="960" height="360" aria-label="动画与波形画布"></canvas>
+      <div class="transport">
+        <button id="playBtn" class="primary" type="button">▶ 播放</button>
+        <button id="restartBtn" type="button">⏮ 回到开头</button>
+        <span class="clock"><span id="timeNow">0.0</span> / 30.0 s</span>
+        <span class="beat-label">节拍 120 BPM（每 0.5 秒）· 提示音频率 C5 D5 E5 G5 A5</span>
+      </div>
+    </section>
+
+    <section class="timeline-panel">
+      <div class="timeline-head">
+        <h2>时间轴</h2>
+        <span class="hint">拖动色块整体移动，拖动左右边缘调整入点 / 出点；点击刻度跳转播放头</span>
+      </div>
+      <div id="timeline" class="timeline">
+        <div id="ruler" class="ruler"></div>
+        <div id="track" class="track"></div>
+        <div id="playhead" class="playhead"></div>
+      </div>
+    </section>
+
+    <section class="editor-panel">
+      <div class="editor-head">
+        <h2>字幕列表</h2>
+        <div class="actions">
+          <button id="addBtn" type="button">＋ 新增字幕</button>
+          <button id="saveBtn" class="primary" type="button">💾 保存</button>
+          <button id="exportBtn" type="button">⬇ 导出 WebVTT</button>
+          <button id="importBtn" type="button">⬆ 导入 WebVTT</button>
+          <button id="resetBtn" type="button">↺ 恢复示例</button>
+          <input id="vttFile" type="file" accept=".vtt,text/vtt" hidden />
+        </div>
+      </div>
+      <div id="cueList" class="cue-list"></div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

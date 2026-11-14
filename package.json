@@ -1,0 +1,15 @@
+{
+  "name": "cue-subtitle-editor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "30 秒程序化动画提示音字幕编辑器（Canvas + Web Audio + WebVTT）",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:logic": "node --test tests/roundtrip.test.js tests/validation.test.js",
+    "test:browser": "node --test tests/browser.test.js"
+  },
+  "dependencies": {
+    "puppeteer": "^25.17.0"
+  }
+}
