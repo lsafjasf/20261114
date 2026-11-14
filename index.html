@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>动态海床等高线</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="layout">
+    <section class="stage">
+      <canvas id="view" width="900" height="640" aria-label="海床三维等高线视图"></canvas>
+      <div id="hud" class="hud"></div>
+      <div id="badge" class="badge" title="每次参数变化后自动校验同 seed 一致性与等高线完整性"></div>
+    </section>
+
+    <aside class="panel">
+      <h1>动态海床等高线</h1>
+
+      <label class="control">
+        <span>随机种子 <code id="seedVal"></code></span>
+        <input id="seed" type="number" min="1" max="4294967295" step="1" value="20261114">
+        <button id="reseed" type="button">换一片海床</button>
+      </label>
+
+      <label class="control">
+        <span>潮位 <b id="tideVal"></b></span>
+        <input id="tide" type="range" step="0.01">
+      </label>
+
+      <label class="control">
+        <span>等高线距 <b id="gapVal"></b></span>
+        <input id="gap" type="range" min="0.1" max="1.5" step="0.05" value="0.5">
+      </label>
+
+      <label class="control check">
+        <input id="showSea" type="checkbox" checked>
+        <span>显示海面与潮间带</span>
+      </label>
+
+      <label class="control check">
+        <input id="showLabels" type="checkbox" checked>
+        <span>显示等高线标注</span>
+      </label>
+
+      <div class="buttons">
+        <button id="exportSvg" type="button">导出 SVG 等高线图层</button>
+        <button id="exportPng" type="button">导出 PNG 总览</button>
+      </div>
+
+      <p class="hint">拖动画面旋转 / 俯仰；潮位每跨过一条等高线，浅滩配色切换一档。地形完全由种子程序化生成，不加载任何地图数据。</p>
+      <div id="legend" class="legend"></div>
+    </aside>
+  </main>
+
+  <script src="terrain.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

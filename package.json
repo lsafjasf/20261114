@@ -1,0 +1,28 @@
+{
+  "name": "uid172",
+  "version": "1.0.0",
+  "description": "Procedural undulating seabed rendered as dynamic Canvas 2D contours with tide controls and SVG/PNG export",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test/terrain.test.js",
+    "test:browser": "node test/browser.smoke.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}
