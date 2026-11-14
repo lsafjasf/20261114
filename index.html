@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三角网格地形 · 水平切片轮廓</title>
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <header>
+    <h1>起伏地形 · 水平切片轮廓分析</h1>
+    <p class="sub">拖动滑块或在 3D 视图中垂直拖动切片平面；在任一视图悬停/点击轮廓，两视图同步高亮。</p>
+  </header>
+
+  <main>
+    <section class="panel controls">
+      <h2>参数控制</h2>
+      <label class="control">
+        <span>起伏强度 <b id="amplitudeValue">1.00</b></span>
+        <input type="range" id="amplitude" min="0.2" max="2" step="0.05" value="1" />
+      </label>
+      <label class="control">
+        <span>切片高度 y <b id="levelValue">0.000</b></span>
+        <input type="range" id="level" min="-0.5" max="0.5" step="0.005" value="0" />
+      </label>
+      <label class="control">
+        <span>水平旋转 yaw <b id="yawValue">40°</b></span>
+        <input type="range" id="yaw" min="-180" max="180" step="1" value="40" />
+      </label>
+      <label class="control">
+        <span>俯仰角 pitch <b id="pitchValue">26°</b></span>
+        <input type="range" id="pitch" min="5" max="85" step="1" value="26" />
+      </label>
+      <label class="control">
+        <span>缩放 <b id="zoomValue">1.00</b></span>
+        <input type="range" id="zoom" min="0.6" max="1.8" step="0.02" value="1" />
+      </label>
+      <div class="buttons">
+        <button id="exportSvg">导出截面 SVG</button>
+        <button id="runCheck" class="secondary">连续性自检</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="check" id="checkResult"></div>
+    </section>
+
+    <section class="panel view">
+      <h2>地形 3D 视图 <small>拖动旋转 · 右键/Shift+拖动垂直移动切片 · 点击轮廓联动</small></h2>
+      <canvas id="view3d" width="620" height="560"></canvas>
+    </section>
+
+    <section class="panel view">
+      <h2>截面 2D 视图 <small>悬停/点击轮廓联动高亮</small></h2>
+      <canvas id="view2d" width="440" height="560"></canvas>
+    </section>
+  </main>
+
+  <footer>
+    Canvas 2D 实时渲染 · 程序化 fBm 地形 · 无外部模型/资源
+  </footer>
+
+  <script src="src/terrain.js"></script>
+  <script src="src/contour.js"></script>
+  <script src="src/svg-export.js"></script>
+  <script src="src/renderer3d.js"></script>
+  <script src="src/section2d.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
