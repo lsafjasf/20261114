@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a1f">
+  <title>TIDEFLOW · 近海风场布点推演</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Tideflow 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M7 28c5.4-9.5 18.4-11.2 26-1.4M7 20c5.4-9.5 18.4-11.2 26-1.4M7 12c5.4-9.5 18.4-11.2 26-1.4"/><circle cx="31" cy="10" r="3.2"/></svg>
+        </span>
+        <span class="brand-copy"><b>TIDEFLOW</b><small>近海风场实验室</small></span>
+      </a>
+      <div class="mission">
+        <span class="live-dot" aria-hidden="true"></span>
+        <div><b>北湾 · 模拟任务 04</b><small>有限网格 / 年度风况 / 双方案推演</small></div>
+      </div>
+      <div class="top-actions">
+        <button class="audio-toggle" id="soundBtn" type="button" aria-pressed="false">
+          <span class="audio-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span>环境声 <em>关</em></span>
+        </button>
+        <button class="round-btn" id="helpBtn" type="button" aria-label="打开操作说明">?</button>
+        <button class="outline-btn" id="exportTopBtn" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10m0 0 4-4m-4 4-4-4M4 13v3h12v-3"/></svg>
+          导出布局
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="map-panel" aria-label="近海风场布点海图">
+        <canvas id="mapCanvas" aria-label="可交互的近海风机布点网格"></canvas>
+        <div class="map-heading">
+          <div class="eyebrow-row"><span class="signal-dot"></span><span>LIVE FIELD / SITE 04</span></div>
+          <h1>北湾近海 · 风机布点</h1>
+          <p>拖拽移动 · 滚轮旋转 · R 键顺风对齐</p>
+        </div>
+        <div class="wind-compass" aria-label="风向 compass">
+          <span class="wind-label">主导风向</span>
+          <div class="compass-face">
+            <span class="north">N</span><span class="east">E</span><span class="south">S</span><span class="west">W</span>
+            <svg viewBox="0 0 70 70" aria-hidden="true"><path class="wind-arrow" d="M12 14C25 30 42 40 58 56"/><path class="wind-head" d="M58 56l-12-1 4-10z"/></svg>
+            <span class="wind-speed">9.4<small>m/s</small></span>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="legend-dot turbine"></i>风机机位</span>
+          <span><i class="legend-dot wake"></i>尾流影响</span>
+          <span><i class="legend-dot ship"></i>主航道</span>
+          <span><i class="legend-dot bird"></i>鸟群迁徙带</span>
+        </div>
+        <div class="map-status">
+          <span id="mapStatusDot" class="status-light"></span>
+          <span id="mapStatusText">网格扫描完成 · 4 台机组在线</span>
+          <span class="grid-scale"> GRID 400 m</span>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="布点控制与年度评估">
+        <div class="scheme-row">
+          <div class="scheme-tabs" role="tablist" aria-label="布点方案">
+            <button class="scheme-tab active" id="schemeABtn" type="button" role="tab" aria-selected="true">方案 A</button>
+            <button class="scheme-tab" id="schemeBBtn" type="button" role="tab" aria-selected="false">方案 B</button>
+          </div>
+          <button class="icon-action" id="cloneBtn" type="button" title="复制当前方案到另一方案">
+            <svg viewBox="0 0 20 20"><rect x="6" y="6" width="9" height="9" rx="2"/><path d="M11 6V4H4v7h2"/></svg>
+          </button>
+        </div>
+
+        <section class="forecast-card">
+          <header class="card-header">
+            <span>预计年发电量</span>
+            <span class="live-pill"><i></i>实时</span>
+          </header>
+          <div class="annual-value"><span id="annualValue">0.0</span><small>GWh</small></div>
+          <div class="forecast-note"><span id="deltaPill" class="delta-pill">较另一方案 +0.0%</span><span>4 × 14 MW</span></div>
+          <div class="month-bars" id="monthBars" aria-label="全年月度发电量分布"></div>
+          <div class="metric-grid">
+            <div class="metric">
+              <span>稳定系数</span><strong id="stabilityValue">0%</strong>
+              <div class="meter"><i id="stabilityMeter"></i></div>
+            </div>
+            <div class="metric">
+              <span>尾流损失</span><strong id="wakeValue">0%</strong>
+              <div class="meter warm"><i id="wakeMeter"></i></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="wind-card">
+          <header class="card-header"><span>年度风况</span><span class="mono-label">WIND ROSE</span></header>
+          <div class="wind-summary">
+            <canvas id="windRoseCanvas" width="150" height="126" aria-label="年度风向玫瑰图"></canvas>
+            <div class="wind-facts">
+              <div><small>主导来风</small><b>NW · 300°</b></div>
+              <div><small>年利用小时</small><b>3,860 h</b></div>
+              <div><small>湍流等级</small><b>IEC B</b></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-card">
+          <header class="card-header">
+            <span>机位控制</span>
+            <div class="unit-picker" id="unitPicker" aria-label="选择风机"></div>
+          </header>
+          <div class="selected-row">
+            <div class="selected-copy"><b id="selectedName">WT-01</b><small id="selectedCoord">网格 3.0 · 4.0</small></div>
+            <span id="selectedState" class="confirm-state">待确认</span>
+          </div>
+          <label class="rotation-control" for="yawSlider">
+            <span>机舱朝向</span><b id="yawValue">300°</b>
+            <input type="range" id="yawSlider" min="0" max="355" step="5" value="300">
+          </label>
+          <div class="control-actions">
+            <button class="soft-btn" id="alignBtn" type="button">↻ 顺风对齐</button>
+            <button class="confirm-btn" id="confirmBtn" type="button">确认机位</button>
+          </div>
+        </section>
+
+        <section class="compliance-card">
+          <header class="card-header"><span>空域合规</span><span id="complianceBadge" class="compliance-badge">4 / 4 合规</span></header>
+          <div class="zone-row"><i class="zone-swatch ship"></i><span>主航道缓冲</span><b id="laneStatus">已避开</b></div>
+          <div class="zone-row"><i class="zone-swatch bird"></i><span>鸟群迁徙带</span><b id="birdStatus">已避开</b></div>
+        </section>
+
+        <div class="panel-actions">
+          <button class="compare-btn" id="compareBtn" type="button"><span>结束推演</span><small>比较 A / B 两种布点</small></button>
+          <button class="square-btn" id="exportSideBtn" type="button" aria-label="导出当前布局图">
+            <svg viewBox="0 0 20 20"><path d="M10 3v10m0 0 4-4m-4 4-4-4M4 13v3h12v-3"/></svg>
+          </button>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal" id="resultsModal" aria-hidden="true">
+    <div class="modal-scrim" data-close-modal></div>
+    <article class="result-dialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <header class="dialog-header">
+        <div><span class="dialog-kicker">ANNUAL FIELD REPORT / 2026</span><h2 id="resultTitle">两种布点，一次比较</h2></div>
+        <button class="round-btn close" type="button" data-close-modal aria-label="关闭">×</button>
+      </header>
+      <div class="compare-grid" id="compareGrid"></div>
+      <div class="result-callout">
+        <span class="callout-mark">↗</span>
+        <div><small>推演结论</small><h3 id="resultHeadline">等待评估</h3><p id="resultNarrative"></p></div>
+      </div>
+      <div class="dialog-footer">
+        <button class="outline-btn" id="exportCompareBtn" type="button">导出对比布局图</button>
+        <button class="solid-btn" type="button" data-close-modal>继续优化布点</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="modal" id="helpModal" aria-hidden="true">
+    <div class="modal-scrim" data-close-modal></div>
+    <article class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <header class="dialog-header"><div><span class="dialog-kicker">FIELD MANUAL / 04</span><h2 id="helpTitle">布点规则</h2></div><button class="round-btn close" type="button" data-close-modal aria-label="关闭">×</button></header>
+      <div class="help-steps">
+        <div><span>01</span><b>移动</b><p>拖拽风机到合适的网格，红色斜纹区域不可布点。</p></div>
+        <div><span>02</span><b>旋转</b><p>滚轮、滑杆或 R 键调整机舱朝向，减少偏航损失。</p></div>
+        <div><span>03</span><b>错列</b><p>主导风从西北来，沿东南方向拉开间距可减弱尾流。</p></div>
+        <div><span>04</span><b>比较</b><p>切换 A / B 方案，结束推演查看年度收益与稳定性。</p></div>
+      </div>
+      <p class="help-note">评估采用九扇区年度风况与简化的 Jensen 尾流模型，适合玩法推演，不替代工程微观选址。</p>
+      <button class="solid-btn full" type="button" data-close-modal>开始布点</button>
+    </article>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
