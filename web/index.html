@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>经纬织造 · 无缝循环纹样工作台</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="panel">
+      <h1>经纬织造工作台</h1>
+      <p class="subtitle">参数即改即预览 · 数学保证接缝无缝</p>
+
+      <section>
+        <h2>纹样预设</h2>
+        <div class="preset-row" id="presetRow">
+          <button data-preset="plain" class="preset-btn">平纹</button>
+          <button data-preset="twill" class="preset-btn">斜纹</button>
+          <button data-preset="satin" class="preset-btn">五枚缎</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>循环单元</h2>
+        <label class="field">
+          <span>单元宽度 <em id="tileWVal"></em></span>
+          <input type="range" id="tileW" min="40" max="240" step="4" />
+        </label>
+        <label class="field">
+          <span>单元高度 <em id="tileHVal"></em></span>
+          <input type="range" id="tileH" min="40" max="240" step="4" />
+        </label>
+        <label class="field">
+          <span>纱线宽度 <em id="lineWidthVal"></em> px</span>
+          <input type="range" id="lineWidth" min="1" max="24" step="1" />
+        </label>
+        <label class="field">
+          <span>经纱间距 <em id="pitchXVal"></em> px</span>
+          <input type="range" id="pitchX" min="6" max="48" step="1" />
+        </label>
+        <label class="field">
+          <span>纬纱间距 <em id="pitchYVal"></em> px</span>
+          <input type="range" id="pitchY" min="6" max="48" step="1" />
+        </label>
+      </section>
+
+      <section>
+        <h2>色彩</h2>
+        <label class="color-field">
+          <span>经纱</span>
+          <input type="color" id="warpColor" />
+        </label>
+        <label class="color-field">
+          <span>纬纱</span>
+          <input type="color" id="weftColor" />
+        </label>
+        <label class="color-field">
+          <span>底布</span>
+          <input type="color" id="bgColor" />
+        </label>
+      </section>
+
+      <section>
+        <h2>镜像规则</h2>
+        <label class="check-field">
+          <input type="checkbox" id="mirrorX" />
+          <span>水平镜像衔接（X 轴三角波）</span>
+        </label>
+        <label class="check-field">
+          <input type="checkbox" id="mirrorY" />
+          <span>垂直镜像衔接（Y 轴三角波）</span>
+        </label>
+        <p class="hint" id="unitHint"></p>
+      </section>
+
+      <section class="actions">
+        <button id="exportBtn" class="primary">导出无缝 PNG</button>
+        <button id="saveBtn">保存参数</button>
+        <button id="restoreBtn">恢复上次参数</button>
+        <button id="resetBtn">重置</button>
+      </section>
+      <p class="status" id="status"></p>
+    </aside>
+
+    <main class="stage">
+      <section class="canvas-block">
+        <h2>单个循环单元 <small id="singleMeta"></small></h2>
+        <div class="canvas-wrap">
+          <canvas id="singleCanvas" width="320" height="320"></canvas>
+        </div>
+      </section>
+      <section class="canvas-block">
+        <h2>四宫格无限平铺预览 <small>接缝处零断裂</small></h2>
+        <div class="canvas-wrap">
+          <canvas id="gridCanvas" width="320" height="320"></canvas>
+        </div>
+        <label class="check-field seam-toggle">
+          <input type="checkbox" id="showSeams" checked />
+          <span>显示单元接缝参考线</span>
+        </label>
+      </section>
+    </main>
+  </div>
+
+  <script src="../src/patterns.js"></script>
+  <script src="../src/png.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# 无头浏览器临时配置
+test/.chrome-profile/
+test/.shot-profile/
+test/.dbg-profile/
+
+# 系统与编辑器
+.DS_Store
+*.log

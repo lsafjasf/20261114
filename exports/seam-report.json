@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-11-14T08:05:15.989Z",
+  "tiles": [
+    {
+      "pattern": "plain",
+      "file": "exports/weave-plain.png",
+      "preview2x2": "exports/weave-plain-2x2.png",
+      "tileSize": "128x128",
+      "bytes": 514,
+      "roundtripMaxDiff": 0,
+      "crossSeamMaxDiff": 0,
+      "pass": true
+    },
+    {
+      "pattern": "twill",
+      "file": "exports/weave-twill.png",
+      "preview2x2": "exports/weave-twill-2x2.png",
+      "tileSize": "144x144",
+      "bytes": 701,
+      "roundtripMaxDiff": 0,
+      "crossSeamMaxDiff": 0,
+      "pass": true
+    },
+    {
+      "pattern": "satin",
+      "file": "exports/weave-satin.png",
+      "preview2x2": "exports/weave-satin-2x2.png",
+      "tileSize": "320x320",
+      "bytes": 3712,
+      "roundtripMaxDiff": 0,
+      "crossSeamMaxDiff": 0,
+      "pass": true
+    }
+  ],
+  "allPass": true
+}
