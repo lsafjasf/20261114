@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="地下回声测绘：根据六段实时合成脚步的声纹线索，复原走廊中的声源路径。"
+    />
+    <title>B1 / 地下回声测绘</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">B1</span>
+        <div>
+          <p class="eyebrow">BASEMENT SIGNAL LAB / 07</p>
+          <h1>地下回声测绘</h1>
+        </div>
+      </div>
+      <div class="seed-console">
+        <label for="seed-input">SESSION SEED</label>
+        <input id="seed-input" inputmode="numeric" maxlength="10" spellcheck="false" />
+        <button id="apply-seed" class="ghost-button compact" type="button">应用</button>
+        <button id="same-seed" class="ghost-button compact" type="button" title="清空本轮并重建相同 seed">重开</button>
+        <button id="new-seed" class="icon-button" type="button" title="生成新的 seed" aria-label="生成新的 seed">↻</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stage-shell" aria-label="声纹与走廊时间线画布">
+        <canvas id="stage" aria-label="可拖拽的声纹样本与走廊时间线">
+          当前浏览器需要 Canvas 支持。
+        </canvas>
+        <div class="stage-corner stage-corner-left">REC / 48kHz</div>
+        <div class="stage-corner stage-corner-right">LIVE SYNTHESIS</div>
+      </section>
+
+      <aside class="console">
+        <section class="console-block brief">
+          <div class="block-heading">
+            <span class="index">A</span>
+            <div>
+              <p class="eyebrow">FIELD BRIEF</p>
+              <h2>任务简报</h2>
+            </div>
+          </div>
+          <p>
+            六段脚步来自同一走廊，但地面材质、左右偏向和墙距各不相同。
+            复原它们的先后位置。两段或以上错位即判定失败。
+          </p>
+        </section>
+
+        <section class="console-block monitor">
+          <div class="block-heading">
+            <span class="index">B</span>
+            <div>
+              <p class="eyebrow">ACOUSTIC READOUT</p>
+              <h2>当前声纹</h2>
+            </div>
+          </div>
+          <div class="selected-line">
+            <span id="selected-label">A / CON</span>
+            <strong id="selected-material">混凝土</strong>
+          </div>
+          <div class="meter-row">
+            <span>回声</span>
+            <div class="meter"><i id="meter-echo"></i></div>
+            <b id="value-echo">000ms</b>
+          </div>
+          <div class="meter-row">
+            <span>偏向</span>
+            <div class="meter"><i id="meter-pan"></i></div>
+            <b id="value-pan">C 00</b>
+          </div>
+          <div class="meter-row">
+            <span>低频</span>
+            <div class="meter"><i id="meter-low"></i></div>
+            <b id="value-low">00%</b>
+          </div>
+          <p id="material-note" class="material-note"></p>
+          <div class="transport">
+            <button id="play-button" class="primary-button" type="button">
+              <span class="button-icon">▶</span> 试听合成
+            </button>
+            <button id="stop-button" class="ghost-button" type="button">停止</button>
+          </div>
+          <div class="reverb-line">
+            <span id="reverb-status">IR 待构建</span>
+            <button id="door-button" class="text-button" type="button">触发电平门</button>
+          </div>
+        </section>
+
+        <section class="console-block guide">
+          <div class="block-heading">
+            <span class="index">C</span>
+            <div>
+              <p class="eyebrow">BEARING RULE</p>
+              <h2>判读法则</h2>
+            </div>
+          </div>
+          <p class="formula"><b>0.55</b> 回声 + <b>0.25</b> 右偏 + <b>0.20</b> 低频</p>
+          <p class="guide-copy">
+            三项归一化后相加。声纹标量由低到高，对应时间线从入口 01 到终端 06。
+            回声范围按 180–880ms 计算，偏向按 −1 到 +1，低频按 0–100%。
+          </p>
+          <div class="guide-keys">
+            <span><i class="swatch amber"></i>拖入时间线</span>
+            <span><i class="swatch cyan"></i>点击试听</span>
+          </div>
+        </section>
+
+        <section class="console-block commit">
+          <div class="commit-stats">
+            <div>
+              <span>已落位</span>
+              <strong><b id="placed-count">0</b> / 6</strong>
+            </div>
+            <div>
+              <span>校准次数</span>
+              <strong id="attempt-count">0</strong>
+            </div>
+          </div>
+          <button id="lock-button" class="lock-button" type="button" disabled>
+            锁定时间线
+          </button>
+          <p id="status-line" class="status-line">等待六段声纹落位</p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>DRAG TO PLACE / 拖拽落位</span>
+      <span id="footer-seed">SEED 481516</span>
+      <span>真实声源路径仅在通过后揭示</span>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
