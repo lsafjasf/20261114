@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月面索道 · 穹顶间运输模拟</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>月面索道 · 穹顶间运输模拟</h1>
+  <p class="sub">两座穹顶之间只剩一条临时索道 —— 排好班次，把设备送过去，再安全急停一次。</p>
+</header>
+
+<main>
+  <section class="stage">
+    <canvas id="scene" width="960" height="540"></canvas>
+    <div id="banner" class="hidden"></div>
+  </section>
+
+  <aside class="panel">
+    <h2>班次参数</h2>
+    <label>发车间隔 <span id="intervalVal">60</span> s
+      <input id="interval" type="range" min="15" max="120" step="5" value="60">
+    </label>
+    <label>停靠停留 <span id="dwellVal">15</span> s
+      <input id="dwell" type="range" min="5" max="40" step="1" value="15">
+    </label>
+    <label>载重系数 <span id="loadVal">1.0</span>（&gt;1.0 为过载）
+      <input id="load" type="range" min="0.5" max="1.5" step="0.1" value="1.0">
+    </label>
+    <label>任务 Seed
+      <input id="seed" type="number" value="20261114" step="1">
+    </label>
+
+    <div class="btns">
+      <button id="autoBtn">自动排班</button>
+      <button id="checkBtn">校验班次</button>
+      <button id="startBtn" class="primary">开始</button>
+      <button id="estopBtn" class="danger" disabled>急停</button>
+      <button id="resetBtn">重置</button>
+    </div>
+    <label>仿真速度
+      <select id="speed">
+        <option value="1">1×</option>
+        <option value="2">2×</option>
+        <option value="4" selected>4×</option>
+        <option value="8">8×</option>
+      </select>
+    </label>
+
+    <h2>任务目标</h2>
+    <ul class="goals">
+      <li id="goalTrips">☐ 完成 3 次往返，送完全部设备</li>
+      <li id="goalEstop">☐ 执行一次安全急停（≥1s 且无碰撞）</li>
+    </ul>
+
+    <h2>状态</h2>
+    <div class="stat">任务时间 <b id="stTime">0.0 s</b></div>
+    <div class="stat">已交付设备 <b id="stDelivered">0 / 3</b></div>
+    <div class="stat">绳索磨损
+      <div class="bar"><div id="wearBar"></div></div>
+      <b id="stWear">0.0%</b>
+    </div>
+    <div class="stat">刹车效能 <b id="stBrake">100%</b></div>
+    <div class="stat" id="stDust">微尘：无</div>
+
+    <h2>日志</h2>
+    <div id="log"></div>
+  </aside>
+</main>
+
+<script src="main.js"></script>
+</body>
+</html>
