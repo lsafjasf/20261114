@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#06141b" />
+    <title>TETHER 03 — 高空协作检修</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app" id="app">
+      <canvas id="scene" aria-label="两名玩家协作操控高空维修吊舱"></canvas>
+
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="brand-name">TETHER <span>03</span></p>
+            <p class="brand-sub">高空幕墙检修 · 双人协同</p>
+          </div>
+        </div>
+        <div class="mission-chip">
+          <span class="mission-chip__label">对接进度</span>
+          <span class="mission-chip__value"><b id="progressValue">0</b> / 3</span>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="soundToggle" type="button" aria-label="切换声音" aria-pressed="true">
+            <span class="sound-icon" aria-hidden="true">◖</span>
+            <span class="icon-button__text">声音</span>
+          </button>
+          <button class="icon-button" id="restartButton" type="button" aria-label="重新开始">
+            <span aria-hidden="true">↻</span>
+            <span class="icon-button__text">重启</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="hud hud--left" aria-label="升降员状态">
+        <div class="player-tag player-tag--lift">
+          <span class="player-tag__dot"></span>
+          <div>
+            <p class="player-tag__role">升降手 · P1</p>
+            <p class="player-tag__hint">控制缆长与锚定</p>
+          </div>
+          <span class="player-tag__num">01</span>
+        </div>
+        <div class="key-row">
+          <span class="key-pair"><kbd>W</kbd><kbd>S</kbd><span>收 / 放缆</span></span>
+          <span class="key-pair"><kbd>F</kbd><span>短暂锚定</span></span>
+        </div>
+        <div class="meter-row">
+          <span class="meter-label">锚定蓄能</span>
+          <div class="meter meter--anchor"><i id="anchorMeter"></i></div>
+          <span class="meter-readout" id="anchorReadout">100%</span>
+        </div>
+      </section>
+
+      <section class="hud hud--right" aria-label="横移员状态">
+        <div class="player-tag player-tag--traverse">
+          <span class="player-tag__dot"></span>
+          <div>
+            <p class="player-tag__role">横移手 · P2</p>
+            <p class="player-tag__hint">控制滑车与吸附</p>
+          </div>
+          <span class="player-tag__num">02</span>
+        </div>
+        <div class="key-row key-row--right">
+          <span class="key-pair"><kbd>←</kbd><kbd>→</kbd><span>横向行走</span></span>
+          <span class="key-pair"><kbd>Space</kbd><span>吸附</span></span>
+        </div>
+        <div class="meter-row">
+          <span class="meter-label">吸盘完整性</span>
+          <div class="meter meter--cup"><i id="cupMeter"></i></div>
+          <span class="meter-readout" id="cupReadout">100%</span>
+        </div>
+      </section>
+
+      <div class="status-line" id="statusLine">
+        <span class="status-line__signal"></span>
+        <span id="statusText">等待入舱 · 按“开始检修”</span>
+      </div>
+
+      <div class="tip-line">
+        <span><b>目标</b> 依次吸附 3 个窗框</span>
+        <span class="tip-line__divider"></span>
+        <span><b>要点</b> 接触角低于 10° 才能固定</span>
+        <span class="tip-line__divider"></span>
+        <span><b>阵风</b> 按 <kbd>F</kbd> 短暂锚定</span>
+      </div>
+
+      <div class="screen screen--start" id="startScreen">
+        <div class="start-grid">
+          <div class="start-copy">
+            <p class="eyebrow"><span></span> CO-OP HIGH-ALTITUDE MAINTENANCE</p>
+            <h1>悬索<span>协作</span></h1>
+            <p class="start-intro">
+              两座塔之间，一只维修吊舱。风会推它，停下也会让它摆动。<br />
+              一人管升降，一人管横移，把吸盘稳稳贴上三个窗框。
+            </p>
+            <div class="start-specs">
+              <div><b>03</b><span>高空窗框</span></div>
+              <div><b>02</b><span>协作玩家</b></div>
+              <div><b>10°</b><span>安全接触角</span></div>
+            </div>
+          </div>
+
+          <div class="briefing-card">
+            <p class="briefing-card__head"><span>作业简报</span><b>WIND / 06</b></p>
+            <div class="control-brief">
+              <div class="control-brief__player control-brief__player--lift">
+                <span class="control-brief__id">P1</span>
+                <div>
+                  <h3>升降手</h3>
+                  <p><kbd>W</kbd><kbd>S</kbd> 收缆 / 放缆</p>
+                  <p><kbd>F</kbd> 消耗蓄能，短暂锚定</p>
+                </div>
+              </div>
+              <div class="control-brief__player control-brief__player--traverse">
+                <span class="control-brief__id">P2</span>
+                <div>
+                  <h3>横移手</h3>
+                  <p><kbd>←</kbd><kbd>→</kbd> 行走 / 微调</p>
+                  <p><kbd>Space</kbd> 对准后按住吸附</p>
+                </div>
+              </div>
+            </div>
+            <div class="briefing-note">
+              <span class="briefing-note__icon">△</span>
+              <p>风力会持续变化。摆幅降到安全范围后，两人同时停止输入，让吊舱自然稳定。</p>
+            </div>
+            <button class="primary-button" id="startButton" type="button">
+              <span>开始检修</span>
+              <i aria-hidden="true">↗</i>
+            </button>
+            <p class="briefing-foot">双人共用键盘 · 建议开启声音 · <kbd>R</kbd> 重启</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen screen--win" id="winScreen" hidden>
+        <div class="win-card">
+          <p class="eyebrow"><span></span> SHIFT COMPLETE</p>
+          <p class="win-kicker">三个窗框已全部固定</p>
+          <h2>收工，<br />安全回落。</h2>
+          <div class="win-stats">
+            <div><span>用时</span><b id="winTime">00:00</b></div>
+            <div><span>吸盘完整度</span><b id="winCup">100%</b></div>
+            <div><span>最大接触角</span><b id="winAngle">0.0°</b></div>
+          </div>
+          <button class="primary-button" id="againButton" type="button">
+            <span>再来一次</span>
+            <i aria-hidden="true">↻</i>
+          </button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
