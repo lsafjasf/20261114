@@ -1,0 +1,9 @@
+{
+  "name": "snowplow-rescue",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "暴雪山口清雪车救援：确定性仿真内核 + Canvas 渲染",
+  "scripts": {
+    "test": "node test/acceptance.mjs"
+  }
+}

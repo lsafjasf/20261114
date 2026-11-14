@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>暴雪山口救援 · Snowplow Rescue</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #121826;
+      color: #e8eef9;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 14px;
+    }
+    h1 { font-size: 20px; margin: 4px 0 10px; letter-spacing: 2px; }
+    #stage { position: relative; width: 960px; max-width: 100%; }
+    canvas {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #2c3852;
+      background: #20283a;
+      display: block;
+    }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      pointer-events: none;
+      text-shadow: 0 1px 3px #000;
+    }
+    .chip {
+      background: rgba(16,24,42,0.72);
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(120,150,200,0.25);
+    }
+    .bar {
+      width: 110px;
+      height: 8px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+    .bar > i { display: block; height: 100%; background: linear-gradient(90deg,#5fd08a,#f2d16b,#f26b6b); }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(10,16,30,0.72);
+      border-radius: 10px;
+      text-align: center;
+      gap: 12px;
+    }
+    #overlay.hidden { display: none; }
+    #overlay h2 { margin: 0; font-size: 30px; letter-spacing: 4px; }
+    #overlay p { margin: 0; color: #b9c6dd; max-width: 560px; line-height: 1.7; }
+    button {
+      background: #3d7bf0;
+      color: #fff;
+      border: 0;
+      padding: 10px 26px;
+      font-size: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 2px;
+    }
+    button:hover { background: #558cff; }
+    #help {
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: #93a2bd;
+      line-height: 1.8;
+      text-align: center;
+    }
+    kbd {
+      background: #232f49;
+      border: 1px solid #3a4a6e;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+  <h1>暴雪山口 · 清雪车救援</h1>
+  <div id="stage">
+    <canvas id="game" width="960" height="640"></canvas>
+    <div id="hud">
+      <span class="chip">耐久 <span class="bar"><i id="durBar"></i></span> <span id="durText">100</span></span>
+      <span class="chip">速度 <b id="speedText">0</b> px/s</span>
+      <span class="chip">载重 <b id="loadText">0</b>/3</span>
+      <span class="chip">已救 <b id="rescueText">0</b>/3</span>
+      <span class="chip">风速 <b id="windText">0</b></span>
+      <span class="chip">封闭倒计时 <b id="closureText">--</b></span>
+      <span class="chip">用时 <b id="timeText">0.0</b>s</span>
+    </div>
+    <div id="overlay">
+      <h2 id="overlayTitle">暴风雪救援</h2>
+      <p id="overlayText">
+        暴雪正在封闭山口。驾驶清雪车沿山路救出三辆受困车辆，注意冰墙缺口、落石与强侧坡。
+        铲深雪会减速，挂载车辆越多刹车距离越长；高速接触受困车辆会撞伤它。
+      </p>
+      <button id="startBtn">开始救援</button>
+    </div>
+  </div>
+  <div id="help">
+    <kbd>W</kbd>/<kbd>↑</kbd> 油门　<kbd>S</kbd>/<kbd>↓</kbd> 刹车　<kbd>A</kbd><kbd>D</kbd>/<kbd>←</kbd><kbd>→</kbd> 转向
+    　<kbd>P</kbd> 暂停　<kbd>R</kbd> 重开　<kbd>1</kbd> 手动　<kbd>2</kbd> 自动驾驶演示
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
