@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>临街房间 · 陷波降噪台</title>
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>临街房间 · 陷波降噪台</h1>
+      <p>三组周期噪声渗入房间。用四段陷波器与两个相位旋钮，把残余能量压到阈值以下。</p>
+    </div>
+    <div class="seed-box">
+      <label>SEED
+        <input id="seedInput" type="text" inputmode="numeric" value="20261114" />
+      </label>
+      <button id="startBtn" class="primary">启动音频</button>
+      <button id="verifyBtn" title="同一 seed：验证一次成功 + 一次失真失败">自检两次</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="meters">
+      <div class="meter-card">
+        <div class="meter-head">
+          <span>实时频谱（对数轴）</span>
+        </div>
+        <canvas id="spectrum" width="900" height="220"></canvas>
+        <div class="axis">
+          <span>40 Hz</span><span>100</span><span>300</span><span>1k</span><span>3k</span><span>8k</span>
+        </div>
+      </div>
+
+      <div class="meter-card">
+        <div class="meter-head">
+          <span>噪声带残余能量</span>
+          <span id="residualValue">--</span>
+        </div>
+        <div class="bar-wrap">
+          <div id="residualBar" class="bar"></div>
+          <div id="thresholdLine" class="threshold-line"></div>
+        </div>
+        <div class="meter-head small">
+          <span>目标：低于虚线阈值</span>
+          <span id="thresholdValue">阈值 --</span>
+        </div>
+
+        <div class="meter-head" style="margin-top:14px">
+          <span>累计失真</span>
+          <span id="distortionValue">0%</span>
+        </div>
+        <div class="bar-wrap danger">
+          <div id="distortionBar" class="bar"></div>
+        </div>
+        <div class="meter-head small">
+          <span>过度调节会让主声源失真，累计到 100% 即失败</span>
+        </div>
+
+        <div id="verdict" class="verdict hidden"></div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <h2>四段陷波器（Notch）</h2>
+      <div id="notchRack" class="rack"></div>
+
+      <h2>两个相位旋钮（延迟对消）</h2>
+      <div id="phaseRack" class="rack phase"></div>
+
+      <div class="reset-row">
+        <button id="resetBtn">全部复位</button>
+        <button id="restartBtn">同 seed 重开</button>
+      </div>
+    </section>
+
+    <section class="verify-log">
+      <h2>自检日志</h2>
+      <pre id="verifyLog">尚未运行。</pre>
+    </section>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

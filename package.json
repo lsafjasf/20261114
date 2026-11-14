@@ -1,0 +1,27 @@
+{
+  "name": "uid152",
+  "version": "1.0.0",
+  "description": "临街房间陷波降噪台：Web Audio 周期噪声抑制小游戏与自检",
+  "main": "index.html",
+  "scripts": {
+    "verify": "node tests/headless-verify.mjs",
+    "verify:ui": "node tests/ui-verify.mjs",
+    "test": "node tests/headless-verify.mjs && node tests/ui-verify.mjs",
+    "serve": "node tests/serve.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "dependencies": {
+    "playwright": "^1.65.1"
+  }
+}
