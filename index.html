@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>街区风场可视化</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>街区风场可视化</h1>
+    <div class="layers" id="layerBtns">
+      <button data-layer="stream" class="active">流线</button>
+      <button data-layer="arrow">箭头</button>
+      <button data-layer="heat">热区</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stage">
+      <canvas id="map" width="880" height="600"></canvas>
+      <div id="tooltip" class="tooltip hidden"></div>
+      <canvas id="legend" width="120" height="600"></canvas>
+    </div>
+
+    <div class="controls">
+      <label for="timeSlider">时间 <span id="timeLabel">08:00</span></label>
+      <input type="range" id="timeSlider" min="0" max="23" step="1" value="8">
+      <button id="pinBtn">标记对比时段</button>
+      <button id="exportBtn">导出当前图</button>
+      <button id="exportCompareBtn">导出三时段对比图</button>
+    </div>
+
+    <div class="compare" id="compareBar">
+      <span>对比时段：</span>
+      <div id="slots" class="slots"></div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

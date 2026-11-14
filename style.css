@@ -1,0 +1,123 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #10151c;
+  color: #dfe6ee;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 20px;
+  background: #18202b;
+  border-bottom: 1px solid #2a3542;
+}
+
+h1 { font-size: 18px; margin: 0; }
+
+.layers button {
+  background: #232e3c;
+  color: #aeb9c6;
+  border: 1px solid #33404f;
+  border-radius: 6px;
+  padding: 6px 16px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.layers button.active {
+  background: #2f6fed;
+  border-color: #2f6fed;
+  color: #fff;
+}
+
+main { padding: 16px 20px; }
+
+.stage {
+  position: relative;
+  display: inline-flex;
+  gap: 10px;
+}
+
+#map {
+  background: #0c1118;
+  border: 1px solid #2a3542;
+  border-radius: 8px;
+  cursor: crosshair;
+}
+
+#legend {
+  background: #0c1118;
+  border: 1px solid #2a3542;
+  border-radius: 8px;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(16, 22, 30, 0.92);
+  border: 1px solid #3b4a5c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.hidden { display: none; }
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.controls label { font-size: 14px; }
+
+#timeSlider { width: 320px; accent-color: #2f6fed; }
+
+.controls button {
+  background: #232e3c;
+  color: #dfe6ee;
+  border: 1px solid #33404f;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.controls button:hover { background: #2c3a4c; }
+
+.compare {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #9fb0c1;
+}
+
+.slots { display: flex; gap: 8px; }
+
+.slot {
+  min-width: 64px;
+  text-align: center;
+  padding: 4px 10px;
+  border: 1px dashed #3b4a5c;
+  border-radius: 6px;
+  color: #7e8fa0;
+  cursor: pointer;
+}
+
+.slot.filled {
+  border-style: solid;
+  border-color: #2f6fed;
+  color: #dfe6ee;
+}
