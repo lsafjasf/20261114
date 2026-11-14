@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b0f">
+  <title>DUAL//BUS · 双人八轨混音台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="eyebrow">COLLABORATIVE MIX ROOM</p>
+          <h1>DUAL<span>//</span>BUS</h1>
+        </div>
+      </div>
+
+      <div class="project-block">
+        <span class="status-dot"></span>
+        <div>
+          <p class="eyebrow">CURRENT PROJECT</p>
+          <p class="project-name" id="projectName">NEON HALF-LIGHT <small>v01</small></p>
+        </div>
+      </div>
+
+      <div class="spec-block" aria-label="工程参数">
+        <div><b>08</b><span>TRACKS</span></div>
+        <div><b>120</b><span>BPM</span></div>
+        <div><b>32.0</b><span>SECONDS</span></div>
+        <div><b>44.1</b><span>kHz</span></div>
+      </div>
+
+      <div class="top-actions">
+        <button class="button button-ghost" id="saveButton" type="button">
+          <span class="button-icon">↓</span> 保存工程
+        </button>
+        <button class="button button-accent" id="exportButton" type="button" disabled>
+          <span class="button-icon">↗</span> 导出混音
+        </button>
+      </div>
+    </header>
+
+    <section class="transport" aria-label="播放控制">
+      <button class="transport-button" id="transportButton" type="button" aria-label="开始 32 秒播放">
+        <span class="transport-icon" id="transportIcon">▶</span>
+      </button>
+      <div class="timecode-block">
+        <span id="timecode">00:00.000</span>
+        <small>/ 00:32.000</small>
+      </div>
+      <div class="transport-line">
+        <div class="transport-progress" id="transportProgress"></div>
+        <div class="transport-marks" aria-hidden="true">
+          <span>0</span><span>8</span><span>16</span><span>24</span><span>32</span>
+        </div>
+      </div>
+      <div class="transport-state">
+        <span class="state-label" id="transportLabel">待机 · 双人控制已连接</span>
+        <span class="state-chip" id="clipChip">0 CLIPS</span>
+      </div>
+    </section>
+
+    <main class="workspace">
+      <section class="player-panel player-left" aria-label="左侧玩家控制台">
+        <div class="panel-head">
+          <div class="player-id">
+            <span class="player-number">01</span>
+            <div>
+              <p class="eyebrow">PLAYER LEFT · LOW END</p>
+              <h2>鼓组 / 低频 / 总线</h2>
+            </div>
+          </div>
+          <span class="private-badge">PRIVATE</span>
+        </div>
+        <div class="canvas-frame fader-frame">
+          <canvas id="leftFaders" aria-label="左侧玩家的鼓组、低频和总线压缩推子"></canvas>
+          <div class="canvas-corner">A / CH 01–04</div>
+        </div>
+        <div class="player-foot">
+          <div class="key-hint">
+            <span><kbd>A</kbd><kbd>Z</kbd> 鼓组</span>
+            <span><kbd>S</kbd><kbd>X</kbd> 低频</span>
+            <span><kbd>D</kbd><kbd>C</kbd> 压缩</span>
+          </div>
+          <div class="peer-watch" id="leftPeerWatch">
+            <span class="peer-signal"></span>
+            <span>对方：旋律席活动</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="master-panel" aria-label="共享总线与电平表">
+        <div class="master-heading">
+          <div>
+            <p class="eyebrow">SHARED INFORMATION</p>
+            <h2>MASTER BRIDGE</h2>
+          </div>
+          <div class="link-badge"><span></span><span></span> 双人链路</div>
+        </div>
+
+        <div class="scope-wrap">
+          <div class="scope-labels">
+            <span>MASTER WAVE / LIVE</span>
+            <span id="sampleRateLabel">44.1 kHz</span>
+          </div>
+          <canvas id="scopeCanvas" aria-label="共享主输出实时波形"></canvas>
+          <div class="scope-grid-label">−1.0</div>
+          <div class="scope-grid-label zero">0</div>
+          <div class="scope-grid-label bottom">+1.0</div>
+        </div>
+
+        <div class="meter-bank">
+          <div class="meter-head">
+            <span class="eyebrow">SHARED LEVEL METER</span>
+            <span class="meter-state" id="meterState">SAFE</span>
+          </div>
+          <div class="peak-row">
+            <div class="peak-value">
+              <span id="peakValue">−∞</span><small>dBFS</small>
+            </div>
+            <div class="peak-hold">
+              <span>PEAK HOLD</span>
+              <b id="peakHold">−∞</b>
+            </div>
+          </div>
+          <canvas id="meterCanvas" aria-label="共享立体声电平表"></canvas>
+          <div class="meter-scale"><span>−60</span><span>−36</span><span>−18</span><span>−6</span><span>0</span></div>
+        </div>
+
+        <div class="master-status">
+          <article class="status-card" id="clipCard">
+            <p class="status-kicker">BUS CLIP</p>
+            <strong id="clipCount">00</strong>
+            <span>削波事件</span>
+          </article>
+          <article class="status-card">
+            <p class="status-kicker">HEADROOM</p>
+            <strong id="headroomValue">—</strong>
+            <span>动态余量</span>
+          </article>
+          <article class="status-card">
+            <p class="status-kicker">CAPTURE</p>
+            <strong id="captureValue">0%</strong>
+            <span>32 秒采集</span>
+          </article>
+        </div>
+
+        <div class="master-note" id="masterNote">
+          <span class="note-mark">i</span>
+          <p>两席共享这条电平表。单边增益过高会推穿总线，导出前必须完整播放。</p>
+        </div>
+      </section>
+
+      <section class="player-panel player-right" aria-label="右侧玩家控制台">
+        <div class="panel-head">
+          <div class="player-id">
+            <span class="player-number">02</span>
+            <div>
+              <p class="eyebrow">PLAYER RIGHT · TOP END</p>
+              <h2>旋律 / 回声 / 声像</h2>
+            </div>
+          </div>
+          <span class="private-badge">PRIVATE</span>
+        </div>
+        <div class="canvas-frame fader-frame">
+          <canvas id="rightFaders" aria-label="右侧玩家的旋律、回声和声像推子"></canvas>
+          <div class="canvas-corner">B / CH 05–08</div>
+        </div>
+        <div class="player-foot">
+          <div class="key-hint">
+            <span><kbd>J</kbd><kbd>M</kbd> 旋律</span>
+            <span><kbd>K</kbd><kbd>N</kbd> 回声</span>
+            <span><kbd>L</kbd><kbd>,</kbd> 声像</span>
+          </div>
+          <div class="peer-watch" id="rightPeerWatch">
+            <span class="peer-signal"></span>
+            <span>对方：低频席活动</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="timeline-panel" aria-label="八轨波形与播放位置">
+      <div class="timeline-head">
+        <div>
+          <p class="eyebrow">ARRANGEMENT / 8 TRACKS</p>
+          <h2>八轨合成时间线</h2>
+        </div>
+        <div class="timeline-legend">
+          <span class="legend-left">LOW END</span>
+          <span class="legend-right">TOP END</span>
+        </div>
+      </div>
+      <div class="timeline-canvas-wrap">
+        <canvas id="timelineCanvas" aria-label="八条合成轨道的波形与播放头"></canvas>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span><b id="syncLabel">LINKED</b> · 双人输入并行采样</span>
+      <span id="footerStatus">等待完整 32 秒无削波播放</span>
+      <span>OFFLINE RENDER / LOCAL PROJECT</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

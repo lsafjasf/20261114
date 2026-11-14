@@ -1,0 +1,14 @@
+{
+  "name": "dual-bus-mix-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "双人八轨实时合成与无削波混音台",
+  "scripts": {
+    "serve": "node tests/serve.mjs",
+    "verify": "node tests/verify.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.65.1"
+  }
+}
