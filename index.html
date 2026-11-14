@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>复节奏隧道 · 3:4:5 节拍门</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>复节奏生产隧道 <span class="tag">3 : 4 : 5</span></h1>
+      <p class="sub">在正确的复节奏间隙送物体过门；过早或过晚都会撞门，连续三次失败即停机。</p>
+    </header>
+
+    <div class="hud">
+      <div class="hud-item"><span class="label">已通过</span><b id="passed">00</b><i>/ 12</i></div>
+      <div class="hud-item"><span class="label">已投入</span><b id="spawned">00</b></div>
+      <div class="hud-item"><span class="label">连撞</span><b id="streak">0</b><i>/ 3</i></div>
+      <div class="hud-item status"><span id="status">⏸ 已冻结</span></div>
+      <div class="hud-actions">
+        <button id="startBtn" class="primary">启动</button>
+        <button id="pauseBtn">继续</button>
+        <button id="resetBtn">复位</button>
+        <button id="solveBtn" class="ghost">载入已验证参数</button>
+      </div>
+    </div>
+
+    <canvas id="stage"></canvas>
+
+    <section class="controls" id="controls"></section>
+
+    <footer class="notes">
+      <p><b>玩法</b>：每组脉冲可调「强弱」（决定闸门开启弧宽）与「偏移」（决定脉冲中心相位）。
+        暂停（或空格键）会同时冻结虚拟时钟、Web Audio 与闸门画面。</p>
+      <p><b>验证</b>：<code>node test/simulate.mjs</code> 离线仿真 12 个物体的通过结果与连续失败停机。</p>
+    </footer>
+  </main>
+
+  <script type="module" src="src/main.js"></script>
+  <script>
+    // 根据三组脉冲动态生成控制条
+    const GATE_META = [
+      { name: '三脉冲', color: '#4cc9f0' },
+      { name: '四脉冲', color: '#f4a261' },
+      { name: '五脉冲', color: '#e76f8f' },
+    ];
+    const box = document.getElementById('controls');
+    GATE_META.forEach((g, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.setProperty('--accent', g.color);
+      card.innerHTML = `
+        <h3><i></i>${g.name}</h3>
+        <label>强弱（开门宽度）
+          <input type="range" id="strength-${i}" min="0" max="100" value="35" />
+        </label>
+        <label>偏移（脉冲相位）
+          <input type="range" id="offset-${i}" min="0" max="99" value="0" />
+        </label>
+        <div class="readout" id="readout-${i}"></div>`;
+      box.appendChild(card);
+    });
+  </script>
+</body>
+</html>

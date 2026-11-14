@@ -1,0 +1,11 @@
+{
+  "name": "polyrhythm-tunnel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "3:4:5 复节奏节拍门隧道：Web Audio + Canvas，暂停时音乐与闸门同步冻结",
+  "scripts": {
+    "test": "node test/simulate.mjs && node test/headless.mjs",
+    "serve": "python3 -m http.server 8131"
+  }
+}
