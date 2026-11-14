@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>纯 Web Audio 拟音室</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0e13;
+      --panel: #151b25;
+      --line: #2a3342;
+      --text: #d7e1ee;
+      --muted: #8fa0b5;
+      --accent: #ffd479;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 500px at 50% -10%, #16202e, var(--bg));
+      color: var(--text);
+      font: 14px/1.5 "Noto Sans SC", system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 22px 20px 40px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 16px; font-size: 13px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    button {
+      background: #1f2937;
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); color: var(--accent); }
+    button.primary { background: #2b3b2a; border-color: #4c7a47; }
+    canvas {
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #10141b;
+      touch-action: none;
+      width: 100%;
+      height: auto;
+    }
+    .readout {
+      margin-top: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .readout strong { color: var(--text); }
+    .status { margin-top: 10px; font-size: 13px; }
+    .status.ok { color: #8fd694; }
+    .status.warn { color: #ff9b6a; }
+    #download-slot a { color: var(--accent); margin-left: 8px; }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>纯 Web Audio 拟音室</h1>
+    <p class="sub">
+      四段短声依次为开门、脚步、雨棚、金属碰撞；仅由振荡器、噪声、滤波器与包络模块搭建，
+      不加载任何音频文件。旋钮在画布上上下拖拽即可调整。
+    </p>
+    <div class="toolbar">
+      <button id="render" class="primary">① 渲染四段</button>
+      <button id="preview-segment">② 试听选中段</button>
+      <button id="preview-scene">③ 回放 10 秒场景</button>
+      <button id="export">④ 导出混音 WAV</button>
+      <span id="download-slot"></span>
+    </div>
+    <canvas id="studio"></canvas>
+    <div class="readout" id="peak">尚未渲染。峰值检查结果将显示在这里。</div>
+    <div class="status" id="status">就绪。</div>
+    <p class="hint">模块清单：OscillatorNode（含 LFO）、AudioBufferSourceNode 白噪声、BiquadFilterNode、GainNode 自动化包络；离线合成走 OfflineAudioContext，导出为 44.1kHz / 16-bit / 单声道 PCM WAV。</p>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
