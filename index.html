@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>暴雨净水厂 · 浊度控制模拟</title>
+<style>
+  :root { --bg:#0b1520; --panel:#12202f; --line:#1f3448; --txt:#cfe3f5; --accent:#3fb6ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt);
+         font:14px/1.5 "PingFang SC","Microsoft YaHei",sans-serif; }
+  #wrap { max-width:1180px; margin:0 auto; padding:12px; }
+  h1 { font-size:18px; margin:4px 0 10px; color:var(--accent); }
+  #stage { position:relative; }
+  canvas { display:block; width:100%; background:var(--panel);
+           border:1px solid var(--line); border-radius:8px; }
+  #hud { display:flex; gap:16px; flex-wrap:wrap; margin:10px 0;
+         padding:8px 12px; background:var(--panel);
+         border:1px solid var(--line); border-radius:8px; }
+  #hud b { color:var(--accent); font-variant-numeric:tabular-nums; }
+  #hud .bad { color:#ff6b6b; } #hud .warn { color:#ffc94d; }
+  #controls { display:grid; grid-template-columns:repeat(3,1fr) auto auto;
+              gap:12px; align-items:end; padding:12px;
+              background:var(--panel); border:1px solid var(--line);
+              border-radius:8px; }
+  label { display:block; font-size:12px; color:#8fb3d1; margin-bottom:4px; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  button { padding:8px 16px; border:1px solid var(--line); border-radius:6px;
+           background:#173049; color:var(--txt); cursor:pointer; font-size:14px; }
+  button:hover { background:#1f4265; }
+  button:disabled { opacity:.4; cursor:default; }
+  #log { height:110px; overflow-y:auto; margin-top:10px; padding:8px 12px;
+         background:var(--panel); border:1px solid var(--line);
+         border-radius:8px; font-size:12px; }
+  #log .t { color:#5d84a6; margin-right:8px; }
+  #overlay { position:absolute; inset:0; display:flex; flex-direction:column;
+             align-items:center; justify-content:center; gap:12px;
+             background:rgba(6,12,20,.82); border-radius:8px; text-align:center; }
+  #overlay h2 { margin:0; font-size:26px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>暴雨净水厂 · 浊度控制模拟（20 分钟运行）</h1>
+  <div id="stage">
+    <canvas id="cv" width="1160" height="560"></canvas>
+    <div id="overlay">
+      <h2>暴雨过后，原水浊度飙升</h2>
+      <p>调节混凝剂投加、沉淀时间与滤速，保持出水 ≤ 1.0 NTU，<br>
+         并守住清水库存。小心污泥压力与滤池穿透！</p>
+      <button id="startBtn">开始运行</button>
+    </div>
+  </div>
+  <div id="hud">
+    <span>时间 <b id="hTime">00:00</b>/20:00</span>
+    <span>原水 <b id="hRaw">--</b> NTU</span>
+    <span>沉淀后 <b id="hSet">--</b> NTU</span>
+    <span>出水 <b id="hEff">--</b> NTU</span>
+    <span>清水库 <b id="hSto">--</b></span>
+    <span>污泥压力 <b id="hSlu">--</b></span>
+    <span>水头损失 <b id="hHead">--</b></span>
+    <span>产水 <b id="hFlow">--</b> m³/min</span>
+    <span>达标率 <b id="hRatio">--</b></span>
+  </div>
+  <div id="controls">
+    <div><label>混凝剂投加 <span id="vDose"></span> mg/L（最佳约 <span id="vOpt"></span>）</label>
+      <input type="range" id="cDose" min="0" max="60" step="0.5"></div>
+    <div><label>沉淀时间 <span id="vSed"></span> min（长→水质好、产能低）</label>
+      <input type="range" id="cSed" min="8" max="40" step="1"></div>
+    <div><label>滤速 <span id="vFil"></span> m/h（快→产能高、易穿透）</label>
+      <input type="range" id="cFil" min="2" max="12" step="0.5"></div>
+    <button id="btnBackwash">反冲洗</button>
+    <button id="btnDesludge">排泥</button>
+  </div>
+  <div id="log"></div>
+</div>
+<script src="sim.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
