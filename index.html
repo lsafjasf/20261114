@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="上海虹桥站到达层客流热力监测与突发客流推演"
+    />
+    <title>站厅客流热力监测</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M5 4.5h14v10.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4.5Z" />
+              <path d="M8 20h8M9 9h6M12 6.5v5" />
+            </svg>
+          </span>
+          <div>
+            <div class="brand-line">
+              <h1>客流热力监测</h1>
+              <span class="env-tag">运营中</span>
+            </div>
+            <p>上海虹桥站 · B1 到达层</p>
+          </div>
+        </div>
+
+        <div class="topbar-center" aria-label="页面导航">
+          <button class="nav-item is-active" type="button">实时总览</button>
+          <button class="nav-item" type="button">客流推演</button>
+          <button class="nav-item" type="button">历史复盘</button>
+        </div>
+
+        <div class="topbar-meta">
+          <div class="live-status">
+            <span class="live-dot"></span>
+            <span>数据同步</span>
+            <strong id="syncTime">08:20</strong>
+          </div>
+          <div class="avatar" aria-label="值班员">林</div>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="overview" aria-labelledby="overviewTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">REAL-TIME OVERVIEW</p>
+              <h2 id="overviewTitle">到达层客流态势</h2>
+            </div>
+            <div class="scenario-switch" role="group" aria-label="客流场景">
+              <button class="scenario-button is-active" data-scene="normal" type="button">
+                正常客流
+              </button>
+              <button class="scenario-button" data-scene="surge" type="button">
+                突发客流
+              </button>
+            </div>
+          </div>
+
+          <div class="stat-grid">
+            <article class="stat-card stat-card-primary">
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="9" cy="8" r="3" />
+                  <path d="M3.8 19c.4-4 2.2-6 5.2-6s4.8 2 5.2 6M16 6.5a3 3 0 0 1 0 5.8M16.8 14c2.2.5 3.3 2.2 3.5 5" />
+                </svg>
+              </div>
+              <div class="stat-copy">
+                <span>实时在场人数</span>
+                <strong><span id="statPeople">0</span><small>人</small></strong>
+              </div>
+              <span class="trend-pill is-up" id="peopleTrend">较 5 分钟前 +4.2%</span>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon stat-icon-amber">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3 3.6 18h16.8L12 3Z" />
+                  <path d="M12 9v4M12 16.5v.1" />
+                </svg>
+              </div>
+              <div class="stat-copy">
+                <span>拥挤热点</span>
+                <strong><span id="statHotspots">0</span><small>/ 6 处</small></strong>
+              </div>
+              <span class="trend-pill" id="hotspotTrend">需关注 2 处</span>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon stat-icon-blue">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4 17V9M9.3 17V5M14.7 17v-6M20 17V7" />
+                </svg>
+              </div>
+              <div class="stat-copy">
+                <span>平均密度</span>
+                <strong><span id="statDensity">0.0</span><small>人/㎡</small></strong>
+              </div>
+              <span class="trend-pill is-neutral" id="densityLevel">舒适</span>
+            </article>
+
+            <article class="stat-card">
+              <div class="stat-icon stat-icon-green">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="m8.5 12 2.2 2.2 4.8-5" />
+                </svg>
+              </div>
+              <div class="stat-copy">
+                <span>通道通行效率</span>
+                <strong><span id="statEfficiency">0</span><small>%</small></strong>
+              </div>
+              <span class="trend-pill is-neutral" id="efficiencyTrend">运行平稳</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <article class="map-card">
+            <div class="card-head map-head">
+              <div>
+                <div class="title-row">
+                  <h2>站厅客流分布</h2>
+                  <span class="pulse-label"><i></i>实时热力</span>
+                </div>
+                <p>点击平面图热点，查看该点位的时间序列</p>
+              </div>
+              <div class="map-toolbar">
+                <div class="filter-group" role="group" aria-label="热点筛选">
+                  <button class="filter-btn is-active" data-filter="all" type="button">全部</button>
+                  <button class="filter-btn" data-filter="gate" type="button">闸口</button>
+                  <button class="filter-btn" data-filter="passage" type="button">通道</button>
+                </div>
+                <button class="icon-button" id="resetView" type="button" title="复位视图" aria-label="复位视图">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 9a7 7 0 1 1 .7 7.2M5 4v5h5" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="map-stage" id="mapStage">
+              <canvas id="stationCanvas" aria-label="车站到达层客流热力平面图"></canvas>
+              <div class="heat-legend" aria-label="热力图例">
+                <span>低</span>
+                <i class="legend-gradient"></i>
+                <span>高</span>
+              </div>
+              <div class="map-note">
+                <span class="note-dot"></span>
+                点为模拟旅客 · 亮度表示拥挤度
+              </div>
+              <div class="tooltip" id="mapTooltip" role="status"></div>
+              <div class="hotspot-hits" id="hotspotHits"></div>
+            </div>
+
+            <div class="timeline-panel">
+              <div class="playback-row">
+                <button class="play-button" id="playButton" type="button" aria-label="播放" data-state="paused">
+                  <svg class="play-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="m9 7 8 5-8 5V7Z" />
+                  </svg>
+                  <svg class="pause-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 7v10M15 7v10" />
+                  </svg>
+                </button>
+                <div class="playback-copy">
+                  <span id="playStateText">已暂停</span>
+                  <strong id="currentTime">07:00</strong>
+                </div>
+                <div class="timeline-divider"></div>
+                <div class="timeline-label">
+                  <span>客流曲线</span>
+                  <small>07:00 — 10:00</small>
+                </div>
+                <div class="speed-control" aria-label="播放速度">
+                  <button class="speed-btn is-active" data-speed="1" type="button">1×</button>
+                  <button class="speed-btn" data-speed="2" type="button">2×</button>
+                </div>
+              </div>
+              <div class="timeline-wrap" id="timelineWrap">
+                <canvas id="timelineCanvas" aria-hidden="true"></canvas>
+                <input
+                  id="timeSlider"
+                  class="time-slider"
+                  type="range"
+                  min="0"
+                  max="180"
+                  step="1"
+                  value="0"
+                  aria-label="时间轴"
+                />
+              </div>
+              <div class="time-ticks" aria-hidden="true">
+                <span>07:00</span><span>07:30</span><span>08:00</span>
+                <span>08:30</span><span>09:00</span><span>09:30</span><span>10:00</span>
+              </div>
+            </div>
+          </article>
+
+          <aside class="insight-card">
+            <div class="card-head insight-head">
+              <div>
+                <p class="eyebrow">HOTSPOT DETAIL</p>
+                <h2>热点洞察</h2>
+              </div>
+              <span class="detail-time" id="detailTime">07:00</span>
+            </div>
+
+            <div class="selected-summary">
+              <div class="selected-title">
+                <span class="selected-symbol" id="selectedSymbol">01</span>
+                <div>
+                  <h3 id="selectedName">东侧出站闸口</h3>
+                  <p id="selectedCategory">出站闸口 · GATE-01</p>
+                </div>
+              </div>
+              <span class="status-badge" id="selectedStatus">畅通</span>
+            </div>
+
+            <div class="detail-metrics">
+              <div>
+                <span>当前人数</span>
+                <strong id="selectedCount">0<small> 人</small></strong>
+              </div>
+              <div>
+                <span>拥挤指数</span>
+                <strong id="selectedIndex">0<small> / 100</small></strong>
+              </div>
+              <div>
+                <span>时段峰值</span>
+                <strong id="selectedPeak">0<small> 人</small></strong>
+              </div>
+            </div>
+
+            <div class="chart-block">
+              <div class="chart-heading">
+                <span>拥挤度时间序列</span>
+                <div class="chart-key"><i></i>当前时刻</div>
+              </div>
+              <div class="detail-chart-wrap">
+                <canvas id="detailCanvas" aria-label="所选热点拥挤度时间序列"></canvas>
+                <div class="empty-chart" id="emptyChart">
+                  <span>点击热点查看趋势</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hotspot-list-head">
+              <h3>点位一览</h3>
+              <span id="listCount">共 6 处</span>
+            </div>
+            <div class="hotspot-list" id="hotspotList"></div>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>数据源：固定样例数据 · 更新频率 1 分钟</span>
+        <span>客流模拟系统 v2.4</span>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
