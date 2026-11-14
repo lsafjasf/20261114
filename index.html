@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>玻璃管琴 · Glass Tube Instrument</title>
+<style>
+  :root { --bg:#0b1020; --panel:#141b30; --fg:#dfe7ff; --accent:#7fd8ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font-family:"Segoe UI",system-ui,sans-serif; }
+  header { padding:10px 16px; display:flex; gap:14px; align-items:center;
+           background:var(--panel); flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; color:var(--accent); }
+  button { background:#22304f; color:var(--fg); border:1px solid #3a4d7a;
+           border-radius:6px; padding:6px 12px; cursor:pointer; }
+  button:hover { background:#2c3f66; }
+  button.active { background:#3f6db3; border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  label { font-size:12px; display:flex; align-items:center; gap:6px; }
+  input[type=range] { width:90px; }
+  #stage { display:block; width:100%; height:420px; cursor:crosshair; }
+  #wave { display:block; width:100%; height:110px; background:#0a0e1c; }
+  #tuners { display:flex; gap:8px; padding:8px 16px; flex-wrap:wrap;
+            background:var(--panel); }
+  .tuner { font-size:11px; text-align:center; }
+  .tuner input { width:80px; display:block; }
+  #status { padding:6px 16px; font-size:12px; color:#9fb4e8;
+            background:#0e1426; white-space:pre; font-family:monospace; }
+</style>
+</head>
+<body>
+<header>
+  <h1>玻璃管琴</h1>
+  <button id="btnAudio">启动音频</button>
+  <button id="btnRecord">● 录音</button>
+  <button id="btnPlay" disabled>▶ 循环回放</button>
+  <button id="btnStop" disabled>■ 停止</button>
+  <button id="btnExport" disabled>导出工程 JSON</button>
+  <button id="btnImport">载入工程</button>
+  <input type="file" id="fileInput" accept=".json" hidden>
+  <label>速度 <input type="range" id="tempo" min="60" max="180" value="100">
+    <span id="tempoVal">100</span> BPM</label>
+  <label>温度上限 <input type="range" id="tempLimit" min="40" max="100" value="80">
+    <span id="tempLimitVal">80</span>°</label>
+</header>
+<canvas id="stage"></canvas>
+<canvas id="wave"></canvas>
+<div id="tuners"></div>
+<div id="status">就绪。点击"启动音频"，鼠标划过玻璃管演奏。</div>
+<script src="app.js"></script>
+</body>
+</html>
