@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>池塘生态平衡</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0b1d26;
+      color: #e8f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    #hud {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    #hud b { color: #7fe0c3; }
+    canvas {
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      max-width: 100%;
+    }
+    #controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin-top: 14px;
+      padding: 12px 18px;
+      background: #123043;
+      border-radius: 12px;
+    }
+    .ctl { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; }
+    .ctl input[type="range"] { width: 140px; accent-color: #7fe0c3; }
+    button {
+      background: #1f6f8b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover { background: #2a8fb5; }
+    button:active { background: #155e75; }
+    #message {
+      margin-top: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 26px;
+    }
+    #message.win { color: #7fe0c3; }
+    #message.fail { color: #ff8a8a; }
+    #tip { margin-top: 8px; font-size: 12px; color: #9db8c4; max-width: 720px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>🐟 池塘生态平衡</h1>
+  <div id="hud">
+    <span>⏱ 剩余 <b id="hud-time">300</b>s</span>
+    <span>🌿 多样性 <b id="hud-diversity">--</b>（目标 0.45–0.67）</span>
+    <span>💧 透明度 <b id="hud-transparency">--</b></span>
+    <span>🔊 <button id="mute">声音开</button></span>
+  </div>
+  <canvas id="pond" width="760" height="480"></canvas>
+  <div id="controls">
+    <div class="ctl">
+      <label>☀️ 光照 <span id="light-val">60%</span></label>
+      <input id="light" type="range" min="0" max="100" value="60" />
+    </div>
+    <div class="ctl">
+      <label>🍚 投喂 <span id="feed-val">20%</span></label>
+      <input id="feed" type="range" min="0" max="100" value="20" />
+    </div>
+    <div class="ctl">
+      <label>🧪 药剂（按住）</label>
+      <button id="dose">按住投放</button>
+    </div>
+    <div class="ctl">
+      <label>🚿 换水</label>
+      <button id="water-change">换水一次</button>
+    </div>
+    <div class="ctl">
+      <label>↻ 重开</label>
+      <button id="restart">重新开始</button>
+    </div>
+  </div>
+  <div id="message"></div>
+  <div id="tip">
+    目标：稳定运行 5 分钟且保持中等多样性。营养过多会引发藻华；药剂过量会误伤浮游生物；鱼群持续下降则失败。
+  </div>
+  <script src="sim.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
