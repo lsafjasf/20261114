@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三基站覆盖规划台</title>
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>三基站覆盖规划台</h1>
+    <div class="topbar-meta">
+      <span>地图 1000 × 750 m · 栅格 5 m · 地形 seed <b id="seedLabel"></b></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="map-wrap">
+      <canvas id="map" width="1000" height="750"></canvas>
+      <div class="hud" id="mouseHud">鼠标位置: --, -- m</div>
+      <div class="legend">
+        <span><i class="lg lg-grass"></i>草地</span>
+        <span><i class="lg lg-forest"></i>林地</span>
+        <span><i class="lg lg-water"></i>水域(不可覆盖)</span>
+        <span><i class="lg lg-rock"></i>岩石(不可覆盖)</span>
+        <span><i class="lg lg-blind"></i>盲区</span>
+        <span><i class="lg lg-overlap"></i>重叠区</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div id="stationControls"></div>
+
+      <div class="stats">
+        <h2>实时统计</h2>
+        <div class="stat-row"><span>可覆盖区域</span><b id="statCoverable">--</b></div>
+        <div class="stat-row"><span>已覆盖面积</span><b id="statCovered">--</b></div>
+        <div class="stat-row"><span>盲区面积</span><b id="statBlind">--</b></div>
+        <div class="stat-row"><span>重叠栅格面积</span><b id="statOverlap">--</b></div>
+        <div class="stat-row"><span>重复覆盖浪费</span><b id="statWaste">--</b></div>
+        <div class="stat-row"><span>实时覆盖率</span><b id="statRate">--</b></div>
+        <p class="warn" id="wasteWarn" hidden>⚠ 功率重叠偏高，建议缩小半径或调整角度。</p>
+      </div>
+
+      <div class="actions">
+        <button id="btnConfirm" class="primary">确认方案</button>
+        <button id="btnExport">导出 PNG</button>
+        <button id="btnReset">重置</button>
+      </div>
+
+      <div class="confirm-box" id="confirmBox" hidden>
+        <h2>估算覆盖率</h2>
+        <div class="big-rate" id="confirmRate">--</div>
+        <p id="confirmDetail"></p>
+      </div>
+    </aside>
+  </main>
+
+  <script src="src/coverage.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

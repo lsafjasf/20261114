@@ -1,0 +1,10 @@
+{
+  "name": "base-station-coverage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "三基站二维覆盖规划工具：Canvas 扇区渲染、盲区统计与 PNG 导出",
+  "scripts": {
+    "test": "node --test test/coverage.test.js test/app.smoke.test.js",
+    "start": "node -e \"require('http').createServer((q,s)=>{const f=require('fs'),p='.'+(q.url==='/'?'/index.html':q.url);f.readFile(p,(e,d)=>{if(e){s.writeHead(404);s.end()}else{s.end(d)}})}).listen(8080,()=>console.log('http://localhost:8080'))\""
+  }
+}
