@@ -1,0 +1,12 @@
+{
+  "name": "four-switch-railway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Four-turnout miniature railway dispatch puzzle",
+  "scripts": {
+    "start": "python3 -m http.server 4173",
+    "test": "node --test tests/sim.test.mjs",
+    "test:e2e": "node tests/e2e.mjs"
+  }
+}

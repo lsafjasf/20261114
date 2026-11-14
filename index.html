@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101813" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2715%27 fill=%27%23131f17%27 stroke=%27%23c8a56a%27/%3E%3Ctext x=%2716%27 y=%2721%27 text-anchor=%27middle%27 fill=%27%23e5c98e%27 font-size=%2715%27%3E4%3C/text%3E%3C/svg%3E" />
+  <title>四道岔 · 微缩铁路调度台</title>
+  <link rel="stylesheet" href="assets/fonts/noto-sans/font.css" />
+  <link rel="stylesheet" href="assets/fonts/noto-serif/font.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <main class="stage">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">4×</span>
+          <div>
+            <h1>四道岔 <em>微缩铁路调度台</em></h1>
+            <p>两列自动列车 · 各停三站 · 四组联锁道岔</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <div class="headway"><span>固定间隔</span><strong>10.5s</strong></div>
+          <button id="pauseBtn" class="icon-btn" type="button" title="暂停 / 继续（空格）">
+            <span class="btn-icon">Ⅱ</span><span id="pauseText">暂停</span>
+          </button>
+          <button id="soundBtn" class="icon-btn" type="button" title="声音开关">
+            <span class="btn-icon">♪</span><span id="soundText">声音开</span>
+          </button>
+          <button id="resetBtn" class="icon-btn ghost" type="button" title="重新开始">重开</button>
+        </div>
+      </header>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="scene" width="1280" height="720" aria-label="俯视微缩铁路沙盘"></canvas>
+        <div class="scanline"></div>
+
+        <div class="overlay start-overlay" id="startOverlay">
+          <div class="start-card">
+            <div class="eyebrow"><span></span> 今日调度任务</div>
+            <h2>让两列车都跑完<br /><i>各自的三站</i></h2>
+            <p class="lead">你坐在微缩沙盘的控制台前。蓝隼号与琥珀号按固定间隔发车，四组道岔由你决定方向。线路被占用时道岔会锁闭；方向错误会让列车在信号机前紧急停车。</p>
+            <div class="brief-grid">
+              <div><b>01</b><span>观察列车下一站与道岔需求</span></div>
+              <div><b>02</b><span>在列车到达前扳动道岔</span></div>
+              <div><b>03</b><span>完成 6 次停靠，避免碰撞与脱轨</span></div>
+            </div>
+            <div class="start-footer">
+              <button id="startBtn" class="primary-btn" type="button">开始调度 <span>→</span></button>
+              <span class="hint">空格暂停 · 数字键 1–4 扳道岔 · 点击道岔卡片亦可</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay pause-overlay hidden" id="pauseOverlay">
+          <div class="pause-card">
+            <span class="pause-glyph">Ⅱ</span>
+            <h2>调度暂停</h2>
+            <p>时间与列车均已冻结，可以慢慢规划下一步。</p>
+            <button id="resumeBtn" class="primary-btn" type="button">继续运行 <span>→</span></button>
+          </div>
+        </div>
+
+        <div class="overlay result-overlay hidden" id="resultOverlay">
+          <div class="result-card" id="resultCard">
+            <div class="eyebrow"><span></span> 调度结果</div>
+            <h2 id="resultTitle">任务通过</h2>
+            <p id="resultMessage"></p>
+            <div class="result-stats" id="resultStats"></div>
+            <div class="result-actions">
+              <button id="againBtn" class="primary-btn" type="button">再来一局 <span>↻</span></button>
+              <span class="hint">相同沙盘 · 相同时刻表</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast" aria-live="polite"></div>
+        <div class="canvas-caption">
+          <span><i class="dot blue"></i>蓝隼号</span>
+          <span><i class="dot amber"></i>琥珀号</span>
+          <span class="caption-note">点位为联锁占用区</span>
+        </div>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <section class="panel-section mission-section">
+        <div class="section-head">
+          <h2>运行任务</h2>
+          <span class="section-meta">2 列车 · 各 3 站</span>
+        </div>
+        <div class="train-cards" id="trainCards"></div>
+      </section>
+
+      <section class="panel-section switch-section">
+        <div class="section-head">
+          <h2>道岔控制</h2>
+          <span class="section-meta">点击 / 1–4</span>
+        </div>
+        <div class="switch-board" id="switchBoard"></div>
+      </section>
+
+      <section class="panel-section status-section">
+        <div class="section-head">
+          <h2>调度状态</h2>
+          <span class="clock" id="clock">00:00</span>
+        </div>
+        <div class="status-strip">
+          <div class="status-cell"><span>总停靠</span><strong id="stopTotal">0/6</strong></div>
+          <div class="status-cell"><span>保护停车</span><strong id="stopCount">0</strong></div>
+          <div class="status-cell"><span>轮轨磨损</span><strong id="wearValue">0%</strong></div>
+        </div>
+        <div class="wear-track"><span id="wearBar"></span></div>
+        <div class="log" id="log"></div>
+      </section>
+
+      <footer class="panel-foot">
+        <span class="foot-key">SPACE</span> 暂停
+        <span class="foot-key">1–4</span> 扳道岔
+        <span class="foot-key">R</span> 重开
+      </footer>
+    </aside>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
