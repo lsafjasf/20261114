@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山区灌溉渠 · 闸门调度</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a2430; color: #e8eef4;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px; user-select: none;
+  }
+  h1 { font-size: 20px; margin-bottom: 8px; letter-spacing: 2px; }
+  #stage { position: relative; }
+  canvas { background: #22303f; border-radius: 8px; display: block; }
+  #overlay {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    background: rgba(10, 16, 24, 0.78); border-radius: 8px; text-align: center;
+  }
+  #overlay h2 { font-size: 30px; margin-bottom: 10px; }
+  #overlay p { margin-bottom: 16px; color: #b8c6d4; }
+  #controls {
+    display: flex; gap: 22px; margin-top: 12px; flex-wrap: wrap;
+    justify-content: center; align-items: stretch;
+  }
+  .gate-ctl {
+    background: #263444; border-radius: 8px; padding: 10px 14px;
+    width: 210px; text-align: center;
+  }
+  .gate-ctl label { font-size: 14px; display: block; margin-bottom: 6px; }
+  .gate-ctl input[type=range] { width: 100%; accent-color: #4db2ff; }
+  .gate-ctl .val { font-size: 12px; color: #9fb4c8; margin-top: 4px; }
+  .gate-ctl .keys { font-size: 11px; color: #6c8093; }
+  button {
+    background: #4db2ff; color: #0b1520; border: none; border-radius: 6px;
+    padding: 10px 26px; font-size: 15px; cursor: pointer; font-weight: bold;
+  }
+  button:hover { background: #6cc1ff; }
+  #hint { margin-top: 8px; font-size: 12px; color: #7e93a8; max-width: 960px; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>山区灌溉渠 · 闸门调度</h1>
+  <div id="stage">
+    <canvas id="cv" width="960" height="560"></canvas>
+    <div id="overlay">
+      <h2 id="ovTitle"></h2>
+      <p id="ovText"></p>
+      <button id="ovBtn">再来一局</button>
+    </div>
+  </div>
+  <div id="controls">
+    <div class="gate-ctl">
+      <label>进水闸（山溪 → 干渠）</label>
+      <input id="gIntake" type="range" min="0" max="100" value="0">
+      <div class="val">目标开度 <span id="vIntake">0%</span></div>
+      <div class="keys">按键 Q / A 调节</div>
+    </div>
+    <div class="gate-ctl">
+      <label>分流闸（干渠 → 灌区）</label>
+      <input id="gDivert" type="range" min="0" max="100" value="0">
+      <div class="val">目标开度 <span id="vDivert">0%</span></div>
+      <div class="keys">按键 W / S 调节</div>
+    </div>
+    <div class="gate-ctl">
+      <label>泄洪闸（蓄水池 → 下游）</label>
+      <input id="gSluice" type="range" min="0" max="100" value="0">
+      <div class="val">目标开度 <span id="vSluice">0%</span></div>
+      <div class="keys">按键 E / D 调节</div>
+    </div>
+    <div class="gate-ctl" style="display:flex;align-items:center;justify-content:center;">
+      <button id="btnStart">开始</button>
+    </div>
+  </div>
+  <p id="hint">
+    目标：在时限内让三块田水位进入绿色目标带（采样达标即完成），且蓄水池水位不低于红色最低线。
+    传感器每 2 秒才更新一次读数，闸门动作有惯性；水位超过田埂会冲毁农田，蓄水池漫顶会导致下游溢出。
+    注意山洪预警，必要时开泄洪闸。声音会随闸门开度与流量变化。
+  </p>
+  <script src="sim.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
