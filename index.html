@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>八层小楼电梯调度模拟</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>🛗 八层小楼 · 三部电梯调度模拟</h1>
+    <div class="hud">
+      <div class="hud-item"><span class="hud-label">时间</span><span id="hud-time">0.0s</span></div>
+      <div class="hud-item"><span class="hud-label">送达</span><span id="hud-delivered">0/0</span></div>
+      <div class="hud-item"><span class="hud-label">耗电</span><span id="hud-energy">0 度</span></div>
+      <div class="hud-item"><span class="hud-label">电量预算</span><span id="hud-budget">1600 度</span></div>
+      <div class="hud-item"><span class="hud-label">启停</span><span id="hud-starts">0</span></div>
+      <div class="hud-item warn"><span class="hud-label">投诉</span><span id="hud-complaints">0/3</span></div>
+      <div class="hud-item"><span class="hud-label">最长等待</span><span id="hud-wait">0s</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <canvas id="scene" width="720" height="600"></canvas>
+      <div class="stage-legend" id="legend"></div>
+    </section>
+
+    <aside class="panel">
+      <h2>调度设置（每部梯）</h2>
+      <div id="car-controls"></div>
+
+      <h2>全局</h2>
+      <label class="row">电量预算
+        <input type="number" id="budget-input" value="1600" min="500" step="50">
+      </label>
+      <label class="row">倍速
+        <select id="speed-multiplier">
+          <option value="1">1× 实时</option>
+          <option value="2" selected>2×</option>
+          <option value="4">4×</option>
+          <option value="8">8×</option>
+        </select>
+      </label>
+
+      <div class="buttons">
+        <button id="btn-start" class="primary">开始一局</button>
+        <button id="btn-pause" disabled>暂停</button>
+        <button id="btn-reset">复位</button>
+        <button id="btn-mute">🔊 音效开</button>
+      </div>
+      <div class="buttons">
+        <button id="btn-compare" class="accent">对比两种回位策略</button>
+      </div>
+
+      <div id="result-card" class="result hidden"></div>
+      <div id="compare-card" class="compare hidden"></div>
+    </aside>
+  </main>
+
+  <script src="js/simulation.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
