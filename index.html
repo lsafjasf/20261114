@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>早高峰 · 路口调度</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">✛</div>
+    <div>
+      <div class="brand-sub">TRAFFIC CONTROL / 07:30</div>
+      <h1>早高峰 · 路口调度</h1>
+    </div>
+  </div>
+  <div class="top-right">
+    <span class="pill" id="simStatus"><i class="dot dim"></i>仿真待命</span>
+    <span class="pill">晴 24°C · 通勤峰值</span>
+    <button class="pill btn" id="muteBtn">🔊 声音</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel canvas-panel">
+    <div class="panel-head">
+      <span class="panel-title">⌖ 滨江大道 × 云杉路 <em>四相位</em></span>
+      <span class="legend">
+        <span><i class="dot ok"></i>畅通</span>
+        <span><i class="dot warn"></i>临界</span>
+        <span><i class="dot bad"></i>溢出</span>
+      </span>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="scene" width="1000" height="700"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="ov-sub">SHIFT 01 · 早高峰</div>
+        <div class="ov-title" id="ovTitle">让车流撑过三分钟</div>
+        <div class="ov-desc" id="ovDesc">调整东西向、南北向绿灯时长与黄灯间隔。任何进口排队超过 16 辆，挑战立即失败。</div>
+        <button class="primary" id="ovStart">开始挑战 <kbd>Space</kbd></button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title"><em class="num">01</em>挑战目标</span><span class="tag">早高峰</span></div>
+      <p class="goal-text">维持路口连续运行 <b>180 秒</b>，四个进口排队均不得超过 <b>16 辆</b>。</p>
+      <div class="progress-row"><span>持续时间</span><span id="timeLabel">0 / 180 s</span></div>
+      <div class="progress"><div class="progress-fill" id="timeBar"></div></div>
+      <div class="kv-grid">
+        <div class="kv"><span>到达率</span><b>≈ 3,300 辆/时</b></div>
+        <div class="kv"><span>排队阈值</span><b>16 辆/进口</b></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title"><em class="num">02</em>信号配时</span><span class="tag muted" id="cfgTag">就绪</span></div>
+      <div class="slider-row">
+        <div class="slider-label"><span><i class="dot cyan"></i>东西向绿灯</span><b id="ewVal">32 s</b></div>
+        <input type="range" id="ewGreen" min="12" max="48" step="2" value="32">
+        <div class="ticks"><span>12s</span><span>30s</span><span>48s</span></div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span><i class="dot ok"></i>南北向绿灯</span><b id="nsVal">28 s</b></div>
+        <input type="range" id="nsGreen" min="12" max="48" step="2" value="28">
+        <div class="ticks"><span>12s</span><span>30s</span><span>48s</span></div>
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span><i class="dot warn"></i>黄灯间隔</span><b id="yVal">3 s</b></div>
+        <input type="range" id="yellow" min="2" max="6" step="1" value="3">
+        <div class="ticks"><span>2s</span><span>4s</span><span>6s</span></div>
+      </div>
+      <div class="order-row">
+        <div class="slider-label"><span>轴内左转放行顺序</span><span class="muted">每轴</span></div>
+        <div class="seg">
+          <button id="ordLeft" class="seg-btn active">先左转</button>
+          <button id="ordThru" class="seg-btn">先直行</button>
+        </div>
+      </div>
+      <p class="hint">左转保护相位先放行，随后放行直行与右转。</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title"><em class="num">03</em>进口排队</span><span class="tag warn">阈值 16</span></div>
+      <div class="queues" id="queueList"></div>
+      <div class="passed-row"><span>本轮通过</span><b id="passedVal">0 辆</b></div>
+    </section>
+
+    <button class="primary big" id="startBtn">▶ 开始挑战 <kbd>Space</kbd></button>
+    <div class="btn-row">
+      <button class="ghost" id="resetBtn">重置</button>
+      <button class="ghost accent" id="optBtn">✦ 自动寻优</button>
+    </div>
+    <p class="hint center">提示：切换越频繁，启动损失越大。</p>
+  </aside>
+</main>
+
+<footer class="stats">
+  <div class="stat"><span>剩余时间</span><b id="stTime">03:00</b><em>连续仿真</em></div>
+  <div class="stat"><span>已通过</span><b id="stPassed">0 <small>辆</small></b><em>累计放行</em></div>
+  <div class="stat"><span>平均等待</span><b id="stWait">0.0 <small>s</small></b><em>每辆到达车</em></div>
+  <div class="stat"><span>通行效率</span><b id="stEff">-- <small>%</small></b><em>绿灯利用率</em></div>
+  <div class="stat"><span>本轮状态</span><b id="stState">待命</b><em id="stStateSub">等待发车</em></div>
+</footer>
+
+<script src="src/sim.js"></script>
+<script src="src/render.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
