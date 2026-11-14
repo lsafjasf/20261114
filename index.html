@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>水族馆三缸循环稳定模拟</title>
+<style>
+  body { margin: 0; background: #08151f; color: #dcecf5;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 14px; }
+  h1 { font-size: 18px; margin: 6px 0 10px; font-weight: 600; }
+  canvas { background: #0c1d2b; border: 1px solid #234; border-radius: 10px;
+    width: 100%; height: auto; display: block; }
+  .panel { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px;
+    background: #0f2433; border: 1px solid #1d3a4e; border-radius: 10px; padding: 14px; }
+  .ctrl { min-width: 200px; flex: 1; }
+  .ctrl label { display: block; font-size: 13px; margin-bottom: 4px; color: #9fc3d8; }
+  input[type=range] { width: 100%; }
+  .val { float: right; color: #7fe3a4; font-family: monospace; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+  button, select { background: #173a52; color: #dcecf5; border: 1px solid #2c5d7e;
+    border-radius: 7px; padding: 8px 12px; font-size: 13px; cursor: pointer; }
+  button:hover { background: #1f4d6c; }
+  button.danger { background: #5a2420; border-color: #8a3a33; }
+  .hud { margin-top: 10px; padding: 8px 12px; border-radius: 8px;
+    font-family: monospace; font-size: 13px; }
+  .hud.ok { background: #143526; color: #9fe6b6; }
+  .hud.warn { background: #3c1f1b; color: #ffb0a4; }
+  #log { margin-top: 10px; font-size: 12px; font-family: monospace;
+    max-height: 150px; overflow: hidden; }
+  .ev { padding: 2px 0; border-bottom: 1px solid #16303f; }
+  .ev-sand, .ev-close, .ev-surge, .ev-pressure { color: #ff9a8b; }
+  .ev-win { color: #9fe6b6; }
+  .hint { font-size: 12px; color: #7fa3b8; margin-top: 8px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>水族馆三缸循环系统 · 泵速与潮阀调节</h1>
+  <canvas id="scene" width="980" height="580"></canvas>
+
+  <div class="panel">
+    <div class="ctrl">
+      <label>循环泵速 <span class="val" id="pumpVal">35%</span></label>
+      <input type="range" id="pump" min="0" max="100" value="35">
+      <label style="margin-top:10px">潮阀 1 开度（A→B）<span class="val" id="v1Val">90%</span></label>
+      <input type="range" id="v1" min="0" max="100" value="90">
+      <label style="margin-top:10px">潮阀 2 开度（C→A）<span class="val" id="v2Val">90%</span></label>
+      <input type="range" id="v2" min="0" max="100" value="90">
+    </div>
+    <div class="ctrl">
+      <div class="btns">
+        <button id="autoBtn">开启自动巡航</button>
+        <button id="resetBtn">重置</button>
+        <button id="failBtn" class="danger">细砂失败演示</button>
+        <button id="muteBtn">静音</button>
+        <select id="speedSel">
+          <option value="1">1× 速度</option>
+          <option value="2">2× 速度</option>
+          <option value="4">4× 速度</option>
+        </select>
+      </div>
+      <p class="hint">
+        目标：三缸的水位、盐度、溶氧、浊度同时进入绿色区间并保持 30 秒。<br>
+        泵速超过 75% 会翻起 A 缸细砂，持续 8 秒闭馆；执行器猛拉会引发压力波动并搅起浊度；
+        任一缸指标连续异常 25 秒同样闭馆。建议缓慢调阀、把泵维持在中高区间。
+      </p>
+    </div>
+  </div>
+  <div id="hud" class="hud ok"></div>
+  <div id="log"></div>
+</div>
+<script src="js/sim.js"></script>
+<script src="js/render.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
