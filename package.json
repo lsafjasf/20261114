@@ -1,0 +1,14 @@
+{
+  "name": "filling-line-jam-drill",
+  "version": "1.0.0",
+  "description": "饮料灌装线堵瓶恢复调度演练（Canvas + Web Audio）",
+  "main": "src/sim.js",
+  "scripts": {
+    "test": "node test/sim.test.js",
+    "test:browser": "node test/browser.smoke.js && node test/browser.jam.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.65.1"
+  }
+}

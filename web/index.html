@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>饮料灌装线调度 · 堵瓶恢复演练</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>饮料灌装线 · 堵瓶恢复演练</h1>
+    <div class="hud">
+      <div class="hud-item"><span class="label">成品</span><span id="hud-goods">0/10</span></div>
+      <div class="hud-item"><span class="label">运行时间</span><span id="hud-time">0.0s</span></div>
+      <div class="hud-item"><span class="label">切换次数</span><span id="hud-switches">0</span></div>
+      <div class="hud-item"><span class="label">状态</span><span id="hud-status">运行中</span></div>
+    </div>
+  </header>
+
+  <main>
+    <canvas id="line" width="980" height="520"></canvas>
+
+    <section class="controls">
+      <div class="ctrl-group">
+        <h3>支线 A</h3>
+        <button data-act="pauseA">暂停 A（清堵）</button>
+        <button data-act="resumeA">重启 A</button>
+      </div>
+      <div class="ctrl-group">
+        <h3>支线 B</h3>
+        <button data-act="pauseB">暂停 B（清堵）</button>
+        <button data-act="resumeB">重启 B</button>
+      </div>
+      <div class="ctrl-group">
+        <h3>传送速度</h3>
+        <button data-act="speedSlow">低速 0.6×</button>
+        <button data-act="speedNormal" class="active">常速 1.0×</button>
+        <button data-act="speedFast">高速 1.8×</button>
+      </div>
+      <div class="ctrl-group">
+        <h3>分流器</h3>
+        <button data-act="divA">偏向 A</button>
+        <button data-act="divAuto" class="active">自动均分</button>
+        <button data-act="divB">偏向 B</button>
+      </div>
+      <div class="ctrl-group">
+        <h3>演练</h3>
+        <button data-act="start" id="btn-start">开始 / 继续</button>
+        <button data-act="reset">重新开始</button>
+        <button data-act="mute" id="btn-mute">声音 开</button>
+      </div>
+    </section>
+
+    <section class="brief">
+      <h3>任务说明</h3>
+      <p>两段支线会先后出现堵塞（红色堵点）。<b>不要关闭整条产线</b>：暂停堵塞支线等待清堵，用分流器把流量临时导向另一条支线，
+      重启时先用低速排空缓存再恢复常速。凑齐 <b>10 件成品</b> 且全程无缓存溢出即通过。</p>
+      <p class="warn">每次暂停/重启、变速、分流切换都有启动延迟；频繁切换会累积延迟、拖慢总吞吐。
+      长时间不处理堵塞、或把分流器强行偏向堵塞支线，都会导致溢出失败。</p>
+      <div id="event-log" class="event-log"></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <button data-act="reset">再来一次</button>
+    </div>
+  </div>
+
+  <script src="../src/sim.js"></script>
+  <script src="audio.js"></script>
+  <script src="render.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
