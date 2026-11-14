@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07110f">
+  <title>夜园声景 · Nocturne Garden</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%2307110f'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23e7b76f'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23e7b76f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="夜园声景首页">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span class="brand-copy">
+          <span class="eyebrow">NOCTURNE FIELD / 01</span>
+          <strong>夜园声景</strong>
+        </span>
+      </a>
+
+      <div class="session-meta" aria-label="作品信息">
+        <span class="pulse-dot"></span>
+        <span>六分钟游园</span>
+        <span class="meta-rule"></span>
+        <span>六处感应</span>
+        <span class="meta-rule"></span>
+        <span>全实时合成</span>
+      </div>
+
+      <div class="top-actions">
+        <label class="ghost-btn import-btn" title="导入 JSON 作品">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 3v10m0 0 4-4m-4 4-4-4M4 15v2h12v-2"/>
+          </svg>
+          <span>导入</span>
+          <input id="importJson" type="file" accept=".json,application/json">
+        </label>
+        <button class="ghost-btn" id="exportBtn" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 13V3m0 0-4 4m4-4 4 4M4 11v6h12v-6"/>
+          </svg>
+          <span>保存 JSON</span>
+        </button>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="查看操作说明">?</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stage-panel" aria-label="夜园路径画布">
+        <div class="stage-heading">
+          <div class="stage-title">
+            <span class="section-index">01</span>
+            <span>
+              <strong>听者路径</strong>
+              <small>LISTENER TRAIL</small>
+            </span>
+          </div>
+          <div class="mode-switch" role="group" aria-label="画布模式">
+            <button class="mode-btn is-active" type="button" data-mode="edit">编排</button>
+            <button class="mode-btn" type="button" data-mode="draw">
+              <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 14c3-1 3-7 6-7s2 5 6 3"/></svg>
+              绘路径
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="gardenCanvas" aria-label="夜间花园，显示听者路径、六个感应节点与当前播放位置"></canvas>
+          <div class="canvas-readout">
+            <span><i class="readout-dot"></i><span id="pathStatus">路径 18 锚点</span></span>
+            <span id="canvasHint">拖动节点可微调位置</span>
+          </div>
+          <div class="audio-status" id="audioStatus">
+            <span class="audio-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span id="audioStatusText">静默 · 等待入场</span>
+          </div>
+          <div class="coordinate-mark" aria-hidden="true">31°14′N / 121°28′E</div>
+        </div>
+
+        <div class="stage-legend" aria-label="画布图例">
+          <span><i class="legend-ring"></i>节点感应范围</span>
+          <span><i class="legend-light"></i>当前播放位置</span>
+          <span><i class="legend-sound"></i>合成声触发</span>
+        </div>
+      </section>
+
+      <aside class="inspector" aria-label="节点调音台">
+        <header class="inspector-head">
+          <div>
+            <span class="eyebrow">02 / SENSOR</span>
+            <h2>节点调音</h2>
+          </div>
+          <span class="selection-number" id="selectionNumber">03</span>
+        </header>
+
+        <div class="node-switcher" id="nodeSwitcher" role="tablist" aria-label="选择感应节点"></div>
+
+        <section class="node-editor" aria-live="polite">
+          <div class="node-identity">
+            <span class="node-glyph" id="nodeGlyph" aria-hidden="true">◌</span>
+            <div>
+              <h3 id="nodeName">水影</h3>
+              <p id="nodeType">SINE / WATER MEMORY</p>
+            </div>
+            <span class="reach-badge" id="reachBadge">路径已触及</span>
+          </div>
+
+          <div class="pitch-readout">
+            <span class="pitch-value" id="pitchValue">392.0</span>
+            <span class="pitch-unit">Hz</span>
+            <span class="note-name" id="noteName">G4</span>
+            <svg id="wavePreview" viewBox="0 0 240 42" preserveAspectRatio="none" aria-hidden="true"></svg>
+          </div>
+
+          <div class="control-stack">
+            <label class="control-row" for="pitchRange">
+              <span class="control-label"><span>音高</span><output id="pitchOutput">392 Hz</output></span>
+              <input id="pitchRange" type="range" min="110" max="920" step="1" value="392">
+              <span class="range-ends"><i>低吟</i><i>高鸣</i></span>
+            </label>
+            <label class="control-row" for="delayRange">
+              <span class="control-label"><span>延迟</span><output id="delayOutput">420 ms</output></span>
+              <input id="delayRange" type="range" min="0" max="2400" step="20" value="420">
+              <span class="range-ends"><i>即刻</i><i>回响之后</i></span>
+            </label>
+            <label class="control-row" for="decayRange">
+              <span class="control-label"><span>衰减</span><output id="decayOutput">2.8 s</output></span>
+              <input id="decayRange" type="range" min="0.4" max="8" step="0.1" value="2.8">
+              <span class="range-ends"><i>轻掠</i><i>长留</i></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="density-panel">
+          <div class="density-heading">
+            <span>游园密度</span>
+            <small>SPARSE → DENSE</small>
+          </div>
+          <div class="density-graph" id="densityGraph" aria-label="声景密度从疏到密">
+            <span class="density-caption">疏</span>
+            <span class="density-caption density-caption-end">密</span>
+          </div>
+          <p>前段留白，后段叠响。感应节点依次触发，环境声随游园进程自然加密。</p>
+        </section>
+
+        <footer class="inspector-foot">
+          <span class="tip-icon">i</span>
+          <p>修改会立即写入作品。播放中调整，后续节点将采用新参数。</p>
+        </footer>
+      </aside>
+    </main>
+
+    <footer class="transport">
+      <div class="transport-identity">
+        <button class="play-btn" id="playBtn" type="button" aria-label="播放游园">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+        </button>
+        <span class="transport-copy">
+          <strong id="transportState">准备入场</strong>
+          <small id="transportDetail">按下播放，合成声场将在浏览器内生成</small>
+        </span>
+      </div>
+
+      <div class="timeline-shell">
+        <div class="timeline-meta">
+          <span class="timecode" id="currentTime">00:00</span>
+          <span class="timeline-intro"><i></i> 疏 <b>渐密</b> 密 <i></i></span>
+          <span class="timecode timecode-end">06:00</span>
+        </div>
+        <div class="timeline" id="timeline" role="slider" tabindex="0" aria-label="游园时间线" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0">
+          <div class="density-fill" aria-hidden="true"></div>
+          <div class="timeline-rules" aria-hidden="true"></div>
+          <div class="timeline-events" id="timelineEvents"></div>
+          <div class="playhead" id="playhead"><span></span></div>
+        </div>
+      </div>
+
+      <div class="transport-tools">
+        <span class="volume-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><path d="M3 8v4h3l4 3V5L6 8H3zm8-1c1 .6 1.5 1.7 1.5 3s-.5 2.4-1.5 3"/></svg>
+        </span>
+        <input class="volume-range" id="volumeRange" type="range" min="0" max="1" step="0.01" value="0.72" aria-label="主音量">
+        <button class="tool-btn" id="resetBtn" type="button" title="回到起点">
+          <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 7a5.5 5.5 0 1 0 1.4-4M4 3v4h4"/></svg>
+          <span>归零</span>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="help-dialog" id="helpDialog">
+    <div class="dialog-mark">✳</div>
+    <span class="eyebrow">FIELD NOTES / 操作提示</span>
+    <h2>如何完成一段夜游</h2>
+    <ol>
+      <li><b>画出路径。</b>选择「绘路径」，在画布上按下并拖动，听者会沿这条线穿过花园。</li>
+      <li><b>穿过六处感应。</b>将路径拖过发光的感应圈；未触及的节点不会发声。</li>
+      <li><b>为节点调音。</b>音高决定合成音的核心频率，延迟决定声音比脚步晚多少，衰减决定余响长度。</li>
+      <li><b>完整收听。</b>播放六分钟。前段稀疏，环境声在行进中逐渐加密。</li>
+    </ol>
+    <p>所有声音均由 Web Audio 实时合成，不读取任何音频文件。路径、节点与参数可保存为 JSON 后再次导入。</p>
+    <button class="dialog-close" id="helpClose" type="button">继续游园</button>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
