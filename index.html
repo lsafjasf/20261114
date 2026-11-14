@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070b12" />
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23070b12'/%3E%3Cpath d='M8 24V14h4v10zm6 0V8h4v16zm6 0V18h4v6z' fill='%23fa8752'/%3E%3C/svg%3E"
+  />
+  <meta
+    name="description"
+    content="SELENE-12 月面营地气密房装配模拟器：旋转十二个舱段，接通供电、供氧与人员通行网络。"
+  />
+  <title>SELENE-12 · 月面气密房装配</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="brand-overline">SELENE SURFACE PROGRAM</p>
+          <h1 class="brand-title">HABITAT <span>/12</span></h1>
+        </div>
+      </div>
+      <div class="mission-strip">
+        <span class="mission-code">SITE 7G · MARE SERENITATIS</span>
+        <span class="mission-clock" id="missionClock">T+ 00:00:00</span>
+      </div>
+      <div class="top-actions">
+        <div class="status-chip" id="missionStatus">
+          <i></i><span>装配中</span>
+        </div>
+        <button class="icon-button" type="button" id="guideButton" aria-label="查看任务说明">
+          <span>?</span>
+        </button>
+        <button class="icon-button sound-on" type="button" id="soundButton" aria-label="切换音效">
+          <span id="soundIcon">◖</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="left-rail panel">
+        <section class="mission-card">
+          <div class="section-kicker"><span>01</span> MISSION BRIEF</div>
+          <h2>让一间房<br />在月面活下来</h2>
+          <p>
+            装配十二个互锁舱段。所有舱门接通气密通路，黄色电力管与青色氧气管分别抵达对应接口。
+          </p>
+          <div class="mission-targets">
+            <div><strong>12</strong><span>舱段</span></div>
+            <div><strong>3</strong><span>生命网络</span></div>
+            <div><strong>1</strong><span>启动窗口</span></div>
+          </div>
+        </section>
+
+        <section class="steps-card">
+          <div class="section-kicker"><span>02</span> ASSEMBLY SEQUENCE</div>
+          <ol class="phase-list">
+            <li class="phase active" data-phase="build">
+              <b>01</b><span>旋转并放置舱段</span><em>BUILD</em>
+            </li>
+            <li class="phase" data-phase="resources">
+              <b>02</b><span>核对资源接口</span><em>LOADOUT</em>
+            </li>
+            <li class="phase" data-phase="check">
+              <b>03</b><span>运行连接检查</span><em>LINK TEST</em>
+            </li>
+            <li class="phase" data-phase="launch">
+              <b>04</b><span>启动营地</span><em>ONLINE</em>
+            </li>
+          </ol>
+        </section>
+
+        <section class="resources-card">
+          <div class="section-kicker"><span>03</span> RESOURCE MANIFEST</div>
+          <div class="resource-list" id="resourceList">
+            <div class="resource-row" data-resource="beds">
+              <span class="resource-icon beds"></span>
+              <div><p>床位</p><small>BUNKS</small></div>
+              <strong><span id="bedCount">0</span><i>/ 6</i></strong>
+            </div>
+            <div class="resource-row" data-resource="batteries">
+              <span class="resource-icon batteries"></span>
+              <div><p>电池单元</p><small>POWER CELLS</small></div>
+              <strong><span id="batteryCount">0</span><i>/ 4</i></strong>
+            </div>
+            <div class="resource-row" data-resource="valves">
+              <span class="resource-icon valves"></span>
+              <div><p>空气阀接口</p><small>AIR VALVES</small></div>
+              <strong><span id="valveCount">0</span><i>/ 2</i></strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="network-card">
+          <div class="section-kicker"><span>04</span> LIVE NETWORKS</div>
+          <div class="network-row">
+            <span><i class="net-dot power"></i>供电总线</span><b id="powerState">待装配</b>
+          </div>
+          <div class="network-row">
+            <span><i class="net-dot oxygen"></i>供氧环路</span><b id="oxygenState">待装配</b>
+          </div>
+          <div class="network-row">
+            <span><i class="net-dot seal"></i>气密通路</span><b id="sealState">待装配</b>
+          </div>
+        </section>
+
+        <section class="check-card">
+          <div class="check-heading">
+            <div class="section-kicker"><span>05</span> LINK CHECK</div>
+            <span class="check-badge" id="checkBadge">未执行</span>
+          </div>
+          <p id="checkSummary">完成 12 个模块后执行连接检查。检查失败时仍可继续调整。</p>
+          <button class="text-button" type="button" id="railCheckButton">运行连接检查 <span>↗</span></button>
+        </section>
+      </aside>
+
+      <section class="stage" aria-label="月面营地装配视图">
+        <canvas id="world"></canvas>
+
+        <div class="stage-header">
+          <div class="sector-tag">
+            <span class="sector-crosshair" aria-hidden="true"></span>
+            <div><small>CONSTRUCTION SECTOR</small><strong>7G / AIRTIGHT HABITAT</strong></div>
+          </div>
+          <div class="view-tag">
+            <span>ISO 2:1</span>
+            <span>GRID 5×5</span>
+            <span class="live-dot"></span><span>LIVE</span>
+          </div>
+        </div>
+
+        <div class="legend-strip">
+          <span><i class="legend-line power"></i>电力 P</span>
+          <span><i class="legend-line oxygen"></i>氧气 O</span>
+          <span><i class="legend-hatch"></i>气密舱门</span>
+          <span><i class="legend-blocked"></i>封死接口</span>
+        </div>
+
+        <div class="selection-readout" id="selectionReadout">
+          <span class="readout-index">SELECT</span>
+          <div>
+            <strong id="readoutTitle">从货架选择一个舱段</strong>
+            <small id="readoutDetail">点击模块，再点击网格落位。按 R 旋转。</small>
+          </div>
+          <button type="button" id="clearSelection" aria-label="取消选择">×</button>
+        </div>
+
+        <div class="hint-callout" id="hintCallout" hidden></div>
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+        <aside class="diagnostics-panel" id="diagnosticsPanel" hidden>
+          <div class="diagnostics-head">
+            <div>
+              <small>CONNECTION REPORT</small>
+              <h3 id="diagnosticsTitle">连接检查</h3>
+            </div>
+            <button type="button" id="closeDiagnostics" aria-label="关闭诊断">×</button>
+          </div>
+          <div class="diagnostics-body" id="diagnosticsBody"></div>
+          <div class="diagnostics-foot" id="diagnosticsFoot"></div>
+        </aside>
+
+        <div class="action-dock">
+          <div class="dock-tools">
+            <button class="tool-button" id="rotateLeft" type="button" title="逆时针旋转 [Q]">
+              <span class="tool-glyph">↺</span><small>旋转</small>
+            </button>
+            <button class="tool-button" id="rotateRight" type="button" title="顺时针旋转 [R]">
+              <span class="tool-glyph">↻</span><small>R</small>
+            </button>
+            <span class="dock-separator"></span>
+            <button class="tool-button" id="undoButton" type="button" title="撤销 [Z]">
+              <span class="tool-glyph">↶</span><small>撤销</small>
+            </button>
+            <button class="tool-button" id="removeButton" type="button" title="移除选中模块">
+              <span class="tool-glyph">⌫</span><small>拆卸</small>
+            </button>
+            <button class="tool-button hint-tool" id="hintButton" type="button" title="定位一个建议模块">
+              <span class="tool-glyph">◇</span><small>提示</small>
+            </button>
+            <button class="tool-button" id="resetButton" type="button" title="清除全部模块">
+              <span class="tool-glyph">⟲</span><small>重置</small>
+            </button>
+          </div>
+          <div class="dock-actions">
+            <button class="action-button secondary" id="checkButton" type="button">
+              <span>运行连接检查</span><small>LINK CHECK · 01</small>
+            </button>
+            <button class="action-button primary" id="launchButton" type="button" disabled>
+              <span>启动营地</span><small>FINAL TEST · 02</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="launch-screen" id="launchScreen" hidden>
+          <div class="launch-rings"></div>
+          <small>ALL SYSTEMS NOMINAL</small>
+          <h2>CAMP<br /><span>ONLINE</span></h2>
+          <p>SELENE-12 · 7G 气密房已完成加压与生命保障接入</p>
+          <div class="launch-stats">
+            <div><b>12</b><span>MODULES</span></div>
+            <div><b>6</b><span>BUNKS</span></div>
+            <div><b>100%</b><span>O₂ COVERAGE</span></div>
+          </div>
+          <button class="action-button secondary" id="launchResetButton" type="button">
+            <span>重新装配</span><small>NEW BUILD</small>
+          </button>
+        </div>
+      </section>
+
+      <aside class="right-rail panel">
+        <div class="rack-head">
+          <div>
+            <div class="section-kicker"><span>06</span> MODULE RACK</div>
+            <h2>舱段货架</h2>
+          </div>
+          <div class="rack-count"><b id="rackCount">0</b><span>/ 12</span></div>
+        </div>
+        <div class="rack-filter">
+          <span>ALL UNITS</span><span>点击选择 · 已装模块可重新定位</span>
+        </div>
+        <div class="module-rack" id="moduleRack"></div>
+        <div class="rail-footnote">
+          <span class="footnote-mark">△</span>
+          <p>每种管线只能对接同类型接口。舱门同时保留人员通道，不占用管线路由。</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="modal-backdrop briefing" id="briefingModal" hidden>
+    <section class="modal briefing-modal" role="dialog" aria-modal="true" aria-labelledby="briefingTitle">
+      <div class="modal-grid" aria-hidden="true"></div>
+      <div class="briefing-orbit" aria-hidden="true"><span></span><i></i></div>
+      <div class="modal-kicker">MISSION / SELENE-12</div>
+      <h2 id="briefingTitle">在真空里，<br /><span>接好每一根管。</span></h2>
+      <p class="modal-copy">
+        十二个舱段必须落在同一片气密通路中。供电、供氧和人员通行不能互相堵住，接口朝向错误或舱段被切断都会禁止启动。
+      </p>
+      <div class="briefing-rules">
+        <div><b>01</b><span>选择舱段<br /><small>点击货架</small></span></div>
+        <div><b>02</b><span>旋转落位<br /><small>R / ↻</small></span></div>
+        <div><b>03</b><span>检查启动<br /><small>两道确认</small></span></div>
+      </div>
+      <div class="briefing-footer">
+        <span>建议使用桌面浏览器 · 音效将在进入后启用</span>
+        <button class="action-button primary" id="enterButton" type="button">
+          <span>进入施工区</span><small>BEGIN ASSEMBLY</small>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal-backdrop guide" id="guideModal" hidden>
+    <section class="modal guide-modal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <button class="modal-close" id="closeGuide" type="button" aria-label="关闭">×</button>
+      <div class="modal-kicker">FIELD MANUAL / 7G-04</div>
+      <h2 id="guideTitle">三网装配手册</h2>
+      <div class="guide-grid">
+        <article>
+          <i class="guide-icon power">P</i>
+          <h3>黄色电力管</h3>
+          <p>电源接口必须与电源接口对接。十二个模块都要汇入同一条电池总线。</p>
+        </article>
+        <article>
+          <i class="guide-icon oxygen">O</i>
+          <h3>青色氧气管</h3>
+          <p>所有乘员舱、指挥舱与两只空气阀需连通。氧气管不能接进电源插口。</p>
+        </article>
+        <article>
+          <i class="guide-icon seal">D</i>
+          <h3>气密舱门</h3>
+          <p>任何同类管线对接都会同时打开人员舱门。接口朝外或对着封死舱壁会漏气。</p>
+        </article>
+      </div>
+      <div class="guide-note">
+        <b>装配原则</b>
+        <span>接口朝向决定管线种类；旋转不会改变模块提供的资源数量。检查失败后仍可拆卸、旋转并再次检查。</span>
+      </div>
+      <div class="guide-actions">
+        <button class="text-button" id="loadBlueprintButton" type="button">载入参考蓝图</button>
+        <button class="action-button primary" id="resumeButton" type="button">
+          <span>返回施工</span><small>RESUME BUILD</small>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
