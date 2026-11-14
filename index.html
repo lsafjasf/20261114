@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双人协同舞台灯光</title>
+<style>
+  body { margin: 0; background: #0b0b12; color: #ddd; font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+         display: flex; flex-direction: column; align-items: center; }
+  h1 { font-size: 20px; margin: 12px 0 4px; }
+  #tip { font-size: 13px; color: #999; margin-bottom: 8px; }
+  canvas { background: #101018; border: 1px solid #333; border-radius: 6px; }
+  #panel { display: flex; gap: 24px; margin-top: 10px; font-size: 13px; line-height: 1.8; }
+  #panel b { color: #ffd27f; }
+  .col { background: #16161f; padding: 8px 14px; border-radius: 6px; }
+  kbd { background: #2a2a38; border-radius: 3px; padding: 1px 6px; font-family: inherit; }
+  #btns { margin-top: 10px; }
+  button { background: #2a4d8f; color: #fff; border: 0; border-radius: 5px;
+           padding: 7px 18px; font-size: 14px; cursor: pointer; margin-right: 8px; }
+  button:hover { background: #3560b0; }
+  button.ghost { background: #333; }
+</style>
+</head>
+<body>
+  <h1>双人协同舞台灯光</h1>
+  <div id="tip">两盏灯同时覆盖演员、且色温接近（±250K）才计合格照明；连续 3.5 秒不合格即暗场事故。完成 5 段照明即通过。</div>
+  <canvas id="stage" width="960" height="600"></canvas>
+  <div id="btns">
+    <button id="startBtn">开始演出（双人）</button>
+    <button id="demoBtn" class="ghost">AI 协同演示</button>
+  </div>
+  <div id="panel">
+    <div class="col">
+      <b>左侧玩家 · 控台</b><br>
+      <kbd>W</kbd>/<kbd>S</kbd> 总亮度 ±<br>
+      <kbd>A</kbd>/<kbd>D</kbd> 灯1 色温 −/+<br>
+      <kbd>Q</kbd>/<kbd>E</kbd> 灯2 色温 −/+
+    </div>
+    <div class="col">
+      <b>右侧玩家 · 追光</b><br>
+      <kbd>←</kbd>/<kbd>→</kbd> 目标点移动<br>
+      <kbd>↑</kbd>/<kbd>↓</kbd> 扩散范围 ±<br>
+      注意：猛打方向电机会过热！
+    </div>
+  </div>
+  <script src="game-core.js"></script>
+  <script src="autopilot.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
