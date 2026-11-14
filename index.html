@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>空间站冷却回路 · 交换节点温控训练</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>空间站冷却回路 · 交换节点温控训练</h1>
+      <p class="sub">调节三只阀门与旁路泵，把升温节点压回安全窗口；快关会引发压力尖峰，泵耗电。</p>
+    </div>
+    <div class="phase-badge" id="phaseBadge">待启动</div>
+  </header>
+
+  <main class="layout">
+    <section class="stage">
+      <canvas id="canvas" width="960" height="540"></canvas>
+      <div class="gauges">
+        <div class="gauge" id="gTemp">
+          <span class="g-label">节点温度</span>
+          <span class="g-value"><b id="vTemp">--</b><i>℃</i></span>
+          <span class="g-band" id="bTemp"></span>
+        </div>
+        <div class="gauge" id="gPress">
+          <span class="g-label">回路压力</span>
+          <span class="g-value"><b id="vPress">--</b><i>bar</i></span>
+          <span class="g-band" id="bPress"></span>
+        </div>
+        <div class="gauge" id="gFlow">
+          <span class="g-label">回路流量</span>
+          <span class="g-value"><b id="vFlow">--</b><i>kg/s</i></span>
+          <span class="g-band" id="bFlow"></span>
+        </div>
+        <div class="gauge" id="gBatt">
+          <span class="g-label">备用电力</span>
+          <span class="g-value"><b id="vBatt">--</b><i>%</i></span>
+          <div class="batt"><div id="battFill"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="controls">
+        <h2>操作台</h2>
+        <div class="valves" id="valveControls"></div>
+
+        <label class="pump-row">
+          <span>旁路泵转速 <b id="pumpVal">--</b></span>
+          <input type="range" id="pumpSlider" min="0" max="1" step="0.01" value="0.25" />
+        </label>
+
+        <div class="btn-row">
+          <button id="btnAuto" class="primary">自动演示两个科目</button>
+          <button id="btnSpike">手动注入快关尖峰(V1)</button>
+        </div>
+        <div class="btn-row">
+          <button id="btnStart">开始 / 继续</button>
+          <button id="btnPause">暂停</button>
+          <button id="btnReset">复位</button>
+          <button id="btnSound" class="on">声音 开</button>
+        </div>
+      </div>
+
+      <div class="log-wrap">
+        <h2>事件日志</h2>
+        <ul class="log" id="log"></ul>
+      </div>
+
+      <div class="legend">
+        <span><i class="dot cold"></i>冷</span>
+        <span><i class="dot warm"></i>温</span>
+        <span><i class="dot hot"></i>热</span>
+        <span><i class="dot alarm"></i>越限</span>
+      </div>
+    </aside>
+  </main>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="overlay-card">
+      <h2 id="overlayTitle">任务结束</h2>
+      <p id="overlayText"></p>
+      <button id="overlayReset">再来一次</button>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

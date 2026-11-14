@@ -1,0 +1,10 @@
+{
+  "name": "cooling-loop-trainer",
+  "version": "1.0.0",
+  "description": "空间站冷却回路交换节点温控训练（Canvas + Web Audio 实时仿真）",
+  "type": "module",
+  "scripts": {
+    "test": "node test/run-mission.mjs && node test/no-action-fail.mjs && node test/canvas-smoke.mjs",
+    "serve": "python3 -m http.server 8731"
+  }
+}
