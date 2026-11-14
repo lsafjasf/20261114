@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b12">
+  <title>REFRACT / 折光剧场</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f16'/%3E%3Cpath d='M8 23 16 7l8 16-8-5z' fill='none' stroke='%235ff4e1' stroke-width='1.4'/%3E%3Cpath d='M16 7v16l-8-5' fill='none' stroke='%23ff64d5' stroke-width='1'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="折光剧场首页">
+      <span class="brand-mark" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </span>
+      <span class="brand-copy">
+        <span class="eyebrow">STUDIO 05 / KINETIC OPTICS</span>
+        <span class="brand-title">折光剧场 <em>REFRACT</em></span>
+      </span>
+    </a>
+
+    <div class="session-label" aria-label="当前展演状态">
+      <span class="live-dot"></span>
+      <span>LIVE RAY TRACE</span>
+      <b>05 / 05</b>
+    </div>
+
+    <div class="top-actions">
+      <div class="history-actions" aria-label="历史操作">
+        <button class="icon-btn" id="undoBtn" type="button" title="撤销 (Ctrl+Z)" disabled>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.2 6.1 3.5 9.5l3.7 3.4M3.9 9.5h6.4a5 5 0 0 1 5 5"/></svg>
+          <span class="sr-only">撤销</span>
+        </button>
+        <button class="icon-btn" id="redoBtn" type="button" title="重做 (Ctrl+Shift+Z)" disabled>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.8 6.1 3.7 3.4-3.7 3.4M16.1 9.5H9.7a5 5 0 0 0-5 5"/></svg>
+          <span class="sr-only">重做</span>
+        </button>
+      </div>
+      <button class="export-btn" id="exportBtn" type="button">
+        <span>导出画面</span>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8v9.1m0 0 3.3-3.2M10 11.9 6.7 8.7M4 12.6v3.2c0 .7.6 1.3 1.3 1.3h9.4c.7 0 1.3-.6 1.3-1.3v-3.2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="context-panel">
+      <div class="section-kicker"><span>01</span><span>装置档案</span></div>
+      <div class="object-id">
+        <span>STUDY</span>
+        <strong>03</strong>
+        <span class="object-slash">/05</span>
+      </div>
+      <h2>三层<br>透光构成</h2>
+      <p class="context-desc">五片独立旋转的二向色玻璃围绕隐藏轴心展开。光穿过折射层，在空间后墙上留下实时生成的光谱。</p>
+
+      <div class="layer-legend" aria-label="雕塑色彩层">
+        <div class="legend-item">
+          <span class="legend-swatch magenta"></span>
+          <span><b>L1 · 品红</b><small>背层 / 1 片</small></span>
+          <i>−</i>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch amber"></span>
+          <span><b>L2 · 琥珀</b><small>中层 / 2 片</small></span>
+          <i>−</i>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch cyan"></span>
+          <span><b>L3 · 青蓝</b><small>前层 / 2 片</small></span>
+          <i>−</i>
+        </div>
+      </div>
+
+      <div class="object-meta">
+        <div><span>材质</span><b>DICHROIC GLASS</b></div>
+        <div><span>单元</span><b>05 PANELS</b></div>
+        <div><span>算法</span><b>CANVAS 2D / RT</b></div>
+      </div>
+      <p class="edition">EDITION 01 — GENERATIVE LIGHT STUDY</p>
+    </aside>
+
+    <section class="stage-shell" aria-label="实时折射投影画布">
+      <canvas id="scene" aria-label="五片透明折射雕塑及其墙面投影"></canvas>
+
+      <div class="stage-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="stage-head">
+        <span class="stage-index">FRAME <b id="frameCount">001</b></span>
+        <span class="stage-coordinates" id="lightCoordinates">LIGHT · X 28 / Y 23</span>
+        <span class="stage-badge"><i></i>REAL-TIME</span>
+      </div>
+
+      <div class="warning" id="warning" role="status" aria-live="polite">
+        <span class="warning-icon">!</span>
+        <span id="warningText">投影几乎重叠</span>
+        <button id="warningAction" type="button">自动展开</button>
+      </div>
+
+      <div class="stage-foot">
+        <div class="interaction-hint">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V11m0-.8a1.5 1.5 0 0 1 3 0v2.3m0-1.1a1.5 1.5 0 0 1 3 0v3.1c0 3.4-2.6 6-6 6h-1.2c-2 0-3.4-.7-4.7-2.1L4.6 15a1.5 1.5 0 0 1 2.2-2l1.2 1.2"/></svg>
+          <span>拖动镜片旋转</span>
+        </div>
+        <div class="scale-note"><span>02M</span><i></i><span>WALL PLANE</span></div>
+      </div>
+    </section>
+
+    <aside class="control-panel">
+      <div class="panel-title">
+        <div><span class="section-kicker"><span>02</span><span>光学控制</span></span><h3>塑造光线</h3></div>
+        <button class="reset-btn" id="resetBtn" type="button" title="重置光学参数">RESET</button>
+      </div>
+
+      <section class="control-group" aria-labelledby="lightTitle">
+        <div class="group-heading">
+          <h4 id="lightTitle">光源位置</h4>
+          <output id="positionOutput">28 / 23</output>
+        </div>
+        <label class="range-row">
+          <span>水平 <b>X</b></span>
+          <input id="lightX" type="range" min="8" max="88" value="28" step="1">
+          <output id="lightXOutput">28</output>
+        </label>
+        <label class="range-row">
+          <span>垂直 <b>Y</b></span>
+          <input id="lightY" type="range" min="8" max="58" value="23" step="1">
+          <output id="lightYOutput">23</output>
+        </label>
+        <p class="micro-note">舞台坐标 / 可直接拖动画面中的光源</p>
+      </section>
+
+      <section class="control-group" aria-labelledby="colorTitle">
+        <div class="group-heading">
+          <h4 id="colorTitle">光源色谱</h4>
+          <span class="color-name" id="colorName">暖白</span>
+        </div>
+        <div class="swatch-row" role="group" aria-label="光源颜色">
+          <button class="color-swatch warm active" type="button" data-color="#fff3d2" data-name="暖白" aria-label="暖白" aria-pressed="true"><i></i></button>
+          <button class="color-swatch ice" type="button" data-color="#c9f3ff" data-name="冰蓝" aria-label="冰蓝" aria-pressed="false"><i></i></button>
+          <button class="color-swatch rose" type="button" data-color="#ff9eb4" data-name="玫瑰" aria-label="玫瑰" aria-pressed="false"><i></i></button>
+          <button class="color-swatch lime" type="button" data-color="#d8ffb2" data-name="嫩绿" aria-label="嫩绿" aria-pressed="false"><i></i></button>
+          <label class="color-picker" title="自定义光源颜色">
+            <input id="lightColor" type="color" value="#fff3d2" aria-label="自定义光源颜色">
+            <span>+</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="control-group" aria-labelledby="intensityTitle">
+        <div class="group-heading">
+          <h4 id="intensityTitle">光束浓度</h4>
+          <output id="intensityOutput">72%</output>
+        </div>
+        <label class="range-row wide">
+          <input id="intensity" type="range" min="8" max="100" value="72" step="1">
+        </label>
+        <div class="intensity-scale"><span>THIN 08</span><span>DENSE 100</span></div>
+      </section>
+
+      <section class="control-group angles" aria-labelledby="anglesTitle">
+        <div class="group-heading">
+          <h4 id="anglesTitle">镜片角度</h4>
+          <span class="degree-unit">DEG</span>
+        </div>
+        <div id="angleControls" class="angle-list"></div>
+      </section>
+
+      <footer class="panel-footer">
+        <div class="history-status">
+          <span>HISTORY</span>
+          <b id="historyStatus">01 / 01</b>
+        </div>
+        <p><kbd>CTRL</kbd> + <kbd>Z</kbd> 撤销 <span>·</span> <kbd>SHIFT</kbd> 重做</p>
+      </footer>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
