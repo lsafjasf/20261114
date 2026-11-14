@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b44b32">
+  <meta name="description" content="暖炉面包房：调节醒发箱，安排三批面包入炉。">
+  <title>暖炉面包房 · Proof &amp; Bake</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23a8432c'/%3E%3Cpath d='M15 43c0-14 7-24 17-24s17 10 17 24c0 6-3 8-7 8H22c-4 0-7-2-7-8Z' fill='%23f2cc87'/%3E%3Cpath d='M24 39c4-2 7-6 8-11 1 5 4 9 8 11' fill='none' stroke='%238b4b2e' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="assets/fonts/noto-sans-sc-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/noto-sans-sc-bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/noto-serif-sc-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/noto-serif-sc-bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient-grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="暖炉面包房">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 42 42" role="img">
+          <path d="M8 29c0-10 5-17 13-17s13 7 13 17c0 4-2 6-5 6H13c-3 0-5-2-5-6Z" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M15 26c3-2 5-5 6-9 1 4 3 7 6 9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.2"/>
+          <path d="M11 34h20" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>暖炉面包房</strong>
+        <small>PROOF &amp; BAKE</small>
+      </span>
+    </a>
+
+    <div class="session-strip" aria-label="本次烘焙信息">
+      <div class="session-item">
+        <span>本次用时</span>
+        <strong id="sessionClock">00:00</strong>
+      </div>
+      <div class="session-divider"></div>
+      <div class="session-item">
+        <span>合格出炉</span>
+        <strong><b id="bakedCount">0</b> / 3</strong>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="icon-button" id="soundToggle" type="button" aria-label="关闭声音" aria-pressed="true" title="声音开关">
+        <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z"/>
+          <path d="M16 8.5c1.5 1.8 1.5 5.2 0 7M18.5 6c3 3.2 3 8.8 0 12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.7"/>
+        </svg>
+        <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9v6h4l5 4V5L8 9H4Z"/>
+          <path d="m16 10 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+        </svg>
+      </button>
+      <button class="text-button" id="restartButton" type="button">重新开炉</button>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <section class="stage-card" aria-label="面包房操作画面">
+      <canvas id="gameCanvas" width="1120" height="700" tabindex="0" aria-label="醒发箱中的三批面团与烤炉状态"></canvas>
+      <div class="stage-header">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span id="stageStatus">醒发箱运转中</span>
+        <span class="stage-rule"></span>
+        <span id="environmentSummary">27°C · 76% RH</span>
+      </div>
+      <div class="stage-caption">
+        <span class="caption-icon" aria-hidden="true">✦</span>
+        <span id="stageHint">轻点面团查看状态，等它鼓到刚好再入炉。</span>
+      </div>
+    </section>
+
+    <aside class="control-rail" aria-label="操作面板">
+      <section class="panel environment-panel">
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">PROOFING ROOM</span>
+            <h1>醒发箱</h1>
+          </div>
+          <span class="status-badge" id="climateBadge">舒适</span>
+        </div>
+
+        <div class="climate-readout">
+          <div class="readout-main">
+            <strong id="tempReadout">27</strong><span>°C</span>
+            <small>箱内温度</small>
+          </div>
+          <div class="readout-main">
+            <strong id="humidityReadout">76</strong><span>%</span>
+            <small>相对湿度</small>
+          </div>
+          <div class="activity-orbit" aria-hidden="true">
+            <span id="activityNeedle"></span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="temperatureSlider">
+            <span class="control-label"><i class="temp-swatch"></i>温度</span>
+            <output id="temperatureOutput" for="temperatureSlider">27°C</output>
+          </label>
+          <div class="slider-row">
+            <button class="step-button" type="button" data-step-target="temperature" data-step="-1" aria-label="降低温度">−</button>
+            <input id="temperatureSlider" type="range" min="18" max="36" value="27" step="1">
+            <button class="step-button" type="button" data-step-target="temperature" data-step="1" aria-label="升高温度">+</button>
+          </div>
+          <div class="scale-labels"><span>18° 凉爽</span><span>36° 炎热</span></div>
+        </div>
+
+        <div class="control-group humidity-group">
+          <label for="humiditySlider">
+            <span class="control-label"><i class="humidity-swatch"></i>湿度</span>
+            <output id="humidityOutput" for="humiditySlider">76%</output>
+          </label>
+          <div class="slider-row">
+            <button class="step-button" type="button" data-step-target="humidity" data-step="-1" aria-label="降低湿度">−</button>
+            <input id="humiditySlider" type="range" min="55" max="95" value="76" step="1">
+            <button class="step-button" type="button" data-step-target="humidity" data-step="1" aria-label="升高湿度">+</button>
+          </div>
+          <div class="scale-labels"><span>55% 干燥</span><span>95% 湿润</span></div>
+        </div>
+
+        <p class="climate-note" id="climateNote">温暖湿润，酵母正舒展。留意每批面团的节奏。</p>
+      </section>
+
+      <section class="panel batch-panel">
+        <div class="panel-heading compact">
+          <div>
+            <span class="eyebrow">THREE BATCHES</span>
+            <h2>面团队列</h2>
+          </div>
+          <span class="queue-count">3 批</span>
+        </div>
+        <div class="batch-list" id="batchList"></div>
+      </section>
+
+      <section class="panel oven-panel" id="ovenPanel">
+        <div class="oven-heading">
+          <div>
+            <span class="eyebrow">DECK OVEN</span>
+            <h2>石窑烤炉</h2>
+          </div>
+          <span class="oven-state" id="ovenState">空闲</span>
+        </div>
+        <div class="oven-progress-row">
+          <div class="oven-progress" aria-hidden="true"><span id="ovenProgressBar"></span></div>
+          <strong id="ovenCountdown">—</strong>
+        </div>
+        <div class="oven-meta">
+          <span id="ovenMeta">一次只放一批</span>
+          <button class="bake-button" id="bakeButton" type="button" disabled>
+            <span>送入烤炉</span>
+            <kbd>空格</kbd>
+          </button>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+  <div class="overlay" id="startOverlay">
+    <div class="overlay-card intro-card">
+      <span class="card-stamp">今日订单 · 3 批</span>
+      <p class="eyebrow">A SMALL BAKERY STORY</p>
+      <h2>让每一团面<br>在最好的时候入炉</h2>
+      <p class="lead">温度与湿度会改变发酵速度。第一批先熟，烤炉一次只容得下一批，出炉后还要回温。别让任何一批错过窗口。</p>
+      <div class="intro-steps">
+        <span><b>01</b> 调节温湿度</span>
+        <span><b>02</b> 观察气泡与体积</span>
+        <span><b>03</b> 恰好时入炉</span>
+      </div>
+      <button class="primary-button" id="startButton" type="button">
+        <span>开始醒发</span>
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>
+      </button>
+      <small class="sound-note">建议开启声音 · 环境音与计时由 Web Audio 生成</small>
+    </div>
+  </div>
+
+  <div class="overlay is-hidden" id="resultOverlay">
+    <div class="overlay-card result-card" id="resultCard">
+      <span class="result-seal" id="resultSeal" aria-hidden="true">✓</span>
+      <p class="eyebrow" id="resultEyebrow">ALL BAKED</p>
+      <h2 id="resultTitle">三炉皆成</h2>
+      <p class="lead" id="resultMessage"></p>
+      <div class="result-stats" id="resultStats"></div>
+      <div class="result-actions">
+        <button class="primary-button" id="playAgainButton" type="button">再烤一炉</button>
+        <button class="secondary-button" id="inspectButton" type="button">看看成品</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/audio.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/renderer.js" defer></script>
+  <script src="js/game.js" defer></script>
+</body>
+</html>
