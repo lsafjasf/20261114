@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>缓动曲线对比工作台</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background: #f4f6fa;
+      color: #2b3140;
+    }
+    header {
+      padding: 14px 22px;
+      background: #232a3d;
+      color: #fff;
+    }
+    header h1 { margin: 0; font-size: 18px; }
+    header p { margin: 4px 0 0; font-size: 12px; color: #aeb7c9; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(380px, 5fr) minmax(360px, 4fr) 280px;
+      gap: 14px;
+      padding: 14px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(20, 30, 60, 0.08);
+    }
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #4a5468;
+      border-bottom: 1px solid #eef0f5;
+      padding-bottom: 6px;
+    }
+    canvas {
+      width: 100%;
+      display: block;
+      border-radius: 6px;
+      background: #fbfcfe;
+    }
+    #curveCanvas { height: 320px; touch-action: none; }
+    #trackCanvas { height: 150px; }
+    .graph { height: 170px; margin-bottom: 10px; }
+    label { font-size: 12px; display: block; margin: 8px 0 3px; color: #5a6478; }
+    select, input[type=text] {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #d3d8e3;
+      border-radius: 6px;
+      font-size: 12px;
+      background: #fff;
+    }
+    button {
+      margin: 6px 4px 0 0;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #3a6df0;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button:hover { background: #2c58cc; }
+    button.mini { padding: 2px 8px; font-size: 11px; background: #8a93a5; }
+    button.mini:hover { background: #6c7585; }
+    .check {
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .check.ok { background: #e7f6ec; color: #1e7a3c; }
+    .check.bad { background: #fdeaea; color: #b03030; }
+    ul { margin: 6px 0; padding-left: 16px; font-size: 12px; max-height: 150px; overflow: auto; }
+    li { margin-bottom: 4px; }
+    .hint { font-size: 11px; color: #8a93a5; margin-top: 6px; line-height: 1.6; }
+    #pointReadout { font-size: 11px; color: #5a6478; margin-top: 6px; font-family: monospace; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; margin-top: 6px; }
+    .legend span { display: inline-flex; align-items: center; gap: 4px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>缓动曲线对比工作台</h1>
+    <p>五种内置缓动 + 可拖拽自定义贝塞尔曲线；Canvas 实时求解绘制，无预录动画</p>
+  </header>
+
+  <div class="layout">
+    <div class="panel">
+      <h2>曲线编辑区（拖动橙色控制点，实时重算）</h2>
+      <canvas id="curveCanvas"></canvas>
+      <div class="legend" id="legend"></div>
+      <div id="pointReadout"></div>
+      <h2 style="margin-top:14px">小球运动轨道（主曲线实心球 / 对比曲线虚影球）</h2>
+      <canvas id="trackCanvas"></canvas>
+    </div>
+
+    <div class="panel">
+      <h2>位移图 s(u)</h2>
+      <canvas id="dispCanvas" class="graph"></canvas>
+      <h2>速度图 ds/du</h2>
+      <canvas id="velCanvas" class="graph"></canvas>
+      <h2>加速度图 d²s/du²</h2>
+      <canvas id="accCanvas" class="graph"></canvas>
+      <div id="continuity" class="check">检测中…</div>
+    </div>
+
+    <div class="panel">
+      <h2>曲线选择与播放</h2>
+      <label>主驱动曲线</label>
+      <select id="driverSelect"></select>
+      <label>对比曲线</label>
+      <select id="compareSelect"></select>
+      <button id="playSingleBtn">播放单条</button>
+      <button id="playBtn">继续</button>
+      <button id="pauseBtn">暂停</button>
+      <button id="resetBtn">复位</button>
+
+      <h2 style="margin-top:14px">保存预设</h2>
+      <label>预设名称（保存当前自定义控制点）</label>
+      <input type="text" id="presetName" placeholder="例如：回弹感弱加速">
+      <button id="savePresetBtn">保存预设</button>
+      <ul id="presetList"></ul>
+
+      <h2 style="margin-top:14px">时间线（上传曲线片段重复使用）</h2>
+      <button id="uploadTimelineBtn">上传当前曲线</button>
+      <button id="playTimelineBtn">播放时间线</button>
+      <button id="clearTimelineBtn">清空</button>
+      <ul id="timelineList"></ul>
+      <div id="timelineInfo" class="hint"></div>
+      <p class="hint">提示：拖拽控制点后主曲线自动切换为“自定义”；所有数值均在每帧由贝塞尔方程实时求解。</p>
+    </div>
+  </div>
+
+  <script src="js/easing.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    (function () {
+      var colors = {
+        linear: '#8a93a5', ease: '#7b61ff', easeIn: '#d64545',
+        easeOut: '#2e8b57', easeInOut: '#1f78b4', custom: '#e08214'
+      };
+      var names = {
+        linear: 'Linear', ease: 'Ease', easeIn: 'EaseIn',
+        easeOut: 'EaseOut', easeInOut: 'EaseInOut', custom: '自定义'
+      };
+      var legend = document.getElementById('legend');
+      Object.keys(names).forEach(function (key) {
+        var span = document.createElement('span');
+        span.innerHTML = '<i class="dot" style="background:' + colors[key] + '"></i>' + names[key];
+        legend.appendChild(span);
+      });
+    })();
+  </script>
+</body>
+</html>
