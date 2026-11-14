@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111d">
+  <title>冰芯计划 · 双人钻探</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div>
+        <b>POLAR / DRILL</b>
+        <small>冰芯计划 · RIG 07</small>
+      </div>
+    </div>
+    <div class="mission-id">
+      <span class="live-dot"></span>
+      <span id="modeLabel">双人协作</span>
+      <em>N 78°13' / E 015°38'</em>
+    </div>
+    <div class="top-actions">
+      <button class="text-button" id="modeButton" type="button">单人调试 <kbd>P</kbd></button>
+      <button class="icon-button" id="audioButton" type="button" aria-label="切换声音">
+        <span class="audio-icon" aria-hidden="true">◖</span>
+        <span id="audioText">声音开</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="rig-shell">
+    <aside class="operatorPanel left-panel" aria-label="一号玩家下压控制">
+      <div class="operator-heading">
+        <span class="operator-number">01</span>
+        <div><small>左位操作员</small><h2>下压力</h2></div>
+      </div>
+      <p class="operator-copy">控制钻头咬冰的力度。压力过高而转速不足，会让钻头卡死。</p>
+
+      <div class="readout pressure-readout">
+        <span>FORCE</span>
+        <strong id="pressureValue">0</strong><em>kN</em>
+      </div>
+      <div class="meter pressure-meter" aria-hidden="true">
+        <span class="meter-safe"></span>
+        <i id="pressureBar"></i>
+      </div>
+      <div class="meter-scale"><span>0</span><span>安全区</span><span>100</span></div>
+
+      <div class="control-cluster">
+        <button class="hold-button" data-hold="pressureUp" type="button">
+          <kbd class="duo-key">A</kbd><kbd class="solo-key">W</kbd><span>加压</span>
+        </button>
+        <button class="hold-button" data-hold="pressureDown" type="button">
+          <kbd class="duo-key">Z</kbd><kbd class="solo-key">S</kbd><span>泄压</span>
+        </button>
+      </div>
+      <div class="operator-tip"><span class="tip-pulse"></span> 按住持续调节</div>
+    </aside>
+
+    <section class="stage">
+      <div class="stage-heading">
+        <div>
+          <span class="eyebrow">DRILL CORE / ICE DESCENT</span>
+          <h1>穿越冰层</h1>
+        </div>
+        <div class="mission-stats">
+          <span><small>目标深度</small><b>330<em>m</em></b></span>
+          <span><small>作业计时</small><b id="elapsedValue">00:00</b></span>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="drillCanvas" width="900" height="720" aria-label="冰层钻探实时画面"></canvas>
+        <div class="scanlines" aria-hidden="true"></div>
+        <div class="stage-corner top-left" aria-hidden="true"></div>
+        <div class="stage-corner top-right" aria-hidden="true"></div>
+        <div class="stage-corner bottom-left" aria-hidden="true"></div>
+        <div class="stage-corner bottom-right" aria-hidden="true"></div>
+
+        <div class="debug-panel" id="debugPanel" hidden>
+          <div class="debug-title"><span>SOLO / TELEMETRY</span><b>调试模式</b></div>
+          <dl>
+            <div><dt>PHASE</dt><dd id="debugPhase">ready</dd></div>
+            <div><dt>DEPTH</dt><dd id="debugDepth">0.0 m</dd></div>
+            <div><dt>FORCE</dt><dd id="debugForce">18%</dd></div>
+            <div><dt>RPM</dt><dd id="debugRpm">12%</dd></div>
+            <div><dt>LOAD</dt><dd id="debugLoad">0.00</dd></div>
+            <div><dt>AUDIO</dt><dd id="debugAudio">off</dd></div>
+            <div><dt>KEYS</dt><dd id="debugKeys">none</dd></div>
+          </dl>
+        </div>
+
+        <div class="intro-card" id="introCard">
+          <span class="intro-kicker">TEAM RIG 07 / BRIEFING</span>
+          <h2>两个人，<br><span>一条冰道。</span></h2>
+          <p>协同控制下压力、转速与排屑，钻穿三层不同密度的冰层。卡钻持续 5 秒或钻头过热，任务立即中止。</p>
+          <div class="role-brief">
+            <span><b>左位</b> 下压力 A / Z</span>
+            <span><b>右位</b> 转速 ↑ / ↓</span>
+            <span><b>右位</b> 排屑 空格</span>
+          </div>
+          <button class="start-button" id="startButton" type="button">
+            <span>开始钻探</span><i aria-hidden="true">↘</i>
+          </button>
+          <small class="intro-foot">建议：先升转速，再轻压入冰 · 声音会在首次交互后开启</small>
+        </div>
+
+        <div class="result-card" id="resultCard" hidden>
+          <span class="result-kicker" id="resultKicker">BOREHOLE COMPLETE</span>
+          <h2 id="resultTitle">冰层贯穿</h2>
+          <p id="resultCopy">三层冰芯全部通过。</p>
+          <div class="result-grid">
+            <span><small>最终深度</small><b id="resultDepth">330.0 m</b></span>
+            <span><small>作业用时</small><b id="resultTime">00:00</b></span>
+            <span><small>最高温度</small><b id="resultTemp">0 °C</b></span>
+          </div>
+          <button class="start-button" id="retryButton" type="button">
+            <span>再次钻探</span><i aria-hidden="true">↻</i>
+          </button>
+        </div>
+      </div>
+      <div class="stage-status">
+        <span class="status-signal" id="statusSignal"></span>
+        <b id="statusText">系统待命</b>
+        <span id="statusHint">等待双人操作</span>
+        <em id="fpsValue">60 FPS</em>
+      </div>
+    </section>
+
+    <aside class="operatorPanel right-panel" aria-label="二号玩家转速与排屑控制">
+      <div class="operator-heading">
+        <span class="operator-number">02</span>
+        <div><small>右位操作员</small><h2>转速 / 排屑</h2></div>
+      </div>
+      <p class="operator-copy">维持钻头转速，并持续排走冰屑。积屑会迅速抬升钻头温度。</p>
+
+      <div class="readout rpm-readout">
+        <span>ROTATION</span>
+        <strong id="rpmValue">0</strong><em>rpm</em>
+      </div>
+      <div class="rpm-ticks" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <div class="control-cluster rpm-controls">
+        <button class="hold-button" data-hold="rpmUp" type="button">
+          <kbd>↑</kbd><span>加速</span>
+        </button>
+        <button class="hold-button" data-hold="rpmDown" type="button">
+          <kbd>↓</kbd><span>减速</span>
+        </button>
+      </div>
+
+      <div class="chip-header"><span>CHIP CLEARANCE</span><b id="chipLabel">稳定</b></div>
+      <div class="chip-meter"><i id="chipBar"></i></div>
+      <button class="clear-button" data-hold="clear" type="button">
+        <kbd>SPACE</kbd><span>启动排屑泵</span><i class="clear-light"></i>
+      </button>
+      <div class="operator-tip"><span class="tip-pulse right"></span> 排屑时保持转速</div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>ICE CORE PROGRAM · 2026</span>
+    <span id="footerHint">左位 A/Z 下压 · 右位 ↑/↓ 转速 · 空格排屑</span>
+    <span>LATENCY 12ms</span>
+  </footer>
+
+  <script src="game.js" defer></script>
+</body>
+</html>
