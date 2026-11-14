@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>走廊监听 · 声源辨向</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>走廊监听 · 声源辨向</h1>
+    <p class="hint">三间相邻房间中藏有一个声源。你只能看到电平表，戴上耳机，用左右声道判断方向。</p>
+
+    <section id="listen-panel">
+      <div class="meters">
+        <div class="meter">
+          <span class="ch">L</span>
+          <div class="bar"><div id="meter-l" class="fill"></div></div>
+        </div>
+        <div class="meter">
+          <span class="ch">R</span>
+          <div class="bar"><div id="meter-r" class="fill"></div></div>
+        </div>
+      </div>
+
+      <div class="position">
+        <label for="pos-slider">监听位置（沿走廊移动）<span id="pos-val">0.0 m</span></label>
+        <input id="pos-slider" type="range" min="-4" max="4" step="0.1" value="0" disabled>
+      </div>
+
+      <div class="dirs" role="radiogroup" aria-label="方向选择">
+        <button type="button" data-dir="front-left" disabled>左前</button>
+        <button type="button" data-dir="front-right" disabled>右前</button>
+        <button type="button" data-dir="back-left" disabled>左后</button>
+        <button type="button" data-dir="back-right" disabled>右后</button>
+      </div>
+
+      <div class="actions">
+        <button id="start-btn" type="button">开始监听</button>
+        <button id="submit-btn" type="button" disabled>提交方向</button>
+      </div>
+      <p id="status">点击「开始监听」激活音频。</p>
+    </section>
+
+    <section id="reveal" hidden>
+      <h2 id="result"></h2>
+      <canvas id="plan" width="560" height="440"></canvas>
+      <p id="reveal-note"></p>
+      <button id="next-btn" type="button">下一轮</button>
+    </section>
+  </main>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

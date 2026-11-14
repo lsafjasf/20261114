@@ -1,0 +1,81 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: #14171c;
+  color: #e6e9ee;
+  display: flex;
+  justify-content: center;
+  padding: 24px 12px;
+}
+
+main { width: 620px; max-width: 100%; }
+
+h1 { font-size: 22px; margin: 0 0 6px; }
+.hint { color: #9aa4b2; font-size: 13px; margin: 0 0 18px; }
+
+section {
+  background: #1d2129;
+  border: 1px solid #2c3340;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.meters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.meter { display: flex; align-items: center; gap: 10px; }
+.ch { width: 18px; font-weight: 700; color: #8fd0ff; }
+.bar {
+  flex: 1;
+  height: 18px;
+  background: #0d0f13;
+  border: 1px solid #2c3340;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2fbf71, #e8d44d 70%, #e05555 95%);
+  transition: width 40ms linear;
+}
+
+.position { margin-bottom: 18px; }
+.position label { display: block; font-size: 14px; margin-bottom: 8px; }
+#pos-val { color: #8fd0ff; margin-left: 8px; font-variant-numeric: tabular-nums; }
+#pos-slider { width: 100%; }
+
+.dirs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.dirs button {
+  padding: 12px 0;
+  font-size: 15px;
+  background: #262c38;
+  color: #e6e9ee;
+  border: 1px solid #39414f;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.dirs button.selected { background: #2f6fb2; border-color: #5aa2e8; }
+.dirs button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.actions { display: flex; gap: 10px; }
+.actions button, #next-btn {
+  padding: 10px 22px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #39414f;
+  background: #2f6fb2;
+  color: #fff;
+  cursor: pointer;
+}
+.actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+#start-btn { background: #276c46; }
+
+#status { color: #9aa4b2; font-size: 13px; margin: 12px 0 0; }
+
+#result { margin: 0 0 12px; font-size: 20px; }
+#result.ok { color: #58d68d; }
+#result.bad { color: #e05555; }
+#plan { width: 100%; background: #10131a; border-radius: 8px; }
+#reveal-note { color: #9aa4b2; font-size: 13px; }
