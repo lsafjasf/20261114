@@ -1,0 +1,15 @@
+{
+  "name": "rain-terrain-24h",
+  "version": "1.0.0",
+  "description": "A fixed 24-hour rainfall sample rendered as an explorable Web Audio and Canvas soundscape.",
+  "scripts": {
+    "test": "node tests/e2e.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "serve": "python3 -m http.server 8000"
+  },
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "playwright-core": "^1.65.1"
+  }
+}

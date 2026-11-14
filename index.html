@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071414" />
+    <meta
+      name="description"
+      content="将固定二十四小时雨量样例映射为可探索、可标记的实时合成声音地形。"
+    />
+    <title>雨声地形 / 24H</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <p class="eyebrow">SONIC HYDROMET · LC-07</p>
+            <h1>雨声地形 <span>/ 24H</span></h1>
+          </div>
+        </div>
+        <div class="session-meta" aria-label="数据概况">
+          <div><span>流域</span><strong>澜川 / LC-07</strong></div>
+          <div><span>采样</span><strong>48 × 30 MIN</strong></div>
+          <div><span>样例</span><strong>FIXED · 11.14</strong></div>
+        </div>
+        <button id="muteBtn" class="round-button" type="button" aria-label="静音" title="静音">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+            <path class="sound-wave" d="M16 8.2a5 5 0 0 1 0 7.6M18.7 5.5a9 9 0 0 1 0 13" />
+          </svg>
+        </button>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-card" aria-label="实时雨量声音地形">
+          <canvas id="terrainCanvas"></canvas>
+          <div class="stage-vignette" aria-hidden="true"></div>
+          <div class="stage-head">
+            <div class="live-badge"><i></i><span>CODE-SYNTH LIVE</span></div>
+            <div class="stage-clock">
+              <span id="bigClock">00:00</span>
+              <small>DAY 01 / 24H</small>
+            </div>
+          </div>
+          <div class="layer-label layer-clouds">云层密度 <b id="cloudLabel">00</b></div>
+          <div class="layer-label layer-river">河道亮度 <b id="riverLabel">00</b></div>
+          <div class="layer-label layer-city">城市照度 <b id="cityLabel">00</b></div>
+          <div class="stage-foot">
+            <div class="field-readouts">
+              <div><span>RAIN</span><strong id="stageRain">0.0</strong><small>mm/h</small></div>
+              <div><span>VOLUME</span><strong id="stageVolume">0</strong><small>%</small></div>
+              <div><span>PAN</span><strong id="stagePan">C</strong><small>L / R</small></div>
+              <div><span>THUNDER</span><strong id="stageThunder">—</strong><small>PULSE</small></div>
+            </div>
+            <div class="wind-readout">
+              <div class="wind-dial" aria-hidden="true">
+                <span>N</span><i id="windArrow"></i>
+              </div>
+              <div><span>WIND</span><strong id="windText">000° NE</strong></div>
+            </div>
+          </div>
+          <div class="stage-hint" id="stageHint">
+            <span class="pointer-mark" aria-hidden="true"></span><span>拖动播放头 · 点击异常窗口标记</span>
+            <span class="hint-divider" aria-hidden="true"></span>
+            <kbd>SPACE</kbd><span>播放 / 暂停</span><kbd>←</kbd><kbd>→</kbd><span>微调</span>
+          </div>
+        </section>
+
+        <aside class="inspector" aria-label="声景检查器">
+          <section class="inspector-block current-block">
+            <div class="block-title">
+              <h2>当前声场</h2>
+              <span class="status-dot"><i></i>SYNC</span>
+            </div>
+            <div class="hero-intensity">
+              <span id="heroRain">0.0</span><small>mm/h</small>
+              <b id="rainTag">小雨</b>
+            </div>
+            <p class="condition" id="conditionText">薄云下的稳定细雨，声场靠近中央。</p>
+            <div class="signal-row">
+              <div class="signal-copy"><span>雨强 → 音量</span><b id="volumeValue">0%</b></div>
+              <div class="meter"><i id="volumeMeter"></i></div>
+            </div>
+            <div class="signal-row">
+              <div class="signal-copy"><span>风向 → 声像</span><b id="panValue">C</b></div>
+              <div class="pan-scale"><i class="pan-marker" id="panMarker"></i></div>
+              <div class="scale-labels"><span>L</span><span>C</span><span>R</span></div>
+            </div>
+            <div class="twin-stats">
+              <div><span>云层</span><strong id="cloudValue">0%</strong><i><b id="cloudMeter"></b></i></div>
+              <div><span>城市</span><strong id="cityValue">0%</strong><i><b id="cityMeter"></b></i></div>
+            </div>
+          </section>
+
+          <section class="inspector-block anomaly-block">
+            <div class="block-title">
+              <h2>异常时段</h2>
+              <span id="markerCount">0 / 3 疑点</span>
+            </div>
+            <p class="block-help">点击异常窗口，跳转并留下疑点标记。</p>
+            <div class="anomaly-list" id="anomalyList"></div>
+          </section>
+
+          <section class="inspector-block marker-block">
+            <div class="block-title">
+              <h2>疑点记录</h2>
+              <button id="clearMarkersBtn" type="button" class="text-button" disabled>清除</button>
+            </div>
+            <ul class="marker-list" id="markerList" aria-live="polite"></ul>
+            <p class="empty-markers" id="emptyMarkers">尚无标记。异常窗口会在时间轴上发光。</p>
+          </section>
+
+          <section class="inspector-block key-block">
+            <div class="key-row"><span class="key-rain"></span><span>雨量 / 音量</span></div>
+            <div class="key-row"><span class="key-pan"></span><span>风向 / 声像</span></div>
+            <div class="key-row"><span class="key-storm"></span><span>雷暴 / 短脉冲</span></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="transport" aria-label="播放控制与时间轴">
+        <div class="transport-controls">
+          <button id="playBtn" type="button" class="play-button" aria-label="播放">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" /></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM14 5h4v14h-4z" /></svg>
+          </button>
+          <button id="rewindBtn" type="button" class="transport-button" aria-label="回到零点">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M19 6l-9 6 9 6V6Z" /></svg>
+          </button>
+          <button id="playheadButton" type="button" class="transport-button" aria-label="在当前时刻添加疑点">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h9l4 4v12H6V4Z" /><path d="M9 12h7M12.5 8.5v7" /></svg>
+          </button>
+          <button id="speedBtn" type="button" class="speed-button" aria-label="播放速度">1.0×</button>
+        </div>
+
+        <div class="timeline-panel">
+          <div class="timeline-meta">
+            <div><span>24H 雨量地形 · 拖动播放头</span><b id="timelineReadout">00:00 / 24:00</b></div>
+            <div class="timeline-legend"><i></i>雨强 <i></i>雷暴 <i></i>异常窗口</div>
+          </div>
+          <div
+            id="timelineFrame"
+            class="timeline-frame"
+            role="slider"
+            tabindex="0"
+            aria-label="二十四小时播放头"
+            aria-valuemin="0"
+            aria-valuemax="1440"
+            aria-valuenow="0"
+            aria-valuetext="00:00"
+          >
+            <canvas id="timelineCanvas"></canvas>
+            <div class="playhead" id="playhead"><span></span></div>
+            <div class="marker-pins" id="markerPins"></div>
+            <div class="timeline-cursor" id="timelineCursor"></div>
+            <div class="timeline-labels" aria-hidden="true">
+              <span>00</span><span>04</span><span>08</span><span>12</span><span>16</span><span>20</span><span>24</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="transport-side">
+          <span>SPEED</span>
+          <strong id="speedValue">1.0×</strong>
+          <small>24H / 96S</small>
+        </div>
+        <div class="statusbar">
+          <span id="engineStatus"><i></i>音频待启动</span>
+          <span>雨强控音量 · 风向控声像 · 雷暴短脉冲</span>
+          <span id="syncStatus">FRAME SYNC · 0.0 ms</span>
+        </div>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
