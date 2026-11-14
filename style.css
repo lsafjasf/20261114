@@ -1,0 +1,116 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #10151d;
+  color: #e8edf4;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 18px;
+  background: #18202c;
+  border-bottom: 1px solid #2a3546;
+}
+
+.topbar h1 { font-size: 18px; margin: 0; flex: 0 0 auto; }
+
+.front-switch { display: flex; gap: 6px; }
+
+.front-btn, .tool-btn {
+  padding: 6px 14px;
+  border: 1px solid #3a4a61;
+  border-radius: 6px;
+  background: #223046;
+  color: #cfe0f5;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.front-btn.active { background: #2f6fd0; border-color: #5b93e8; color: #fff; }
+.tool-btn[aria-pressed="true"] { background: #7a4fd0; border-color: #a07fe8; color: #fff; }
+.tool-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.tools { margin-left: auto; display: flex; gap: 8px; }
+
+.layout {
+  display: flex;
+  gap: 16px;
+  padding: 16px 18px;
+  align-items: flex-start;
+}
+
+.canvas-wrap { position: relative; flex: 0 0 auto; }
+
+#section {
+  display: block;
+  background: #0c1118;
+  border: 1px solid #2a3546;
+  border-radius: 8px;
+  cursor: crosshair;
+}
+
+.probe-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 6px 10px;
+  background: rgba(12, 18, 28, 0.88);
+  border: 1px solid #3a4a61;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.hint { margin: 8px 2px 0; font-size: 12px; color: #8fa1b8; }
+
+.panel {
+  flex: 1 1 260px;
+  min-width: 240px;
+  background: #18202c;
+  border: 1px solid #2a3546;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.panel h2 { font-size: 15px; margin: 0 0 12px; }
+
+.point-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+  color: #9fb2c9;
+}
+
+.point-meta strong { color: #fff; font-variant-numeric: tabular-nums; }
+
+.readout {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout th, .readout td {
+  padding: 7px 6px;
+  text-align: right;
+  border-bottom: 1px solid #263144;
+}
+
+.readout th:first-child, .readout td:first-child { text-align: left; }
+.readout thead th { color: #8fa1b8; font-weight: 600; }
+
+.selection-info {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #8fa1b8;
+  border-top: 1px dashed #2a3546;
+  padding-top: 10px;
+}

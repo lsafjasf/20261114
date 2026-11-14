@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>锋面剖面交互分析</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>锋面剖面交互分析</h1>
+  <div class="front-switch" role="group" aria-label="锋面类型">
+    <button class="front-btn active" data-front="warm">暖锋</button>
+    <button class="front-btn" data-front="cold">冷锋</button>
+    <button class="front-btn" data-front="stationary">静止锋</button>
+  </div>
+  <div class="tools">
+    <button id="selectModeBtn" class="tool-btn" aria-pressed="false">选区模式</button>
+    <button id="exportBtn" class="tool-btn" disabled>导出 PNG</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="canvas-wrap">
+    <canvas id="section" width="880" height="560"></canvas>
+    <div id="probeChip" class="probe-chip" aria-live="polite"></div>
+    <p class="hint">拖动剖面查看三层大气参数；开启“选区模式”后拖出矩形可导出 PNG。</p>
+  </section>
+
+  <aside class="panel">
+    <h2>当前点位数据</h2>
+    <div class="point-meta">
+      <span>水平位置</span>
+      <strong id="panelX">— km</strong>
+    </div>
+    <div class="point-meta">
+      <span>锋面类型</span>
+      <strong id="panelFront">暖锋</strong>
+    </div>
+    <table class="readout" id="readoutTable">
+      <thead>
+        <tr><th>层次</th><th>温度 °C</th><th>气压 hPa</th><th>风速 m/s</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="selection-info" id="selectionInfo">未选择导出区域</div>
+  </aside>
+</main>
+
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
