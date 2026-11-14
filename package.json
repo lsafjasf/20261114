@@ -1,0 +1,31 @@
+{
+  "name": "uid189",
+  "version": "1.0.0",
+  "description": "手持街景相机模拟器（Canvas 2D + Web Audio）",
+  "private": true,
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/math-core.test.js && node tests/dom.smoke.test.js && node tests/render.check.js",
+    "test:math": "node tests/math-core.test.js",
+    "test:dom": "node tests/dom.smoke.test.js",
+    "test:render": "node tests/render.check.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lsafjasf/20261114.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lsafjasf/20261114/issues"
+  },
+  "homepage": "https://github.com/lsafjasf/20261114#readme",
+  "devDependencies": {
+    "canvas": "^3.2.3",
+    "jsdom": "^31.0.1"
+  }
+}

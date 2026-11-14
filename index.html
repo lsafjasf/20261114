@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>手持街景 · Handheld Street Cam</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>手持街景相机 <span>Canvas 2D · Handheld Camera Simulator</span></h1>
+    <div class="preset-bar">
+      <select id="presetSelect" title="加载预设"></select>
+      <input id="presetName" type="text" maxlength="24" placeholder="预设名称" />
+      <button id="savePresetBtn" type="button">保存预设</button>
+      <button id="deletePresetBtn" type="button" class="ghost">删除</button>
+      <button id="exportPresetBtn" type="button" class="ghost">导出 JSON</button>
+      <button id="importPresetBtn" type="button" class="ghost">导入</button>
+      <input id="importPresetFile" type="file" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage-col">
+      <div class="stage-wrap">
+        <canvas id="stage" width="1280" height="720"></canvas>
+        <div id="edgeWarn" class="edge-warn" hidden>
+          <strong>⚠ 边缘露出</strong>
+          <span id="edgeWarnDetail"></span>
+        </div>
+        <div id="hud" class="hud"></div>
+      </div>
+
+      <div class="timeline-row">
+        <button id="playBtn" type="button">▶ 播放</button>
+        <button id="pauseBtn" type="button">⏸ 暂停</button>
+        <button id="stopBtn" type="button" class="ghost">⏹ 回到起点</button>
+        <button id="prevFrameBtn" type="button" class="ghost">◀ 单帧</button>
+        <button id="nextFrameBtn" type="button" class="ghost">单帧 ▶</button>
+        <input id="scrub" type="range" min="0" max="119" step="1" value="0" />
+        <span id="timeReadout" class="time-readout">00:00 / 00:04 · 帧 0/119</span>
+      </div>
+
+      <div class="sub-row">
+        <label>时长
+          <input id="durationInput" type="number" min="1" max="30" step="1" value="4" /> 秒
+        </label>
+        <label>帧率
+          <select id="fpsSelect">
+            <option value="24">24 fps</option>
+            <option value="30" selected>30 fps</option>
+            <option value="60">60 fps</option>
+          </select>
+        </label>
+        <label class="check"><input id="safeToggle" type="checkbox" checked /> 显示安全区</label>
+        <span class="spacer"></span>
+        <button id="validateBtn" type="button">校验全片边缘</button>
+        <button id="exportFrameBtn" type="button">导出当前帧 PNG</button>
+        <button id="exportLastBtn" type="button" class="ghost">导出末尾帧</button>
+      </div>
+      <p id="validateMsg" class="validate-msg" aria-live="polite"></p>
+    </section>
+
+    <aside class="panel-col">
+      <section class="panel">
+        <h2>曲线通道</h2>
+        <div class="channel-tabs">
+          <button class="ch-tab active" data-ch="pan" type="button">水平晃动 X</button>
+          <button class="ch-tab" data-ch="tilt" type="button">垂直晃动 Y</button>
+          <button class="ch-tab" data-ch="roll" type="button">旋转 R</button>
+        </div>
+        <canvas id="curve" width="560" height="260"></canvas>
+        <div class="curve-controls">
+          <button id="addPointBtn" type="button">添加关键帧</button>
+          <button id="deletePointBtn" type="button" class="ghost">删除选中</button>
+          <button id="resetCurveBtn" type="button" class="ghost">重置该通道</button>
+          <span class="curve-hint">拖动圆点编辑，点击曲线空白处选中</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>脚步声（Web Audio）</h2>
+        <div class="sub-row compact">
+          <button id="audioEnableBtn" type="button">启用脚步声</button>
+          <label>频率
+            <input id="stepRate" type="number" min="0.5" max="4" step="0.1" value="1.8" /> 步/秒
+          </label>
+          <label>音量
+            <input id="stepVolume" type="range" min="0" max="1" step="0.01" value="0.5" />
+          </label>
+        </div>
+        <p class="curve-hint">首次点击启用时浏览器才允许创建 AudioContext，脚步与播放共用同一条时间线。</p>
+      </section>
+    </aside>
+  </main>
+
+  <script src="js/math-core.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/curve-editor.js"></script>
+  <script src="js/audio-footsteps.js"></script>
+  <script src="js/timeline.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
