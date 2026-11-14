@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>机械手抓取放置仿真</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>机械手抓取放置仿真</h1>
+  <div id="app">
+    <div id="stage">
+      <canvas id="cv" width="700" height="540"></canvas>
+      <div id="banner"></div>
+      <div id="status">用滑杆移动机械手，闭合夹爪抓取左侧工件，越过隔墙放到右侧夹具。</div>
+    </div>
+    <div id="panel">
+      <h2>关节控制</h2>
+      <div id="sliders"></div>
+      <h2>姿态序列</h2>
+      <div class="btnrow">
+        <button id="btnRecord">记录当前姿态</button>
+        <button id="btnReplay">逐步回放</button>
+      </div>
+      <div class="btnrow">
+        <button id="btnDemo">载入演示序列</button>
+        <button id="btnSave">保存序列</button>
+        <button id="btnLoad">读取序列</button>
+        <button id="btnClear">清空</button>
+      </div>
+      <ol id="poseList"></ol>
+      <div class="btnrow">
+        <button id="btnReset">复位（解除急停）</button>
+      </div>
+    </div>
+  </div>
+  <script src="arm.js"></script>
+  <script src="demo_sequence.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
