@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天文台之夜 · 观测排班</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0b1020; color: #dfe6f5;
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh; padding: 16px;
+  }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #8fa0c5; font-size: 13px; margin-bottom: 12px; }
+  .layout { display: flex; gap: 16px; max-width: 1240px; margin: 0 auto; }
+  .side { width: 280px; flex: none; }
+  .main { flex: 1; min-width: 0; }
+  .card {
+    background: #141b31; border: 1px solid #26304f; border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 10px; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .card.sel { border-color: #6ea8ff; box-shadow: 0 0 0 1px #6ea8ff; }
+  .card .tname { font-weight: 600; font-size: 14px; }
+  .card .tinfo { font-size: 12px; color: #9fb0d8; margin-top: 4px; line-height: 1.6; }
+  .card .plan { font-size: 12px; margin-top: 4px; color: #7fd6a0; }
+  .card button {
+    margin-top: 6px; font-size: 12px; background: #2a3556; color: #cfd9f2;
+    border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer;
+  }
+  .card button:hover { background: #36436b; }
+  .badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 8px; margin-left: 6px; }
+  .b-idle { background: #2a3556; color: #9fb0d8; }
+  .b-wait { background: #3a4a2a; color: #b8d98a; }
+  .b-run  { background: #2a4a5a; color: #8ad0e8; }
+  .b-ok   { background: #2a5a3a; color: #8ae8a8; }
+  .b-fail { background: #5a2a2a; color: #e88a8a; }
+  canvas { display: block; width: 100%; border-radius: 10px; background: #0d1330; }
+  #tl { margin-top: 12px; }
+  .bar { display: flex; gap: 8px; margin: 12px 0; align-items: center; flex-wrap: wrap; }
+  .bar button {
+    background: #2f5fd0; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 14px; cursor: pointer;
+  }
+  .bar button.sec { background: #2a3556; }
+  .bar button:disabled { background: #232c47; color: #5a6588; cursor: not-allowed; }
+  #msg { font-size: 13px; color: #ffd27f; min-height: 18px; }
+  #result { font-size: 15px; font-weight: 600; margin-top: 6px; }
+  .rules { font-size: 12px; color: #8fa0c5; line-height: 1.7; margin-top: 10px;
+           background: #10172b; border-radius: 8px; padding: 8px 10px; }
+</style>
+</head>
+<body>
+<h1>🔭 天文台之夜 · 观测排班</h1>
+<div class="sub">一座穹顶、两架望远镜、三项任务。避开高云量时段，至少完成两项观测即成功。</div>
+<div class="layout">
+  <div class="side">
+    <div id="tasks"></div>
+    <div class="bar">
+      <button id="runBtn">▶ 开始观测</button>
+      <button id="resetBtn" class="sec">清空排班</button>
+      <button id="regenBtn" class="sec">换一夜</button>
+    </div>
+    <div id="msg"></div>
+    <div id="result"></div>
+    <div class="rules">
+      玩法：点选左侧任务卡片，再点击下方时间条中某架望远镜的行，即可安排开始时间。<br>
+      · 同一台望远镜两次任务间需冷却 10 分钟（阴影区）。<br>
+      · 观测期间任意时刻云量超过任务上限，任务即失败。<br>
+      · 云图与任务由固定种子生成，已预验证存在可行排班。
+    </div>
+  </div>
+  <div class="main">
+    <canvas id="dome" width="920" height="330"></canvas>
+    <canvas id="tl" width="920" height="300"></canvas>
+  </div>
+</div>
+<script>
+"use strict";
+/* ================= 常量与状态 ================= */
+const SLOT_MIN = 5;            // 每格 5 分钟
+const SLOTS = 48;              // 20:00 - 24:00，共 4 小时
+const COOLDOWN = 2;            // 设备切换冷却 2 格 = 10 分钟
+const NIGHT_START = 20;        // 20:00 开始
+let seed = 20261115;           // 固定种子（已验证：云量对任务构成真实威胁且排班可行）
+let cloud = [];                // 每格云量 0-100
+let tasks = [];
+let sel = -1;                  // 当前选中的任务
+let msg = "";
+const teleState = [ {angle:-0.5, target:-0.5}, {angle:0.5, target:0.5} ];
+const sim = { running:false, t:0, speed:1.5, done:false, alertFlash:0 };
+
+/* ================= 随机数与生成 ================= */
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function cloudOK(ti, st){
+  for (let i = st; i < st + tasks[ti].dur; i++)
+    if (cloud[i] > tasks[ti].tol) return false;
+  return true;
+}
+function conflict(ai, sa, bi, sb){
+  return sa < sb + tasks[bi].dur + COOLDOWN && sb < sa + tasks[ai].dur + COOLDOWN;
+}
+/* 预验证：存在全部三项成功的排班，或至少两项成功的排班 */
+function feasible(){
+  const opts = tasks.map((t, ti) => {
+    const o = [];
+    for (let s = 0; s + t.dur <= SLOTS; s++) if (cloudOK(ti, s)) o.push(s);
+    return o;
+  });
+  for (const t0 of [0,1]) for (const s0 of opts[0])
+  for (const t1 of [0,1]) for (const s1 of opts[1]){
+    if (t0 === t1 && conflict(0, s0, 1, s1)) continue;
+    for (const t2 of [0,1]) for (const s2 of opts[2]){
+      if (t0 === t2 && conflict(0, s0, 2, s2)) continue;
+      if (t1 === t2 && conflict(1, s1, 2, s2)) continue;
+      return true; // 三项全部可行
+    }
+  }
+  for (const [a, b] of [[0,1],[0,2],[1,2]])
+    for (const ta of [0,1]) for (const sa of opts[a])
+    for (const tb of [0,1]) for (const sb of opts[b]){
+      if (ta === tb && conflict(a, sa, b, sb)) continue;
+      return true; // 至少两项可行
+    }
+  return false;
+}
+function generate(){
+  const r = mulberry32(seed);
+  let v = 25 + r() * 40;
+  cloud = [];
+  for (let i = 0; i < SLOTS; i++){
+    v += (r() - 0.5) * 24;
+    v = Math.max(3, Math.min(97, v));
+    cloud.push(v);
+  }
+  for (let k = 0; k < 2; k++)
+    cloud = cloud.map((c, i) =>
+      (cloud[Math.max(0, i-1)] + c + cloud[Math.min(SLOTS-1, i+1)]) / 3);
+  const names = ["M31 仙女座星系", "木星 · 大红斑", "M57 环状星云"];
+  tasks = names.map(n => ({
+    name: n,
+    dur: 4 + Math.floor(r() * 5),       // 20-40 分钟
+    tol: 35 + Math.floor(r() * 35),     // 云量上限 35%-69%
+    tele: null, start: null, state: "idle"
+  }));
+  if (!feasible()){ seed++; generate(); return; }
+  sel = -1; msg = "";
+  sim.running = false; sim.done = false; sim.t = 0;
+}
+
+/* ================= 音效（WebAudio 合成） ================= */
+let actx = null;
+function ac(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!actx) actx = new AC();
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function tone(freq, dur, type, gain, when){
+  const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || "sine"; o.frequency.value = freq;
+  const t0 = c.currentTime + (when || 0);
+  g.gain.setValueAtTime(gain || 0.12, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur);
+}
+function sndClick(){ tone(660, 0.06, "square", 0.05); }
+function sndSlew(){ // 设备转动：低频锯齿滑音
+  const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = "sawtooth";
+  const t0 = c.currentTime;
+  o.frequency.setValueAtTime(90, t0);
+  o.frequency.linearRampToValueAtTime(240, t0 + 0.7);
+  g.gain.setValueAtTime(0.08, t0);
+  g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.8);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + 0.8);
+}
+function sndAlarm(){ // 天气警报：三声急促方波
+  for (let i = 0; i < 3; i++) tone(880, 0.15, "square", 0.12, i * 0.22);
+}
+function sndOK(){ tone(523, 0.18, "sine", 0.12); tone(784, 0.3, "sine", 0.12, 0.18); }
+function sndWin(){ [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.35, "sine", 0.12, i * 0.16)); }
+
+/* ================= 穹顶剖面 ================= */
+const domeCv = document.getElementById("dome");
+const dctx = domeCv.getContext("2d");
+const stars = [];
+{
+  const r = mulberry32(7);
+  for (let i = 0; i < 90; i++)
+    stars.push({ x: r() * 920, y: r() * 200, s: r() * 1.6 + 0.4, tw: r() * 6.28 });
+}
+const TASK_ANGLE = [-0.85, -0.15, 0.6]; // 各任务目标方位（弧度偏移）
+function curCloud(){
+  if (!sim.running && !sim.done) return cloud[0];
+  return cloud[Math.min(SLOTS - 1, Math.floor(sim.t))];
+}
+function drawDome(now){
+  const W = 920, H = 330;
+  const g = dctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#060a1c"); g.addColorStop(1, "#101a3a");
+  dctx.fillStyle = g; dctx.fillRect(0, 0, W, H);
+  // 星星（云越厚越暗）
+  const cc = curCloud() / 100;
+  for (const s of stars){
+    const tw = 0.5 + 0.5 * Math.sin(now / 400 + s.tw);
+    dctx.globalAlpha = (1 - cc * 0.9) * (0.3 + 0.7 * tw);
+    dctx.fillStyle = "#cfe0ff";
+    dctx.fillRect(s.x, s.y, s.s, s.s);
+  }
+  dctx.globalAlpha = 1;
+  // 月亮
+  dctx.globalAlpha = 1 - cc * 0.7;
+  dctx.fillStyle = "#e8e4c8";
+  dctx.beginPath(); dctx.arc(820, 55, 22, 0, 6.29); dctx.fill();
+  dctx.globalAlpha = 1;
+  // 云层（随风漂移）
+  const drift = (now / 60) % 300;
+  dctx.fillStyle = "rgba(120,135,170," + (0.12 + cc * 0.55) + ")";
+  for (let i = 0; i < 6; i++){
+    const cx = ((i * 210 + drift * (1 + i * 0.13)) % 1200) - 140;
+    const cy = 40 + (i % 3) * 32;
+    dctx.beginPath();
+    dctx.ellipse(cx, cy, 110, 16 + (i % 3) * 6, 0, 0, 6.29);
+    dctx.ellipse(cx + 60, cy + 8, 80, 13, 0, 0, 6.29);
+    dctx.fill();
+  }
+  // 地面
+  dctx.fillStyle = "#131c33"; dctx.fillRect(0, 268, W, H - 268);
+  // 基座
+  dctx.fillStyle = "#2b3563";
+  dctx.fillRect(330, 240, 260, 30);
+  // 穹顶（剖面）
+  const cx0 = 460, cy0 = 240, R = 120;
+  dctx.fillStyle = "#3a4a7d";
+  dctx.beginPath(); dctx.arc(cx0, cy0, R, Math.PI, 0); dctx.closePath(); dctx.fill();
+  dctx.strokeStyle = "#55679c"; dctx.lineWidth = 3;
+  dctx.beginPath(); dctx.arc(cx0, cy0, R, Math.PI, 0); dctx.stroke();
+  // 穹顶缝隙（跟随活动望远镜方位）
+  const active = teleState[0].busy ? 0 : (teleState[1].busy ? 1 : -1);
+  const slitA = active >= 0 ? teleState[active].angle : 0;
+  dctx.save();
+  dctx.translate(cx0, cy0);
+  dctx.rotate(slitA);
+  dctx.fillStyle = "#060a1c";
+  dctx.fillRect(-9, -R - 2, 18, R);
+  dctx.restore();
+  // 两架望远镜
+  const teleX = [cx0 - 45, cx0 + 45];
+  for (let k = 0; k < 2; k++){
+    const st = teleState[k];
+    st.angle += (st.target - st.angle) * 0.06;
+    dctx.save();
+    dctx.translate(teleX[k], cy0 - 6);
+    dctx.rotate(st.angle);
+    dctx.strokeStyle = st.busy ? "#8ad0e8" : "#9fb0d8";
+    dctx.lineWidth = 7; dctx.lineCap = "round";
+    dctx.beginPath(); dctx.moveTo(0, 0); dctx.lineTo(0, -58); dctx.stroke();
+    dctx.fillStyle = st.busy ? "#8ad0e8" : "#6d7ea8";
+    dctx.fillRect(-6, -66, 12, 14);
+    dctx.restore();
+    dctx.fillStyle = "#4a5a8d";
+    dctx.fillRect(teleX[k] - 8, cy0 - 6, 16, 12);
+    dctx.fillStyle = "#9fb0d8"; dctx.font = "11px sans-serif";
+    dctx.textAlign = "center";
+    dctx.fillText("T" + (k + 1), teleX[k], cy0 + 18);
+  }
+  // 状态文字
+  dctx.fillStyle = "#8fa0c5"; dctx.font = "13px sans-serif"; dctx.textAlign = "left";
+  const hh = String(NIGHT_START + Math.floor(sim.t * SLOT_MIN / 60)).padStart(2, "0");
+  const mm = String(Math.floor(sim.t * SLOT_MIN) % 60).padStart(2, "0");
+  const label = sim.running ? "观测中 " + hh + ":" + mm :
+                sim.done ? "夜空已结束" : "排班阶段 · 20:00 开场";
+  dctx.fillText(label + "　云量 " + Math.round(curCloud()) + "%", 16, 24);
+  if (sim.alertFlash > 0){
+    dctx.fillStyle = "rgba(220,80,80," + (sim.alertFlash * 0.5) + ")";
+    dctx.fillRect(0, 0, W, 6);
+  }
+}
+
+/* ================= 时间条 ================= */
+const tlCv = document.getElementById("tl");
+const tctx = tlCv.getContext("2d");
+const TL = { L: 78, R: 14, top: 14, cloudH: 64, rowY: [118, 178], rowH: 34 };
+function slotW(){ return (920 - TL.L - TL.R) / SLOTS; }
+function slotX(s){ return TL.L + s * slotW(); }
+const STATE_COLOR = {
+  idle: "#3d6bd6", wait: "#3d6bd6", run: "#37b6d9",
+  ok: "#3fae6a", fail: "#b04a4a"
+};
+function fmtTime(s){
+  const m = s * SLOT_MIN;
+  return String(NIGHT_START + Math.floor(m / 60)).padStart(2, "0") + ":" +
+         String(m % 60).padStart(2, "0");
+}
+function drawTimeline(){
+  const W = 920, H = 300;
+  tctx.fillStyle = "#0d1330"; tctx.fillRect(0, 0, W, H);
+  const cw = slotW();
+  // 云量面积图
+  const base = TL.top + TL.cloudH;
+  tctx.beginPath();
+  tctx.moveTo(slotX(0), base);
+  for (let i = 0; i < SLOTS; i++)
+    tctx.lineTo(slotX(i) + cw / 2, base - cloud[i] / 100 * TL.cloudH);
+  tctx.lineTo(slotX(SLOTS), base);
+  tctx.closePath();
+  tctx.fillStyle = "rgba(110,135,190,0.35)"; tctx.fill();
+  tctx.strokeStyle = "#8ba3d8"; tctx.lineWidth = 1.5;
+  tctx.beginPath();
+  for (let i = 0; i < SLOTS; i++){
+    const y = base - cloud[i] / 100 * TL.cloudH;
+    i ? tctx.lineTo(slotX(i) + cw / 2, y) : tctx.moveTo(slotX(i) + cw / 2, y);
+  }
+  tctx.stroke();
+  // 选中任务的云量上限线
+  if (sel >= 0){
+    const y = base - tasks[sel].tol / 100 * TL.cloudH;
+    tctx.strokeStyle = "#ffd27f"; tctx.setLineDash([5, 4]);
+    tctx.beginPath(); tctx.moveTo(TL.L, y); tctx.lineTo(W - TL.R, y); tctx.stroke();
+    tctx.setLineDash([]);
+    tctx.fillStyle = "#ffd27f"; tctx.font = "11px sans-serif"; tctx.textAlign = "left";
+    tctx.fillText("上限 " + tasks[sel].tol + "%", TL.L + 4, y - 4);
+  }
+  tctx.fillStyle = "#8fa0c5"; tctx.font = "11px sans-serif"; tctx.textAlign = "left";
+  tctx.fillText("云量", 8, TL.top + 12);
+  // 小时刻度
+  tctx.textAlign = "center";
+  for (let s = 0; s <= SLOTS; s += 12){
+    const x = slotX(s);
+    tctx.strokeStyle = "#26304f";
+    tctx.beginPath(); tctx.moveTo(x, TL.top); tctx.lineTo(x, TL.rowY[1] + TL.rowH + 8); tctx.stroke();
+    tctx.fillStyle = "#8fa0c5";
+    tctx.fillText(fmtTime(s), x, TL.rowY[1] + TL.rowH + 24);
+  }
+  // 望远镜行
+  for (let k = 0; k < 2; k++){
+    const y = TL.rowY[k];
+    tctx.fillStyle = "#141b31";
+    tctx.fillRect(TL.L, y, W - TL.L - TL.R, TL.rowH);
+    tctx.strokeStyle = "#26304f";
+    tctx.strokeRect(TL.L, y, W - TL.L - TL.R, TL.rowH);
+    tctx.fillStyle = "#9fb0d8"; tctx.font = "13px sans-serif"; tctx.textAlign = "left";
+    tctx.fillText("望远镜 T" + (k + 1), 8, y + TL.rowH / 2 + 4);
+  }
+  // 已排任务与冷却阴影
+  tasks.forEach((t, ti) => {
+    if (t.tele === null) return;
+    const x = slotX(t.start), w = t.dur * cw, y = TL.rowY[t.tele];
+    tctx.fillStyle = "rgba(90,100,130,0.45)";
+    tctx.fillRect(x + w, y, COOLDOWN * cw, TL.rowH);
+    tctx.fillStyle = STATE_COLOR[t.state];
+    tctx.fillRect(x, y + 3, w, TL.rowH - 6);
+    if (ti === sel){
+      tctx.strokeStyle = "#fff"; tctx.lineWidth = 2;
+      tctx.strokeRect(x, y + 3, w, TL.rowH - 6);
+    }
+    tctx.fillStyle = "#fff"; tctx.font = "11px sans-serif"; tctx.textAlign = "center";
+    tctx.fillText(t.name.split(" ")[0], x + w / 2, y + TL.rowH / 2 + 4);
+  });
+  // 仿真时间游标
+  if (sim.running || sim.done){
+    const x = slotX(Math.min(SLOTS, sim.t));
+    tctx.strokeStyle = "#ffd27f"; tctx.lineWidth = 2;
+    tctx.beginPath(); tctx.moveTo(x, TL.top); tctx.lineTo(x, TL.rowY[1] + TL.rowH + 8); tctx.stroke();
+  }
+  // 底部图例
+  tctx.textAlign = "left"; tctx.font = "11px sans-serif";
+  const legend = [["待观测", "#3d6bd6"], ["观测中", "#37b6d9"], ["成功", "#3fae6a"], ["失败", "#b04a4a"], ["冷却", "rgba(90,100,130,0.6)"]];
+  let lx = TL.L;
+  for (const [name, color] of legend){
+    tctx.fillStyle = color; tctx.fillRect(lx, 282, 12, 12);
+    tctx.fillStyle = "#9fb0d8"; tctx.fillText(name, lx + 16, 292);
+    lx += 84;
+  }
+}
+
+/* ================= 任务卡片 UI ================= */
+const tasksEl = document.getElementById("tasks");
+const msgEl = document.getElementById("msg");
+const resultEl = document.getElementById("result");
+const runBtn = document.getElementById("runBtn");
+const STATE_NAME = { idle:"未安排", wait:"已排班", run:"观测中", ok:"成功", fail:"失败" };
+function renderUI(){
+  tasksEl.innerHTML = "";
+  tasks.forEach((t, ti) => {
+    const div = document.createElement("div");
+    div.className = "card" + (ti === sel ? " sel" : "");
+    const plan = t.tele === null
+      ? '<div class="plan unplan">尚未安排 — 点我选中后到时间条落子</div>'
+      : '<div class="plan">T' + (t.tele + 1) + " · " + fmtTime(t.start) +
+        " 开始　" + (sim.running || sim.done ? "" : '<button data-act="un">取消安排</button>') + "</div>";
+    div.innerHTML =
+      '<div class="tname">' + t.name +
+      '<span class="badge b-' + t.state + '">' + STATE_NAME[t.state] + "</span></div>" +
+      '<div class="tinfo">时长 ' + t.dur * SLOT_MIN + " 分钟 · 云量上限 " + t.tol + "%</div>" + plan;
+    div.addEventListener("click", e => {
+      if (sim.running) return;
+      if (e.target.dataset.act === "un"){
+        t.tele = null; t.start = null; t.state = "idle";
+        msg = ""; renderUI(); return;
+      }
+      sel = ti; sndClick(); renderUI();
+    });
+    tasksEl.appendChild(div);
+  });
+  msgEl.textContent = msg;
+  runBtn.disabled = sim.running || tasks.filter(t => t.tele !== null).length < 2;
+}
+
+/* ================= 排班落子 ================= */
+function canPlace(ti, tele, start){
+  const t = tasks[ti];
+  if (start < 0 || start + t.dur > SLOTS) return "超出夜间时段";
+  for (let oi = 0; oi < tasks.length; oi++){
+    if (oi === ti) continue;
+    const o = tasks[oi];
+    if (o.tele !== tele || o.start === null) continue;
+    if (conflict(ti, start, oi, o.start)) return "与「" + o.name + "」撞车或冷却不足";
+  }
+  return null;
+}
+tlCv.addEventListener("click", e => {
+  if (sim.running) return;
+  const r = tlCv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * (920 / r.width);
+  const y = (e.clientY - r.top) * (300 / r.height);
+  let tele = -1;
+  for (let k = 0; k < 2; k++)
+    if (y >= TL.rowY[k] && y <= TL.rowY[k] + TL.rowH) tele = k;
+  if (tele < 0 || x < TL.L) return;
+  const slot = Math.floor((x - TL.L) / slotW());
+  // 点到已有任务条 → 选中该任务
+  for (let ti = 0; ti < tasks.length; ti++){
+    const t = tasks[ti];
+    if (t.tele === tele && t.start !== null && slot >= t.start && slot < t.start + t.dur){
+      sel = ti; sndClick(); renderUI(); return;
+    }
+  }
+  if (sel < 0){ msg = "先在左侧选中一项任务"; renderUI(); return; }
+  const err = canPlace(sel, tele, slot);
+  if (err){ msg = "✗ " + err; sndAlarmSoft(); renderUI(); return; }
+  const t = tasks[sel];
+  t.tele = tele; t.start = slot; t.state = "wait";
+  msg = "✓ 已安排到 T" + (tele + 1) + " · " + fmtTime(slot) + " 开始";
+  sndClick(); sel = -1; renderUI();
+});
+function sndAlarmSoft(){ tone(220, 0.12, "square", 0.07); }
+
+/* ================= 仿真 ================= */
+sim.alertFlash = 0;
+function startSim(){
+  const placed = tasks.filter(t => t.tele !== null);
+  if (placed.length < 2){ msg = "请至少安排两项任务"; renderUI(); return; }
+  tasks.forEach(t => { t.state = t.tele === null ? "idle" : "wait"; t.warned = false; });
+  teleState.forEach(s => { s.busy = false; s.target = s.angle = s === teleState[0] ? -0.5 : 0.5; });
+  sim.running = true; sim.done = false; sim.t = 0;
+  msg = ""; resultEl.textContent = "";
+  ac(); renderUI();
+}
+function stepSim(dt){
+  sim.t += dt * sim.speed;
+  sim.alertFlash = Math.max(0, sim.alertFlash - dt * 1.5);
+  const slot = Math.floor(sim.t);
+  tasks.forEach((t, ti) => {
+    if (t.tele === null) return;
+    if (t.state === "wait" && sim.t >= t.start){
+      t.state = "run";
+      teleState[t.tele].busy = true;
+      teleState[t.tele].target = TASK_ANGLE[ti];
+      sndSlew();
+    }
+    if (t.state === "run"){
+      if (slot < SLOTS && cloud[slot] > t.tol){
+        t.state = "fail";
+        teleState[t.tele].busy = false;
+        sim.alertFlash = 1;
+        sndAlarm();
+        msg = "⚠ 云量 " + Math.round(cloud[slot]) + "% 超过上限，「" + t.name + "」观测失败";
+        renderUI();
+      } else if (sim.t >= t.start + t.dur){
+        t.state = "ok";
+        teleState[t.tele].busy = false;
+        sndOK();
+        renderUI();
+      }
+    }
+  });
+  if (sim.t >= SLOTS){
+    sim.running = false; sim.done = true;
+    teleState.forEach(s => s.busy = false);
+    const ok = tasks.filter(t => t.state === "ok").length;
+    if (ok >= 2){
+      resultEl.textContent = "🎉 排班成功！完成 " + ok + "/3 项观测。";
+      resultEl.style.color = "#7fd6a0";
+      sndWin();
+    } else {
+      resultEl.textContent = "💔 仅完成 " + ok + "/3 项，未达两项门槛，重新排班再试。";
+      resultEl.style.color = "#e88a8a";
+      sndAlarm();
+    }
+    renderUI();
+  }
+}
+
+/* ================= 主循环与初始化 ================= */
+let last = 0;
+function loop(now){
+  const dt = Math.min(0.05, (now - last) / 1000 || 0);
+  last = now;
+  if (sim.running) stepSim(dt);
+  drawDome(now);
+  drawTimeline();
+  requestAnimationFrame(loop);
+}
+runBtn.addEventListener("click", startSim);
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (sim.running) return;
+  tasks.forEach(t => { t.tele = null; t.start = null; t.state = "idle"; });
+  sim.done = false; sim.t = 0; sel = -1;
+  msg = ""; resultEl.textContent = "";
+  renderUI();
+});
+document.getElementById("regenBtn").addEventListener("click", () => {
+  if (sim.running) return;
+  seed++;
+  generate();
+  resultEl.textContent = "";
+  renderUI();
+});
+generate();
+renderUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
