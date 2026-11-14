@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四色套准印刷机</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>四色套准印刷机</h1>
+  <p class="sub">连续送纸 10 张 · 调整横向 / 纵向位移与压印力度 · 让每张落在容差内</p>
+</header>
+
+<main>
+  <section class="panel press">
+    <h2>印刷预览</h2>
+    <canvas id="sheetCanvas" width="560" height="400"></canvas>
+    <div class="press-status" id="pressStatus">待机</div>
+  </section>
+
+  <section class="panel scope">
+    <h2>放大镜 · 对位标记</h2>
+    <canvas id="scopeCanvas" width="260" height="260"></canvas>
+    <div class="readout" id="scopeReadout">误差 X 0.00mm / Y 0.00mm</div>
+  </section>
+
+  <section class="panel controls">
+    <h2>机台调整</h2>
+    <label>横向位移 X
+      <input type="range" id="adjX" min="-0.6" max="0.6" step="0.01" value="0">
+      <span id="valX">0.00 mm</span>
+    </label>
+    <label>纵向位移 Y
+      <input type="range" id="adjY" min="-0.6" max="0.6" step="0.01" value="0">
+      <span id="valY">0.00 mm</span>
+    </label>
+    <label>压印力度
+      <input type="range" id="adjP" min="0" max="100" step="1" value="55">
+      <span id="valP">55 %</span>
+    </label>
+    <div class="hint">力度 &gt; 85% 纸面起皱直接报废；&lt; 30% 着墨不足容差收紧。</div>
+    <button id="btnRun">开机 · 跑 10 张</button>
+    <button id="btnReset" disabled>重置（同一 seed）</button>
+  </section>
+
+  <section class="panel stack">
+    <h2>纸堆 / 废纸</h2>
+    <canvas id="stackCanvas" width="260" height="400"></canvas>
+    <div class="readout" id="tally">良品 0 / 10 · 废纸 0</div>
+  </section>
+
+  <section class="panel log">
+    <h2>机台日志</h2>
+    <ul id="logList"></ul>
+  </section>
+</main>
+
+<script src="js/logic.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
