@@ -1,0 +1,15 @@
+{
+  "name": "loom-sync-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.js",
+    "verify": "node scripts/verify-loom.js",
+    "verify:browser": "node scripts/browser-verify.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

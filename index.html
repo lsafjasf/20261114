@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="双综小织机同步实验台：校准开口时机、纬线张力与梭速，织出十厘米完整布面。"
+    />
+    <title>经纬之间 · 双综织机实验台</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <div class="page-noise" aria-hidden="true"></div>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="经纬之间首页">
+          <span class="brand-mark" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </span>
+          <span>
+            <strong>经纬之间</strong>
+            <small>LOOM SYNC / 织造实验台</small>
+          </span>
+        </a>
+
+        <div class="topbar-tools">
+          <div class="machine-state" id="machineState">
+            <span class="state-light"></span>
+            <span id="statusText">机台待机</span>
+          </div>
+          <button
+            class="icon-button"
+            id="soundToggle"
+            type="button"
+            aria-label="关闭织机声音"
+            aria-pressed="true"
+            title="声音开关"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9v6h4l5 4V5L8 9H4Z" />
+              <path class="sound-wave" d="M16 8.4a5 5 0 0 1 0 7.2M18.5 6a8 8 0 0 1 0 12" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <article class="stage-card">
+          <header class="stage-heading">
+            <div>
+              <p class="eyebrow">织机 02 · 双综平织</p>
+              <h1>让每一次落梭，<em>严丝合缝。</em></h1>
+            </div>
+            <div class="target-stamp">
+              <span>目标</span>
+              <strong>10<small>CM</small></strong>
+              <span>无断线 · 少瑕疵</span>
+            </div>
+          </header>
+
+          <div class="canvas-shell" id="canvasShell">
+            <canvas id="loomCanvas" aria-label="正在织造的布面、经纬张力与梭子位置"></canvas>
+            <div class="canvas-readout">
+              <div class="readout-chip">
+                <span class="chip-dot" id="chipDot"></span>
+                <span id="canvasStatus">等待落梭</span>
+              </div>
+              <div class="readout-chip numeric">
+                <span id="cmReadout">0.0</span>
+                <small>/ 10.0 CM</small>
+              </div>
+            </div>
+            <div class="canvas-alert" id="canvasAlert" role="status" aria-live="polite"></div>
+          </div>
+
+          <div class="stage-footer">
+            <div class="metric-strip">
+              <div class="metric">
+                <span>布面长度</span>
+                <strong id="lengthMetric">0.0</strong><small>cm</small>
+              </div>
+              <div class="metric">
+                <span>瑕疵</span>
+                <strong id="defectMetric">0</strong><small>/ 少于 6</small>
+              </div>
+              <div class="metric">
+                <span>当前张力</span>
+                <strong id="tensionMetric">1.80</strong><small>N</small>
+              </div>
+              <div class="metric">
+                <span>梭速</span>
+                <strong id="speedMetric">3.1</strong><small>次/s</small>
+              </div>
+            </div>
+            <div
+              class="length-track"
+              id="lengthTrack"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="10"
+              aria-valuenow="0"
+              aria-label="十厘米织造进度"
+            >
+              <span class="track-fill" id="progressFill"></span>
+              <i class="track-tick" style="left: 20%"></i>
+              <i class="track-tick" style="left: 40%"></i>
+              <i class="track-tick" style="left: 60%"></i>
+              <i class="track-tick" style="left: 80%"></i>
+              <span class="track-goal">10 CM</span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="side-stack">
+          <section class="instrument-card">
+            <header class="card-heading">
+              <div>
+                <p class="eyebrow">LIVE GAUGE</p>
+                <h2>机台读数</h2>
+              </div>
+              <span class="serial">NO. 0220</span>
+            </header>
+
+            <div class="sync-gauge">
+              <div class="gauge-ring" id="gaugeRing">
+                <div class="gauge-needle" id="gaugeNeedle"></div>
+                <div class="gauge-center">
+                  <strong id="syncValue">+5.3</strong>
+                  <span>双综相差</span>
+                  <small>ms</small>
+                </div>
+              </div>
+              <div class="gauge-scale">
+                <span>−12</span>
+                <span class="gauge-good">同步窗口</span>
+                <span>+12</span>
+              </div>
+            </div>
+
+            <div class="diagnostic-list">
+              <div class="diagnostic">
+                <span>开口窗口</span>
+                <strong id="windowReading">待校准</strong>
+              </div>
+              <div class="diagnostic">
+                <span>纬线状态</span>
+                <strong id="threadReading">张力正常</strong>
+              </div>
+              <div class="diagnostic">
+                <span>落梭同步</span>
+                <strong id="pickReading">等待启动</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="log-card">
+            <header class="card-heading compact">
+              <div>
+                <p class="eyebrow">WEAVE LOG</p>
+                <h2>织造记录</h2>
+              </div>
+              <span class="row-counter"><b id="rowCounter">00</b>/30</span>
+            </header>
+            <ol class="event-log" id="eventLog" aria-live="polite">
+              <li class="event muted">
+                <time>--:--</time>
+                <span>校准双综，准备上机</span>
+              </li>
+            </ol>
+          </section>
+        </aside>
+      </section>
+
+      <section class="control-deck" aria-label="织机控制台">
+        <div class="control-intro">
+          <p class="eyebrow">MECHANISM CONTROL</p>
+          <h2>校机三要素</h2>
+          <p>先把绿色同步区对准，再听织机的声音判断节奏。</p>
+        </div>
+
+        <div class="control-grid">
+          <label class="control-unit" for="openingRange">
+            <span class="control-top">
+              <span class="control-label">开口时机<small>SHED TIMING</small></span>
+              <output id="openingOutput">+5.3 ms</output>
+            </span>
+            <input
+              id="openingRange"
+              type="range"
+              min="0"
+              max="100"
+              step="0.5"
+              value="72"
+              aria-describedby="openingHint"
+            />
+            <span class="control-scale"><i>−12</i><i>0</i><i>+12</i></span>
+            <span class="control-hint" id="openingHint">双综尚差 5.3 ms，布面易起斜纹</span>
+          </label>
+
+          <label class="control-unit" for="tensionRange">
+            <span class="control-top">
+              <span class="control-label">纬线张力<small>WEFT TENSION</small></span>
+              <output id="tensionOutput">1.80 N</output>
+            </span>
+            <input
+              id="tensionRange"
+              type="range"
+              min="0.8"
+              max="3.4"
+              step="0.01"
+              value="1.8"
+              aria-describedby="tensionHint"
+            />
+            <span class="control-scale"><i>松弛</i><i>平衡</i><i>断线</i></span>
+            <span class="control-hint" id="tensionHint">张力稳定，纬线贴合经纱</span>
+          </label>
+
+          <label class="control-unit" for="speedRange">
+            <span class="control-top">
+              <span class="control-label">梭子速度<small>SHUTTLE SPEED</small></span>
+              <output id="speedOutput">3.1 次/s</output>
+            </span>
+            <input
+              id="speedRange"
+              type="range"
+              min="1.2"
+              max="5.6"
+              step="0.1"
+              value="3.1"
+              aria-describedby="speedHint"
+            />
+            <span class="control-scale"><i>稳健</i><i>流畅</i><i>错位</i></span>
+            <span class="control-hint" id="speedHint">落梭节奏平稳，开口时间充足</span>
+          </label>
+        </div>
+
+        <div class="action-panel">
+          <button class="primary-button" id="runButton" type="button">
+            <span class="button-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z" /></svg>
+            </span>
+            <span id="runLabel">落梭开织</span>
+          </button>
+          <button class="ghost-button" id="resetButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10a8 8 0 1 1 2.4 7.6M4 4v6h6" />
+            </svg>
+            重新上机
+          </button>
+          <p class="shortcut-note"><kbd>Space</kbd> 开织 / 暂停</p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>双综织机模拟 · 30 梭 / 10 厘米</span>
+        <span>把偏差留在机台上，不要留在布里。</span>
+      </footer>
+    </main>
+
+    <dialog class="result-dialog" id="resultDialog" aria-labelledby="resultTitle">
+      <div class="result-seal" id="resultSeal" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <p class="eyebrow" id="resultEyebrow">WEAVE COMPLETE</p>
+      <h2 id="resultTitle">十厘米，完整落机。</h2>
+      <p class="result-copy" id="resultCopy"></p>
+      <div class="result-stats">
+        <div><span>长度</span><strong id="resultLength">10.0 cm</strong></div>
+        <div><span>瑕疵</span><strong id="resultDefects">0</strong></div>
+        <div><span>评价</span><strong id="resultGrade">甲等</strong></div>
+      </div>
+      <div class="result-actions">
+        <button class="primary-button" id="weaveAgainButton" type="button">再织一匹</button>
+        <button class="ghost-button" id="closeResultButton" type="button">查看布面</button>
+      </div>
+    </dialog>
+
+    <div class="toast-host" id="toastHost" aria-live="assertive"></div>
+  </body>
+</html>
