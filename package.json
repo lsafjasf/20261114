@@ -1,0 +1,10 @@
+{
+  "name": "sailing-three-legs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "双桅帆船三段航程游戏：固定风场、帆角/舵角/压舱水、翻覆与触礁",
+  "scripts": {
+    "test": "node test/simulate.js",
+    "test:browser": "node test/browser_smoke.js"
+  }
+}

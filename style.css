@@ -1,0 +1,78 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: #06283d;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  color: #eaf6ff;
+  overflow: hidden;
+}
+
+#wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game {
+  width: min(100vw, 160vh);
+  height: auto;
+  aspect-ratio: 16 / 10;
+  display: block;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+#hud { position: absolute; inset: 0; pointer-events: none; }
+
+.panel {
+  position: absolute;
+  top: 14px;
+  background: rgba(4, 30, 48, 0.72);
+  border: 1px solid rgba(140, 220, 255, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  backdrop-filter: blur(4px);
+}
+
+#panel-left { left: 14px; }
+#panel-right { right: 14px; }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  line-height: 1.7;
+}
+
+.row span { opacity: 0.75; }
+.row b { font-variant-numeric: tabular-nums; }
+
+#message {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 34px;
+  font-weight: 700;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  white-space: nowrap;
+}
+
+#help {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12.5px;
+  line-height: 1.6;
+  text-align: center;
+  opacity: 0.65;
+  background: rgba(4, 30, 48, 0.55);
+  padding: 6px 14px;
+  border-radius: 8px;
+}

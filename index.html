@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双桅帆船 · 三段航程</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="1600" height="1000"></canvas>
+    <div id="hud">
+      <div class="panel" id="panel-left">
+        <div class="row"><span>航段</span><b id="hud-leg">1 / 3</b></div>
+        <div class="row"><span>船速</span><b id="hud-speed">0.0 kn</b></div>
+        <div class="row"><span>风速</span><b id="hud-wind">0.0 m/s</b></div>
+        <div class="row"><span>横倾</span><b id="hud-heel">0°</b></div>
+        <div class="row"><span>船体</span><b id="hud-hull">100</b></div>
+      </div>
+      <div class="panel" id="panel-right">
+        <div class="row"><span>帆角 [↑↓]</span><b id="hud-sheet">--</b></div>
+        <div class="row"><span>舵角 [←→]</span><b id="hud-rudder">--</b></div>
+        <div class="row"><span>压舱 [Q/E]</span><b id="hud-ballast">--</b></div>
+      </div>
+      <div id="message"></div>
+      <div id="help">
+        ←→ 舵 · ↑↓ 帆角 · Q/E 压舱水 · M 声音 · R 重开<br>
+        依次通过 3 个浮标。横风强风记得加压舱，横倾过大即翻覆；远离礁石。
+      </div>
+    </div>
+  </div>
+  <script src="js/physics.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
