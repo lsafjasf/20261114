@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>临时吊桥 · 救援队通行</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #1a2332; color: #e8eef5;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 16px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: #8fa3bd; font-size: 13px; margin-bottom: 12px; }
+  #stage { position: relative; }
+  canvas {
+    background: linear-gradient(#243b55 0%, #2e4d6e 55%, #1c2f45 100%);
+    border-radius: 10px; display: block; cursor: pointer;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+  }
+  #panel {
+    width: 960px; max-width: 96vw; margin-top: 12px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px;
+    align-items: end;
+  }
+  .ctrl { background: #22314a; border-radius: 8px; padding: 10px 12px; }
+  .ctrl label { font-size: 12px; color: #9db2cc; display: block; margin-bottom: 6px; }
+  .ctrl .val { color: #ffd166; font-weight: 600; }
+  input[type=range] { width: 100%; accent-color: #ffd166; }
+  .btns { display: flex; gap: 8px; }
+  button {
+    border: none; border-radius: 8px; padding: 12px 20px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  #startBtn { background: #2ea86f; color: #fff; }
+  #startBtn:disabled { background: #3a4a63; color: #7d8ea8; cursor: default; }
+  #resetBtn { background: #3a4a63; color: #cfe0f5; }
+  #status {
+    width: 960px; max-width: 96vw; margin-top: 10px; font-size: 14px;
+    min-height: 22px; color: #ffd166;
+  }
+  #help {
+    width: 960px; max-width: 96vw; margin-top: 8px;
+    font-size: 12.5px; color: #8fa3bd; line-height: 1.7;
+  }
+  #help b { color: #cfe0f5; }
+</style>
+</head>
+<body>
+  <h1>🌉 临时吊桥 · 救援队通行</h1>
+  <div class="sub">调整张力与车队间距，点击桥板加固（次数有限），让三辆救援车全部安全抵达对岸</div>
+  <div id="stage"><canvas id="cv" width="960" height="440"></canvas></div>
+  <div id="panel">
+    <div class="ctrl">
+      <label>绳索张力（通行中可实时调整）· 当前 <span class="val" id="tensionVal">78%</span></label>
+      <input type="range" id="tension" min="0" max="100" value="78">
+    </div>
+    <div class="ctrl">
+      <label>车辆间距 · 当前 <span class="val" id="spacingVal">26 m</span></label>
+      <input type="range" id="spacing" min="10" max="40" value="26">
+    </div>
+    <div class="ctrl">
+      <label>剩余加固次数 · <span class="val" id="reinforceVal">4</span>（点击桥板加固/取消）</label>
+      <div style="font-size:12px;color:#9db2cc">加固板应力上限 ×2.4，刚度 ×1.6</div>
+    </div>
+    <div class="btns">
+      <button id="startBtn">▶ 放行车队</button>
+      <button id="resetBtn">↺ 重置</button>
+    </div>
+  </div>
+  <div id="status">准备就绪：建议加固跨中桥板，重车通过时保持高张力。</div>
+  <div id="help">
+    <b>规则</b>：任意桥板应力超限即断裂；车压上断板会坠落，任务失败；断板达 5 块桥梁垮塌。
+    桥板颜色从 <b>绿→黄→红</b> 表示应力水平；车辆移动产生动态载荷（颠簸+共振），低张力下摆动更剧烈。
+    音调高低反映绳索张力，应力过大时会听到颤音警告。三辆车全部到达对岸即胜利。
+  </div>
+  <script src="bridge.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
